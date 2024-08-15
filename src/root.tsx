@@ -40,7 +40,7 @@ export function Root({ children }: RootProps): React.JSX.Element {
               <I18nProvider language="en">
                 <ThemeProvider>
                   {children}
-                  <SettingsButton />
+                  {/* <SettingsButton /> */}
                   <Toaster position="bottom-right" />
                 </ThemeProvider>
               </I18nProvider>
