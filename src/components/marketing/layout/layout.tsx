@@ -1,12 +1,10 @@
 import * as React from 'react';
 import GlobalStyles from '@mui/material/GlobalStyles';
 
-import { Footer } from '@/components/marketing/layout/footer';
-import { MainNav } from '@/components/marketing/layout/main-nav';
 
 interface LayoutProps {
   children: React.ReactNode;
-}
+} 
 
 export function Layout({ children }: LayoutProps): React.JSX.Element {
   return (
@@ -24,9 +22,7 @@ export function Layout({ children }: LayoutProps): React.JSX.Element {
         }}
       />
       <div>
-        {/* <MainNav /> */}
         {children}
-        {/* <Footer /> */}
       </div>
     </React.Fragment>
   );
