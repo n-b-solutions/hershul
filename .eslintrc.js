@@ -21,6 +21,7 @@ module.exports = {
     },
   },
   rules: {
+    'react/jsx-sort-props': false,
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
