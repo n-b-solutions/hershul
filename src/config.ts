@@ -33,7 +33,7 @@ export interface Config {
 export const config = {
   site: {
     name: 'Devias Kit Pro',
-    description: 'בנין בראך',
+    description: import.meta.env.VITE_NAME||'cbh',
     colorScheme: 'light',
     themeColor: '#090a0b',
     primaryColor: 'neonBlue',

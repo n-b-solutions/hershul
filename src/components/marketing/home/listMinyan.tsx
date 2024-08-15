@@ -4,83 +4,91 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { DotsThree as DotsThreeIcon } from '@phosphor-icons/react/dist/ssr/DotsThree';
-import { PencilSimple as PencilSimpleIcon } from '@phosphor-icons/react/dist/ssr/PencilSimple';
 
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
-import { Button, Tooltip } from '@mui/material';
+import { Divider, Tooltip } from '@mui/material';
 
-interface Order {
-    id: string;
-    customer: { name: string; email: string };
-    paymentMethod: string;
-    currency: string;
-    totalAmount: number;
-    status: 'pending' | 'completed' | 'canceled';
-    createdAt: Date;
+interface Minyan {
+    room: string;
+    messages: string;
+    announcement: boolean;
+    startDate: Date;
 }
 
-const orders = [
+const minyans = [
     {
-        id: 'ORD-005',
-        customer: { name: 'Carson Darrin', email: 'carson.darrin@domain.com' },
-        paymentMethod: 'CreditCard',
-        currency: 'USD',
-        totalAmount: 78.1,
-        status: 'pending',
-        createdAt: dayjs().subtract(23, 'second').subtract(32, 'minute').toDate(),
+        room: 'room1',
+        announcement: true,
+        messages: "room1",
+        startDate: dayjs().subtract(23, 'second').subtract(32, 'minute').toDate(),
     },
     {
-        id: 'ORD-004',
-        customer: { name: 'Fran Perez', email: 'fran.perez@domain.com' },
-        paymentMethod: 'PayPal',
-        currency: 'USD',
-        totalAmount: 110.39,
-        status: 'completed',
-        createdAt: dayjs().subtract(51, 'second').subtract(36, 'minute').toDate(),
+        room: 'room2',
+        announcement: false,
+        messages: "room2",
+        startDate: dayjs().subtract(51, 'second').subtract(36, 'minute').toDate(),
     },
     {
-        id: 'ORD-003',
-        customer: { name: 'Jie Yan', email: 'jie.yan@domain.com' },
-        paymentMethod: 'CreditCard',
-        currency: 'USD',
-        totalAmount: 25.58,
-        status: 'pending',
-        createdAt: dayjs().subtract(55, 'second').subtract(38, 'minute').toDate(),
+        room: 'room3',
+        messages: "room3",
+        announcement: true,
+        startDate: dayjs().subtract(55, 'second').subtract(38, 'minute').toDate(),
     },
     {
-        id: 'ORD-002',
-        customer: { name: 'Siegbert Gottfried', email: 'siegbert.gottfried@domain.com' },
-        paymentMethod: 'PayPal',
-        currency: 'USD',
-        totalAmount: 89.41,
-        status: 'completed',
-        createdAt: dayjs().subtract(3, 'second').subtract(40, 'minute').toDate(),
+        room: 'room3',
+        messages: "room3",
+        announcement: true,
+        startDate: dayjs().subtract(3, 'second').subtract(40, 'minute').toDate(),
     },
     {
-        id: 'ORD-001',
-        customer: { name: 'Miron Vitold', email: 'miron.vitold@domain.com' },
-        paymentMethod: 'CreditCard',
-        currency: 'USD',
-        totalAmount: 19.99,
-        status: 'completed',
-        createdAt: dayjs().subtract(32, 'second').subtract(45, 'minute').toDate(),
+        room: 'room3',
+        messages: "room3",
+        announcement: false,
+        startDate: dayjs().subtract(32, 'second').subtract(45, 'minute').toDate(),
     },
-] satisfies Order[];
+    {
+        room: 'room1',
+        announcement: true,
+        messages: "room1",
+        startDate: dayjs().subtract(23, 'second').subtract(32, 'minute').toDate(),
+    },
+    {
+        room: 'room2',
+        announcement: false,
+        messages: "room2",
+        startDate: dayjs().subtract(51, 'second').subtract(36, 'minute').toDate(),
+    },
+    {
+        room: 'room3',
+        messages: "room3",
+        announcement: true,
+        startDate: dayjs().subtract(55, 'second').subtract(38, 'minute').toDate(),
+    },
+    {
+        room: 'room3',
+        messages: "room3",
+        announcement: true,
+        startDate: dayjs().subtract(3, 'second').subtract(40, 'minute').toDate(),
+    },
+    {
+        room: 'room3',
+        messages: "room3",
+        announcement: false,
+        startDate: dayjs().subtract(32, 'second').subtract(45, 'minute').toDate(),
+    },
+] satisfies Minyan[];
 
 const columns = [
     {
         formatter: (row): React.JSX.Element => (
             <div>
                 <Typography color="text.secondary" suppressHydrationWarning sx={{ whiteSpace: 'nowrap' }} variant="body2">
-                    {dayjs(row.createdAt).format(' hh:mm A')}
+                    {dayjs(row.startDate).format(' hh:mm A')}
                 </Typography>
             </div>
         ),
@@ -91,7 +99,7 @@ const columns = [
         formatter: (row): React.JSX.Element => (
             <div>
                 <Typography sx={{ whiteSpace: 'nowrap' }} variant="subtitle2">
-                    {row.customer.name}
+                    {row.room}
                 </Typography>
             </div>
         ),
@@ -101,38 +109,27 @@ const columns = [
 
     {
         formatter: (row): React.JSX.Element => {
-            const mapping = {
-                pending: { label: 'Pending', color: 'warning' },
-                completed: { label: 'Completed', color: 'success' },
-                canceled: { label: 'Canceled', color: 'error' },
-            } as const;
-            const { label, color } = mapping[row.status] ?? { label: 'Unknown', color: 'secondary' };
             return <>
-                {label === 'Completed' && (
-                    <Tooltip title={row.customer.name}>
+                {row.announcement ? <Tooltip title={row.messages}>
                     <IconButton >
                         <SpeakerIcon />
                     </IconButton>
-                    </Tooltip>
-                )}
+                </Tooltip> : null}
             </>;
         },
         name: 'Status',
         width: '70px',
     },
-] satisfies ColumnDef<Order>[];
+] satisfies ColumnDef<Minyan>[];
 
 export function ListMinyan(): React.JSX.Element {
     return (
-        <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
-            <Card>
-                <CardHeader
-                   
-                    title="Next Minyans"
-                />
+        <Box sx={{ height: '90vh', display: 'flex', flexDirection: 'column', p: 3 }}>
+            <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <CardHeader title="Next Minyans" />
                 <Divider />
-                <Box sx={{ overflowX: 'auto' }}>
-                    <DataTable<Order> columns={columns} rows={orders} />
+                <Box sx={{ flex: 1, overflow: 'auto' }}>
+                    <DataTable<Minyan> columns={columns} rows={minyans} />
                 </Box>
             </Card>
         </Box>

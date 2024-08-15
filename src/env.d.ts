@@ -39,6 +39,9 @@ interface ImportMetaEnv {
 
   // Google Tag Manager
   VITE_GOOGLE_TAG_MANAGER_ID?: string;
+
+  //name
+  VITE_NAME:string;
 }
 
 interface ImportMeta {
