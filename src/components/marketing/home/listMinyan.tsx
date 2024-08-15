@@ -124,7 +124,7 @@ const columns = [
 
 export function ListMinyan(): React.JSX.Element {
     return (
-        <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
+        <Box sx={{ p: 3 }}>
             <Card>
                 <CardHeader
                    

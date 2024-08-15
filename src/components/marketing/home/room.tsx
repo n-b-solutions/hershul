@@ -59,7 +59,7 @@ export function Room(): React.JSX.Element {
     };
 
     return (
-        <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
+        <Box sx={{ p: 3 }}>
             <Grid container spacing={3}>
                 {assetsState.map((asset) => (
                     <Grid key={asset.id} xs={12} sm={6}>
