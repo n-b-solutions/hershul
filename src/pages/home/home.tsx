@@ -5,6 +5,7 @@ import { config } from '@/config';
 import { RoomMatrix } from '@/components/marketing/home/roomMatrix';
 import { ListMinyan } from '@/components/marketing/home/listMinyan';
 import { Grid, Typography } from '@mui/material';
+import { CreateSystemMessages } from '@/components/marketing/home/createSystemMessages';
 
 const metadata = { title: config.site.name, description: config.site.description } satisfies Metadata;
 
@@ -25,6 +26,7 @@ export function Page(): React.JSX.Element {
             </Grid>
         </Grid>
       </main>
+      <CreateSystemMessages/>
     </React.Fragment>
   );
 }
