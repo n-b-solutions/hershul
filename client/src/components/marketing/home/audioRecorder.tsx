@@ -2,8 +2,13 @@ import React, { useState, useRef } from 'react';
 import { Box, IconButton } from '@mui/material';
 import { Microphone as MicrophoneIcon, Stop as StopIcon } from '@phosphor-icons/react';
 
-const AudioRecorder: React.FC = () => {
+interface AudioRecorderProps {
+    onSave: (audioBlob: Blob | null) => void;
+}
+
+const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave }) => {
     const [isRecording, setIsRecording] = useState<boolean>(false);
+    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const [audioURL, setAudioURL] = useState<string | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
@@ -12,27 +17,31 @@ const AudioRecorder: React.FC = () => {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const mediaRecorder = new MediaRecorder(stream);
             mediaRecorderRef.current = mediaRecorder;
-
+    
             mediaRecorder.ondataavailable = (event: BlobEvent) => {
                 if (event.data.size > 0) {
-                    const audioBlob = new Blob([event.data], { type: 'audio/wav' });
-                    setAudioURL(URL.createObjectURL(audioBlob));
+                    const blob = new Blob([event.data], { type: 'audio/wav' });
+                    setAudioBlob(blob);
+                    setAudioURL(URL.createObjectURL(blob));
+                    
+                    onSave(blob); // העברת ה-blob האחרון ל-onSave
                 }
             };
-
+    
             mediaRecorder.start();
             setIsRecording(true);
         } catch (err) {
             console.error('Error accessing audio devices.', err);
         }
     };
-
-    const stopRecording = () => {
+    
+    const stopRecording = async () => {
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
             setIsRecording(false);
         }
     };
+    
 
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', p: 2 }}>
@@ -51,7 +60,9 @@ const AudioRecorder: React.FC = () => {
                     ></span>
                 ))}
             </Box>
+            
             {audioURL && (
+                
                 <audio controls src={audioURL} style={{ marginTop: 16 }} />
             )}
             <style>

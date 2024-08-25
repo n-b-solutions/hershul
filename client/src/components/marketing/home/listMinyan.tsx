@@ -13,6 +13,7 @@ import type { ColumnDef } from '@/components/core/data-table';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import { Divider, Tooltip } from '@mui/material';
 import { SystemMessages } from './systemMessages';
+import axios from 'axios';
 
 interface Minyan {
     room: string;
@@ -20,79 +21,27 @@ interface Minyan {
     announcement: boolean;
     startDate: Date;
 }
-
-const minyans = [
-    {
-        room: 'room1',
-        announcement: true,
-        messages: "room1",
-        startDate: dayjs().subtract(23, 'second').subtract(32, 'minute').toDate(),
-    },
-    {
-        room: 'room2',
-        announcement: false,
-        messages: "room2",
-        startDate: dayjs().subtract(51, 'second').subtract(36, 'minute').toDate(),
-    },
-    {
-        room: 'room3',
-        messages: "room3",
-        announcement: true,
-        startDate: dayjs().subtract(55, 'second').subtract(38, 'minute').toDate(),
-    },
-    {
-        room: 'room3',
-        messages: "room3",
-        announcement: true,
-        startDate: dayjs().subtract(3, 'second').subtract(40, 'minute').toDate(),
-    },
-    {
-        room: 'room3',
-        messages: "room3",
-        announcement: false,
-        startDate: dayjs().subtract(32, 'second').subtract(45, 'minute').toDate(),
-    },
-    {
-        room: 'room1',
-        announcement: true,
-        messages: "room1",
-        startDate: dayjs().subtract(23, 'second').subtract(32, 'minute').toDate(),
-    },
-    {
-        room: 'room2',
-        announcement: false,
-        messages: "room2",
-        startDate: dayjs().subtract(51, 'second').subtract(36, 'minute').toDate(),
-    },
-    {
-        room: 'room3',
-        messages: "room3",
-        announcement: true,
-        startDate: dayjs().subtract(55, 'second').subtract(38, 'minute').toDate(),
-    },
-    {
-        room: 'room3',
-        messages: "room3",
-        announcement: true,
-        startDate: dayjs().subtract(3, 'second').subtract(40, 'minute').toDate(),
-    },
-    {
-        room: 'room3',
-        messages: "room3",
-        announcement: false,
-        startDate: dayjs().subtract(32, 'second').subtract(45, 'minute').toDate(),
-    },
-] satisfies Minyan[];
-
-
-
+const API_BASE_URL=import.meta.env.VITE_LOCAL_SERVER
 export function ListMinyan(): React.JSX.Element {
+    const [minyans, setMinyans] = React.useState<Minyan[]>([]);
+
+    React.useEffect(() => {
+        axios.get(`${API_BASE_URL}/minyan`)
+            .then(res => {
+                setMinyans(res.data);
+                console.log("minyans,", minyans); 
+            })
+            .catch(err => {
+                console.error("Error fetching data:", err);
+            });
+    }, []);
+
     const columns = [
         {
             formatter: (row): React.JSX.Element => (
                 <div>
                     <Typography color="text.secondary" suppressHydrationWarning sx={{ whiteSpace: 'nowrap' }} variant="body2">
-                        {dayjs(row.startDate).format(' hh:mm A')}
+                        {dayjs(row.startDate).format('hh:mm A')}
                     </Typography>
                 </div>
             ),
@@ -110,7 +59,6 @@ export function ListMinyan(): React.JSX.Element {
             name: 'Room',
             width: '70px',
         },
-    
         {
             formatter: (row): React.JSX.Element => {
                 return <>
@@ -125,13 +73,15 @@ export function ListMinyan(): React.JSX.Element {
             width: '70px',
         },
     ] satisfies ColumnDef<Minyan>[];
-    const [displayMessage, setDisplayMessage] = React.useState<boolean>(false)
+
+    const [displayMessage, setDisplayMessage] = React.useState<boolean>(false);
     const handleMessageClick = () => {
-        setDisplayMessage(true)
+        setDisplayMessage(true);
     }
     const handleCloseMessage = () => {
-        setDisplayMessage(false)
-      }
+        setDisplayMessage(false);
+    }
+
     return (
         <Box sx={{ height: '90vh', display: 'flex', flexDirection: 'column', p: 3 }}>
             <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -140,7 +90,7 @@ export function ListMinyan(): React.JSX.Element {
                 <Box sx={{ flex: 1, overflow: 'auto' }}>
                     <DataTable<Minyan> columns={columns} rows={minyans} />
                 </Box>
-                <SystemMessages open={displayMessage} handleClose={handleCloseMessage}/>
+                <SystemMessages open={displayMessage} handleClose={handleCloseMessage} />
             </Card>
         </Box>
     );

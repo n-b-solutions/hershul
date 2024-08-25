@@ -9,34 +9,32 @@ import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { IconButton, TextField, InputAdornment, Dialog } from '@mui/material';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { CreateSystemMessages } from './createSystemMessages'; // Import your dialog component
-
-interface Message {
-  id: string;
-  messages: string;
-}
-
-const messages = [
-  { id: 'USR-010', messages: 'Alcides Antonio' },
-  { id: 'USR-003', messages: 'Carson Darrin' },
-  { id: 'USR-005', messages: 'Fran Perez' },
-  { id: 'USR-006', messages: 'Iulia Albu' },
-  { id: 'USR-008', messages: 'Jie Yan' },
-  { id: 'USR-009', messages: 'Marcus Finn' },
-  { id: 'USR-001', messages: 'Miron Vitold' },
-  { id: 'USR-007', messages: 'Nasimiyu Danai' },
-  { id: 'USR-011', messages: 'Omar Darobe' },
-  { id: 'USR-004', messages: 'Penjani Inyene' },
-  { id: 'USR-002', messages: 'Siegbert Gottfried' },
-] satisfies Message[];
+import { useSelector, useDispatch } from 'react-redux';
+import type { AppDispatch } from '../../../state/store'; // ייבוא AppDispatch
+import { fetchMessageRooms, selectMessageRooms, selectMessageRoomLoading } from '../../../state/messageRoom/messageRoomSlice';
+import { CreateSystemMessages } from './createSystemMessages';
 
 export function SystemMessages(props: { open: boolean; handleClose: () => void }): React.JSX.Element {
   const { open, handleClose } = props;
+  const dispatch = useDispatch<AppDispatch>(); // שימוש ב-AppDispatch
+  
+  // שליפת הנתונים מ-Redux
+  const messages = useSelector(selectMessageRooms);
+  const loading = useSelector(selectMessageRoomLoading);
+  
+  // ניהול המצב המקומי של השאילתא והדיאלוג
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState<boolean>(false);
 
+  // שליחת פעולה לקבלת ההודעות כאשר הקומפוננטה נטענת
+  React.useEffect(() => {
+    if (open) {
+      dispatch(fetchMessageRooms());
+    }
+  }, [dispatch, open]);
+
   const handleCreateDialogOpen = () => {
-    handleClose()
+    handleClose();
     setIsCreateDialogOpen(true);
   };
 
@@ -44,8 +42,13 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void }
     setIsCreateDialogOpen(false);
   };
 
-  const filteredMessages = messages.filter((contact) =>
-    contact.messages.toLowerCase().includes(searchQuery.toLowerCase())
+  const handleItemClick = (message: string) => {
+    console.log(`Clicked on : ${message}`);
+    handleClose();
+  };
+
+  const filteredMessages = messages.filter((contact) => 
+    contact.name && contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -92,28 +95,34 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void }
               />
             </Box>
             <Box sx={{ height: '320px', overflowY: 'auto', px: 1, pb: 2 }}>
-              <List disablePadding sx={{ '& .MuiListItemButton-root': { borderRadius: 1 } }}>
-                {filteredMessages.length > 0 ? (
-                  filteredMessages.map((contact) => (
-                    <ListItem disablePadding key={contact.id}>
-                      <ListItemButton>
-                        <ListItemText
-                          disableTypography
-                          primary={
-                            <Typography noWrap variant="subtitle2">
-                              {contact.messages}
-                            </Typography>
-                          }
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  ))
-                ) : (
-                  <Typography sx={{ px: 2, py: 1 }} variant="subtitle2" color="textSecondary">
-                    No matching results
-                  </Typography>
-                )}
-              </List>
+              {loading ? (
+                <Typography sx={{ px: 2, py: 1 }} variant="subtitle2" color="textSecondary">
+                  Loading...
+                </Typography>
+              ) : (
+                <List disablePadding sx={{ '& .MuiListItemButton-root': { borderRadius: 1 } }}>
+                  {filteredMessages.length > 0 ? (
+                    filteredMessages.map((contact) => (
+                      <ListItem disablePadding key={contact.id}>
+                        <ListItemButton onClick={() => handleItemClick(contact.name)}>
+                          <ListItemText
+                            disableTypography
+                            primary={
+                              <Typography noWrap variant="subtitle2">
+                                {contact.name}
+                              </Typography>
+                            }
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    ))
+                  ) : (
+                    <Typography sx={{ px: 2, py: 1 }} variant="subtitle2" color="textSecondary">
+                      No matching results
+                    </Typography>
+                  )}
+                </List>
+              )}
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
               <IconButton onClick={handleCreateDialogOpen}>

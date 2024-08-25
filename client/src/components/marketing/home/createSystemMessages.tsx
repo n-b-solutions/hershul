@@ -9,6 +9,9 @@ import Button from '@mui/material/Button';
 import { Dialog } from '@mui/material';
 import AudioRecorder from './audioRecorder';
 import { Option } from '@/components/core/option';
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch } from '../../../state/store';
+import { createMessageRoom, selectMessageRoomLoading } from '../../../state/messageRoom/messageRoomSlice';
 
 interface Room {
   id: string;
@@ -26,10 +29,27 @@ const rooms = [
 
 export function CreateSystemMessages(props: { open: boolean; handleClose: () => void }): React.JSX.Element {
   const [selectedRoom, setSelectedRoom] = React.useState<string>('');
+  const [name, setName] = React.useState<string>('');
+  const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
   const { open, handleClose } = props;
+
+  const dispatch = useDispatch<AppDispatch>();
+  const loading = useSelector(selectMessageRoomLoading);
 
   const handleRoomChange = (event: SelectChangeEvent<string>) => {
     setSelectedRoom(event.target.value);
+  };
+
+  const handleSave = async () => {
+    if (audioBlob) {
+      const newRoom = {
+        name,
+        audioBlob,
+      };
+
+      dispatch(createMessageRoom(newRoom));
+      handleClose()
+    }
   };
 
   return (
@@ -40,15 +60,22 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
             <Grid sm={6} xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Name</InputLabel>
-                <OutlinedInput name="name" />
+                <OutlinedInput
+                  name="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
               </FormControl>
             </Grid>
 
             <Grid sm={6} xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Room</InputLabel>
-                <Select value={selectedRoom} onChange={handleRoomChange}>
-                  <Option value="">Select a room</Option>
+                <Select
+                  value={selectedRoom}
+                  onChange={handleRoomChange}
+                  input={<OutlinedInput label="Room" />}
+                >
                   {rooms.map((room) => (
                     <Option key={room.id} value={room.id}>
                       {room.room}
@@ -57,18 +84,18 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
                 </Select>
               </FormControl>
             </Grid>
-
-            <Grid sm={12} xs={12}>
-              <AudioRecorder />
-            </Grid>
-
-            <Grid sm={12} xs={12}>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                <Button variant="outlined" onClick={handleClose}>Cancel</Button>
-                <Button variant="contained" color="primary" onClick={handleClose}>Save</Button>
-              </Box>
-            </Grid>
           </Grid>
+          <Box sx={{ mt: 3 }}>
+            <AudioRecorder onSave={(blob) => setAudioBlob(blob)} />
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+            <Button onClick={handleClose} variant="outlined" sx={{ mr: 1 }}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} variant="contained" disabled={loading}>
+              Save
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Dialog>

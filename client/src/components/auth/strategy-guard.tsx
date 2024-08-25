@@ -18,6 +18,7 @@ export function StrategyGuard({ children, expected }: StrategyGuardProps): React
           To render this page, you need to configure the auth strategy to &quot;{expected}&quot;
         </Alert>
       </Box>
+
     );
   }
 

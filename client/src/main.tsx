@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { Root } from '@/root';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
-
+import { Provider } from 'react-redux';
+import { store } from './state/store'; // או הנתיב הנכון שלך
+import { Root } from '@/root';
 import { routes } from '@/routes';
 import { ScrollRestoration } from '@/components/core/scroll-restoration';
 
@@ -23,6 +24,8 @@ const router = createBrowserRouter([
 
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
   </React.StrictMode>
 );

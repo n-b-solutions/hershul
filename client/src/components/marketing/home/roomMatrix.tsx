@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import { Gear as SettingsIcon } from '@phosphor-icons/react/dist/ssr/Gear';
+import axios from 'axios';
 
 interface Asset {
     name: string;
@@ -19,48 +20,24 @@ interface AssetCollection {
     nameRoom: string;
     assets: Asset[];
 }
-const initialAssetCollection: AssetCollection[] = [
-    {
-        nameRoom: 'room1',
-        assets: [
-            { name: "on", active: true },
-            { name: "off", active: false },
-            { name: "blur", active: false },
-        ]
-    },
-    {
-        nameRoom: 'room2',
-        assets: [
-            { name: "on", active: true },
-            { name: "off", active: false },
-            { name: "blur", active: false },
-        ]
-    },
-    {
-        nameRoom: 'room3',
-        assets: [
-            { name: "on", active: true },
-            { name: "off", active: false },
-            { name: "blur", active: false },
-        ]
-    },
-    {
-        nameRoom: 'room4',
-        assets: [
-            { name: "on", active: true },
-            { name: "off", active: false },
-            { name: "blur", active: false },
-        ]
-    },
-];
+
+const API_BASE_URL =import.meta.env.VITE_LOCAL_SERVER;
 
 export function RoomMatrix(): React.JSX.Element {
-    const [assetsState, setAssetsState] = React.useState<AssetCollection[]>(initialAssetCollection);
-
-    const handleStatusChange = (roomId: string, assetName: string) => {
+    const [assetsState, setAssetsState] = React.useState<AssetCollection[]>([]);
+    React.useEffect(() => {
+        axios.get(`${API_BASE_URL}/roomStatus`)
+            .then(res => {
+                setAssetsState(res.data);
+            })
+            .catch(err => {
+                console.error("Error fetching data:", err);
+            });
+    }, []);
+    const handleStatusChange = (nameRoom: string, assetName: string) => {
         setAssetsState((prevState) =>
             prevState.map((asset) =>
-                asset.nameRoom === roomId
+                asset.nameRoom === nameRoom
                     ? {
                         ...asset,
                         assets: asset.assets.map((ass) =>
