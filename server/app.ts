@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import MinyanListRouter from './router/minyanListRouter';
-import RoomStatusRouter from './router/RoomStatusRouter';
+import RoomStatusRouter from './router/roomStatusRouter';
 import MessageRoomRouter from './router/MessageRoomRouter';
 import connectDB from './DB/mongoConnect';
 connectDB();
