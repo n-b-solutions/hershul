@@ -5,20 +5,21 @@ import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import MessageModel from '../models/messageModel';
 
-
+// Get __filename and __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Extend Express Request type to include Multer file properties
 declare global {
     namespace Express {
         interface Request {
-            file?: multer.File;
-            files?: multer.File[];
+            file?: Express.Multer.File;  // Correctly use Express.Multer.File
+            files?: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[];  // Matches the Multer definition
         }
     }
 }
 
-const uploadDir = path.join(__dirname, '..','uploads', 'audio');
+const uploadDir = path.join(__dirname, '..', 'uploads', 'audio');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -30,11 +31,10 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
         const basename = path.basename(file.originalname, ext);
-        const name = req.body.name || path.basename(file.originalname, ext);
+        const name = req.body.name || basename;
         cb(null, `${name}${ext}`);
     }
 });
-
 
 const upload = multer({ storage });
 
