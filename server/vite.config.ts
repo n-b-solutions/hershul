@@ -1,9 +1,12 @@
 import { defineConfig } from 'vite';
 import { VitePluginNode } from 'vite-plugin-node';
+import { config } from "dotenv";
+
+config();
 
 export default defineConfig({
   server: {
-    port: 4000
+    port: 4000,
   },
   plugins: [
     ...VitePluginNode({
@@ -12,9 +15,8 @@ export default defineConfig({
       exportName: 'viteNodeApp',
       initAppOnBoot: false,
       tsCompiler: 'esbuild',
-      swcOptions: {}
-    })
+      swcOptions: {},
+    }),
   ],
-  optimizeDeps: {
-  },
+  optimizeDeps: {},
 });

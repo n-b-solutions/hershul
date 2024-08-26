@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-
   "scripts": {
     "dev": "concurrently \"cd client && npm run dev\" \"cd server && npm run dev\"",
     "start-server": "cd server && yarn install && npm run start",
     "start-client": "cd client && npm install && npm run dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate-up": "cd server/DB && migrate-mongo up",
+    "migrate-down": "cd server/DB && migrate-mongo down"
   },
   "author": "",
   "license": "ISC",
@@ -16,5 +17,8 @@
     "concurrently": "^8.2.2",
     "vite": "^4.5.3",
     "vite-plugin-node": "^3.1.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
   }
 }
