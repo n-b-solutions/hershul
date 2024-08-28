@@ -5,6 +5,8 @@ import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 
 import { routes } from '@/routes';
 import { ScrollRestoration } from '@/components/core/scroll-restoration';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
 
 const root = createRoot(document.getElementById('root')!);
 
@@ -23,6 +25,7 @@ const router = createBrowserRouter([
 
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Provider store={store}>
+    <RouterProvider router={router} /></Provider>
   </React.StrictMode>
 );

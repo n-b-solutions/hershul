@@ -1,13 +1,20 @@
-export interface typeOfDate{
+export interface TypeOfDate{
     value: number
     label: string
 }
 
 export interface LineItemTable {
-    id: string;
-    blink: string;
-    startTime: number;
-    endTime: number;
-    room: number;
+    id?: string|null;
+    blink: string |null;
+    startTime: string|null;
+    endTime: string|null;
+    room: number|null;
+  }
+
+  export interface TablePropForEdit {
+    blink: { isInput: boolean;};
+    startTime:{ isInput: boolean; };
+    endTime: { isInput: boolean; };
+    room: { isInput: boolean; };
   }
   

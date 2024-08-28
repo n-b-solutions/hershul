@@ -1,10 +1,9 @@
-import { typeOfDate } from '@/types/minyanim';
-import { Button } from '@mui/material';
+import * as React from 'react';
+import type { TypeOfDate } from '@/types/minyanim';
 import Tab from '@mui/material/Tab/Tab';
 import Tabs from '@mui/material/Tabs';
-import * as React from 'react';
 
-const typesOfDates: typeOfDate[] = [
+const typesOfDates: TypeOfDate[] = [
     { value: 0, label: 'Sunday & Tuesday & Wednesday' },
     { value: 1, label: "Monday & Thursday" },
     { value: 3, label: "Friday" },
@@ -15,23 +14,18 @@ const typesOfDates: typeOfDate[] = [
     { value: 8, label: "Calendar" },
 ];
 
-
-
-
-export function TypeOfdate(): React.JSX.Element {
+export function TypeOfDateComponent(): React.JSX.Element {
 
     const [value, setValue] = React.useState(0);
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleChange = (event: React.SyntheticEvent, newValue: number) : void => {
         setValue(newValue);
     }
     return (
-        <div>
-            <Tabs value={value} onChange={handleChange}>
-                {typesOfDates.map((typeOfDate: typeOfDate, index: number) => (
-                    <Tab {...typeOfDate} key={index} />
+            <Tabs onChange={handleChange} sx={{padding:'24px'}} value={value}>
+                {typesOfDates.map((typeOfDate: TypeOfDate) => (
+                  <Tab {...typeOfDate} key={typeOfDate.value} />
                 ))}
             </Tabs>
-        </div>
     )
 
 }
