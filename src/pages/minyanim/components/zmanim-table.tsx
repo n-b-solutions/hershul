@@ -74,8 +74,8 @@ export function ZmanimTable(): React.JSX.Element {
 
   const dispatch = useDispatch();
 
-  const handlePlusClick= (index:number, isFirst?:boolean):void=>{
-      dispatch(addSettingTimes({index:isFirst? 0 : index+1,newRow: { id: '66666', blink: null, startTime:null, endTime: null, room: null }}));
+  const handlePlusClick= (index:number):void=>{
+    dispatch(addSettingTimes({ index,newRow: { id: '66666', blink: null, startTime:null, endTime: null, room: null }}));
   }
  
   return (

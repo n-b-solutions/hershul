@@ -16,6 +16,7 @@ const initialState:Istate = {
      { id: '3', blink: '5',startTime: dayjs(new Date()).format('hh:mm'), endTime:  dayjs(new Date()).format('hh:mm'), room: 65},
      { id: '4', blink: '',startTime: dayjs(new Date()).format('hh:mm'), endTime:  dayjs(new Date()).format('hh:mm'), room: 4},
      { id: '5', blink: '', startTime: dayjs(new Date()).format('hh:mm'), endTime:  dayjs(new Date()).format('hh:mm'), room: 6},
+     { id: '6', blink: '', startTime: '', endTime:'', room:null},
   ],
   isToShowPlus:true
 };
