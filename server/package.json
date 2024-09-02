@@ -4,6 +4,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "migrate-up": "migrate-mongo up",
+    "migrate-down": "migrate-mongo down",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
