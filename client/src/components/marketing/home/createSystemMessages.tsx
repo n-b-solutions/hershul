@@ -11,7 +11,7 @@ import AudioRecorder from './audioRecorder';
 import { Option } from '@/components/core/option';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '../../../state/store';
-import { createMessageRoom, selectMessageRoomLoading } from '../../../state/messageRoom/messageRoomSlice';
+import { createMessageRoom, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
 
 interface Room {
   id: string;

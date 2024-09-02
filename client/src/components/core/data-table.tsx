@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { TextField, Tooltip, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Table from '@mui/material/Table';
 import type { TableProps } from '@mui/material/Table';
@@ -8,16 +9,23 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
+
+import type { LineItemTable, TablePropForEdit } from '@/types/minyanim';
+import { AddRow } from '@/pages/minyanim/components/add-row';
 
 export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
   field?: keyof TRowModel;
   formatter?: (row: TRowModel, index: number) => React.ReactNode;
+  formatterForEdit?: (row: TRowModel, index: number) => React.ReactNode;
   hideName?: boolean;
   name: string;
   width?: number | string;
+  padding?: Padding;
+  tooltip?: string;
 }
-
+type Padding = 'normal' | 'checkbox' | 'none';
 type RowId = number | string;
 
 export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
@@ -33,6 +41,13 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   selectable?: boolean;
   selected?: Set<RowId>;
   uniqueRowId?: (row: TRowModel) => RowId;
+  onAddRowClick?: (index: number) => void;
+  edited?: boolean;
+  onChangeInput?: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    index: number,
+    column: keyof LineItemTable
+  ) => void;
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null }>({
@@ -48,11 +63,41 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   selectable,
   selected,
   uniqueRowId,
+  onAddRowClick,
+  edited,
+  onChangeInput,
   ...props
 }: DataTableProps<TRowModel>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
+  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({ isclick: false, id: '' });
+  const [isShowPlus, setIsShowPlus] = React.useState<boolean>(false);
 
+  const cellRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    cellRef.current?.focus();
+  });
+
+  const handleStatusClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
+    (event.target as HTMLTextAreaElement).localName === 'div' && setIsShowPlus(true);
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
+    const id = (event.currentTarget as HTMLTextAreaElement).id;
+    setIsCellClick({ isclick: true, id });
+  };
+
+  const handleBlurInput = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    const id = (event.currentTarget as HTMLTextAreaElement).id;
+    setIsCellClick({ isclick: false, id });
+    setIsShowPlus(false);
+  };
+
+  const getValue = (index: number, column: keyof TablePropForEdit): string | number | null => {
+    const currentRow = rows[index] as unknown as LineItemTable;
+    const value = currentRow[column];
+    return value;
+  };
   return (
     <Table {...props}>
       <TableHead sx={{ ...(hideHead && { visibility: 'collapse', '--TableCell-borderWidth': 0 }) }}>
@@ -84,6 +129,18 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                 }}
               >
                 {column.hideName ? null : column.name}
+                {column.tooltip ? (
+                  <Tooltip
+                    arrow
+                    title={
+                      <Typography sx={{ width: '100px', textAlign: 'center' }} variant="body1">
+                        {column?.tooltip}
+                      </Typography>
+                    }
+                  >
+                    <WarningIcon color="#635bff" display="inline" size={20} />
+                  </Tooltip>
+                ) : null}
               </TableCell>
             )
           )}
@@ -104,7 +161,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   onClick(event, row);
                 },
               })}
-              sx={{ ...(onClick && { cursor: 'pointer' }) }}
+              sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
             >
               {selectable ? (
                 <TableCell padding="checkbox">
@@ -125,19 +182,51 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   />
                 </TableCell>
               ) : null}
+
               {columns.map(
                 (column): React.JSX.Element => (
-                  <TableCell key={column.name} sx={{ ...(column.align && { textAlign: column.align }) }}>
-                    {
-                      (column.formatter
+                  <TableCell
+                    id={column.name + index}
+                    key={column.name}
+                    onClick={(e) => {
+                      edited && handleClick(e);
+                    }}
+                    padding={column?.padding}
+                    sx={{ ...(column.align && { textAlign: column.align }) }}
+                  >
+                    {edited && isCellClick.isclick && isCellClick.id === column.name + index ? (
+                      <TextField
+                        inputRef={cellRef}
+                        name={column.name + index}
+                        onBlur={(e) => {
+                          handleBlurInput(e);
+                        }}
+                        onChange={(e) => {
+                          onChangeInput && onChangeInput(e, index, column.name as keyof TablePropForEdit);
+                        }}
+                        // type={props.isDate ? 'time' : 'number'}
+                        value={getValue(index, column.name as keyof TablePropForEdit)}
+                      />
+                    ) : (
+                      ((column.formatter
                         ? column.formatter(row, index)
                         : column.field
                           ? row[column.field]
-                          : null) as React.ReactNode
-                    }
+                          : null) as React.ReactNode)
+                    )}
                   </TableCell>
                 )
               )}
+              {onAddRowClick && !isShowPlus ? (
+                <TableCell
+                  onClick={(e) => {
+                    handleStatusClick(e);
+                  }}
+                  sx={{ padding: '0px', width: '0px', pointerEvents: isShowPlus ? 'none' : 'auto' }}
+                >
+                  <AddRow index={index} isFinal={index === rows.length - 1} onPlusClick={onAddRowClick} />
+                </TableCell>
+              ) : null}
             </TableRow>
           );
         })}
