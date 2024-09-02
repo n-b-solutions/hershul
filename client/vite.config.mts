@@ -3,6 +3,9 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
+import { config } from "dotenv";
+
+config();
 
 // https://github.com/vitejs/vite/issues/15012#issuecomment-1825035992
 function muteWarningsPlugin(warningsToIgnore: string[][]): Plugin {
@@ -66,9 +69,6 @@ export default defineConfig({
     ],
   },
   server: {
-    port: 3000,
-  },
-  preview: {
-    port: 3000,
+    port: process.env.PORT ? +process.env.PORT : 3000,
   },
 });
