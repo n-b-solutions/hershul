@@ -8,7 +8,7 @@ module.exports = {
     options: {
     }
   },
-  migrationsDir: "migrations", 
+  migrationsDir: "DB/migrations", 
   changelogCollectionName: "changelog",
   migrationFileExtension: ".ts",
   useFileHash: false,

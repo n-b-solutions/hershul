@@ -3,6 +3,7 @@ export const paths = {
   checkout: '/checkout',
   contact: '/contact',
   pricing: '/pricing',
+  minyanim: '/minyanim',
   auth: {
     custom: {
       signIn: '/auth/custom/sign-in',
