@@ -56,26 +56,21 @@ const RoomStatusController = {
   },
   put_: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const { assetName } = req.body;
-      const room = await RoomStatusModel.findById(id);
-      if (!room) {
-        res.status(404).send("Room not found");
-        return;
-      }
-      room.assets = room.assets.map((asset) => ({
-        ...asset,
-        active: asset.name === assetName,
-      }));
-
-      await room.save();
-
-      res.status(200).json(room);
+        const { id } = req.params; 
+        const { status } = req.body; 
+        const room = await RoomStatusModel.findById(id);
+        if (!room) {
+            res.status(404).send("Room not found");
+            return;
+        }
+        room.status = status; 
+        await room.save();
+        res.status(200).json(room);
     } catch (error) {
-      console.error(error);
-      res.status(500).send("Internal Server Error");
+        console.error(error);
+        res.status(500).send("Internal Server Error");
     }
-  },
+},
   delete: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;

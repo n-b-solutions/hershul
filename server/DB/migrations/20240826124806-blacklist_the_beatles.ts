@@ -10,7 +10,7 @@ module.exports = {
       const messageData = JSON.parse(fs.readFileSync(path.join(__dirname,'..', 'data', 'messageRoom.json')));
 
       // מכניס נתונים ל-collections
-      await db.collection('status_rooms').insertMany(roomStatusData);
+      await db.collection('rooms').insertMany(roomStatusData);
       await db.collection('minyans').insertMany(minyanData);
       await db.collection('messages').insertMany(messageData);
 
@@ -23,7 +23,7 @@ module.exports = {
   async down(db, client) {
     try {
       // אופציונלי - קוד לביטול המיגרציה
-      await db.collection('status_rooms').deleteMany({});
+      await db.collection('rooms').deleteMany({});
       await db.collection('minyans').deleteMany({});
       await db.collection('messages').deleteMany({});
       

@@ -1,104 +1,26 @@
 [
     {
         "nameRoom": "room1",
-        "assets": [
-            {
-                "name": "on",
-                "active": true
-            },
-            {
-                "name": "off",
-                "active": false
-            },
-            {
-                "name": "blur",
-                "active": false
-            }
-        ]
+       "status":"off"
     },
     {
         "nameRoom": "room2",
-        "assets": [
-            {
-                "name": "on",
-                "active": true
-            },
-            {
-                "name": "off",
-                "active": false
-            },
-            {
-                "name": "blur",
-                "active": false
-            }
-        ]
+       "status":"off"
     },
     {
         "nameRoom": "room3",
-        "assets": [
-            {
-                "name": "on",
-                "active": true
-            },
-            {
-                "name": "off",
-                "active": false
-            },
-            {
-                "name": "blur",
-                "active": false
-            }
-        ]
+       "status":"off"
     },
     {
         "nameRoom": "room4",
-        "assets": [
-            {
-                "name": "on",
-                "active": true
-            },
-            {
-                "name": "off",
-                "active": false
-            },
-            {
-                "name": "blur",
-                "active": false
-            }
-        ]
+       "status":"on"
     },
     {
         "nameRoom": "room5",
-        "assets": [
-            {
-                "name": "on",
-                "active": true
-            },
-            {
-                "name": "off",
-                "active": false
-            },
-            {
-                "name": "blur",
-                "active": false
-            }
-        ]
+       "status":"on"
     },
     {
         "nameRoom": "room6",
-        "assets": [
-            {
-                "name": "on",
-                "active": true
-            },
-            {
-                "name": "off",
-                "active": false
-            },
-            {
-                "name": "blur",
-                "active": false
-            }
-        ]
+       "status":"on"
     }
 ]
