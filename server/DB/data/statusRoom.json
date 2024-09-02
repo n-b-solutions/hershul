@@ -1,0 +1,104 @@
+[
+    {
+        "nameRoom": "room1",
+        "assets": [
+            {
+                "name": "on",
+                "active": true
+            },
+            {
+                "name": "off",
+                "active": false
+            },
+            {
+                "name": "blur",
+                "active": false
+            }
+        ]
+    },
+    {
+        "nameRoom": "room2",
+        "assets": [
+            {
+                "name": "on",
+                "active": true
+            },
+            {
+                "name": "off",
+                "active": false
+            },
+            {
+                "name": "blur",
+                "active": false
+            }
+        ]
+    },
+    {
+        "nameRoom": "room3",
+        "assets": [
+            {
+                "name": "on",
+                "active": true
+            },
+            {
+                "name": "off",
+                "active": false
+            },
+            {
+                "name": "blur",
+                "active": false
+            }
+        ]
+    },
+    {
+        "nameRoom": "room4",
+        "assets": [
+            {
+                "name": "on",
+                "active": true
+            },
+            {
+                "name": "off",
+                "active": false
+            },
+            {
+                "name": "blur",
+                "active": false
+            }
+        ]
+    },
+    {
+        "nameRoom": "room5",
+        "assets": [
+            {
+                "name": "on",
+                "active": true
+            },
+            {
+                "name": "off",
+                "active": false
+            },
+            {
+                "name": "blur",
+                "active": false
+            }
+        ]
+    },
+    {
+        "nameRoom": "room6",
+        "assets": [
+            {
+                "name": "on",
+                "active": true
+            },
+            {
+                "name": "off",
+                "active": false
+            },
+            {
+                "name": "blur",
+                "active": false
+            }
+        ]
+    }
+]

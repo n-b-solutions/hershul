@@ -1,0 +1,62 @@
+[
+    {
+      "room": "room1",
+      "announcement": true,
+      "messages": "room1",
+      "startDate": "2024-08-20T13:25:37.000Z"
+    },
+    {
+      "room": "room2",
+      "announcement": false,
+      "messages": "room2",
+      "startDate": "2024-08-20T13:21:41.000Z"
+    },
+    {
+      "room": "room3",
+      "announcement": true,
+      "messages": "room3",
+      "startDate": "2024-08-20T13:19:37.000Z"
+    },
+    {
+      "room": "room3",
+      "announcement": true,
+      "messages": "room3",
+      "startDate": "2024-08-20T13:17:57.000Z"
+    },
+    {
+      "room": "room3",
+      "announcement": false,
+      "messages": "room3",
+      "startDate": "2024-08-20T13:15:28.000Z"
+    },
+    {
+      "room": "room1",
+      "announcement": true,
+      "messages": "room1",
+      "startDate": "2024-08-20T13:25:37.000Z"
+    },
+    {
+      "room": "room2",
+      "announcement": false,
+      "messages": "room2",
+      "startDate": "2024-08-20T13:21:41.000Z"
+    },
+    {
+      "room": "room3",
+      "announcement": true,
+      "messages": "room3",
+      "startDate": "2024-08-20T13:19:37.000Z"
+    },
+    {
+      "room": "room3",
+      "announcement": true,
+      "messages": "room3",
+      "startDate": "2024-08-20T13:17:57.000Z"
+    },
+    {
+      "room": "room3",
+      "announcement": false,
+      "messages": "room3",
+      "startDate": "2024-08-20T13:15:28.000Z"
+    }
+]
