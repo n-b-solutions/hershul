@@ -6,8 +6,6 @@ interface RoomStatus extends Document {
   status: string;
 }
 
-
-
 const RoomStatusSchema = new Schema<RoomStatus>({
   nameRoom: {
     type: String,

@@ -19,6 +19,7 @@
     "@types/mongoose": "^5.11.97",
     "@types/node": "^22.5.0",
     "cors": "^2.8.5",
+    "cron": "^3.1.7",
     "dayjs": "^1.11.12",
     "dotenv": "^16.4.5",
     "dotenv-flow": "^4.1.0",

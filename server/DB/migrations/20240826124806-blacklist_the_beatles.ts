@@ -23,7 +23,7 @@ module.exports = {
   async down(db, client) {
     try {
       // אופציונלי - קוד לביטול המיגרציה
-      await db.collection('status_rooms').deleteMany({});
+      await db.collection('rooms').deleteMany({});
       await db.collection('minyans').deleteMany({});
       await db.collection('messages').deleteMany({});
       

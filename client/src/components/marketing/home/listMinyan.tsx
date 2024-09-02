@@ -20,6 +20,7 @@ interface Minyan {
     messages: string;
     announcement: boolean;
     startDate: Date;
+    endDate: Date;
 }
 const API_BASE_URL=import.meta.env.VITE_LOCAL_SERVER
 export function ListMinyan(): React.JSX.Element {

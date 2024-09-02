@@ -1,7 +1,7 @@
 [
     {
         "nameRoom": "room1",
-       "status":"on"
+       "status":"off"
     },
     {
         "nameRoom": "room2",
