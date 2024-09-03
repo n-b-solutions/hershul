@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
-import messageRoomReducer from './messageRoom/messageRoomSlice';
+
+import messageRoomReducer from './message-room/message-room-slice';
+import settingTimesSliceReducer from './setting-times/setting-times-slice';
 
 export const store = configureStore({
   reducer: {
     messageRoom: messageRoomReducer,
+    settingTimes: settingTimesSliceReducer,
   },
 });
 

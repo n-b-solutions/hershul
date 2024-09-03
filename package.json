@@ -6,9 +6,7 @@
   "scripts": {
     "install-all": "npm install && concurrently \"cd client && npm install\" \"cd server && npm install\"",
     "dev": "concurrently \"cd client && npm run dev\" \"cd server && npm run dev\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "migrate-up": "cd server/DB && migrate-mongo up",
-    "migrate-down": "cd server/DB && migrate-mongo down"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",

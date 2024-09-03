@@ -1,11 +1,13 @@
 import * as React from 'react';
-import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { store } from './state/store'; // או הנתיב הנכון שלך
 import { Root } from '@/root';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
+
 import { routes } from '@/routes';
 import { ScrollRestoration } from '@/components/core/scroll-restoration';
+
+import { store } from './state/store';
 
 const root = createRoot(document.getElementById('root')!);
 

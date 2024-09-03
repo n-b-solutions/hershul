@@ -11,7 +11,7 @@ import { IconButton, TextField, InputAdornment, Dialog } from '@mui/material';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
 import { useSelector, useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../../state/store'; // ייבוא AppDispatch
-import { fetchMessageRooms, selectMessageRooms, selectMessageRoomLoading } from '../../../state/messageRoom/messageRoomSlice';
+import { fetchMessageRooms, selectMessageRooms, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
 import { CreateSystemMessages } from './createSystemMessages';
 
 export function SystemMessages(props: { open: boolean; handleClose: () => void }): React.JSX.Element {

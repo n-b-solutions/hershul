@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 
 import { Page as HomePage } from '@/pages/home/home';
 import { Page as NotFoundPage } from '@/pages/not-found';
+import { Page as Minyanim } from '@/pages/minyanim/minyanim';
 import { Layout as MarketingLayout } from '@/components/marketing/layout/layout';
 
 import { route as authRoute } from './auth';
@@ -21,4 +22,5 @@ export const routes: RouteObject[] = [
   authRoute,
   dashboardRoute,
   { path: '*', element: <NotFoundPage /> },
+  { path: '/minyanim', element: <Minyanim /> },
 ];
