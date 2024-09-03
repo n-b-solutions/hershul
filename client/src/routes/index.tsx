@@ -22,5 +22,5 @@ export const routes: RouteObject[] = [
   authRoute,
   dashboardRoute,
   { path: '*', element: <NotFoundPage /> },
-  { path: '/minyanim', element: <Minyanim /> },
+  { path: '/setting', element: <Minyanim /> },
 ];
