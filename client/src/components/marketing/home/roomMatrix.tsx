@@ -11,6 +11,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import { Gear as SettingsIcon } from '@phosphor-icons/react/dist/ssr/Gear';
 import axios from 'axios';
+import { socket } from '../../../socket';
 
 interface AssetCollection {
     nameRoom: string;
@@ -30,7 +31,17 @@ export function RoomMatrix(): React.JSX.Element {
             .catch(err => {
                 console.error("Error fetching data:", err);
             });
-    }, []);
+
+        socket.on('roomStatusUpdated', (updatedStatuses: AssetCollection[]) => {
+            console.log("socket on:",updatedStatuses);
+            
+            setAssetsState(updatedStatuses);
+
+        });
+        return () => {
+            socket.off('roomStatusUpdated');
+        };
+    }, [socket]);
 
     const handleStatusChange = (nameRoom: string, newStatus: 'on' | 'off' | 'blur') => {
         setAssetsState((prevState) =>
@@ -40,6 +51,9 @@ export function RoomMatrix(): React.JSX.Element {
                     : room
             )
         );
+
+        // Emit an event to the server on button click
+        socket.emit('changeRoomStatus', { nameRoom, newStatus });
     };
 
     return (
