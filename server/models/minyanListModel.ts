@@ -6,7 +6,8 @@ interface MinyanDocument extends Document {
     announcement: boolean;
     startDate: Date;
     endDate: Date;
-    
+    blink:Number;
+    steadyFlag:Boolean;
 }
 
 const MinyanSchema: Schema<MinyanDocument> = new Schema({
@@ -14,7 +15,10 @@ const MinyanSchema: Schema<MinyanDocument> = new Schema({
     messages: { type: String, required: true },
     announcement: { type: Boolean, required: true },
     startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true }
+    endDate: { type: Date, required: true },
+    blink: { type: Number, required: true },
+    steadyFlag: { type: Boolean, required: true }, 
+
 });
 
 const MinyanListModel = mongoose.model<MinyanDocument>('minyans', MinyanSchema);

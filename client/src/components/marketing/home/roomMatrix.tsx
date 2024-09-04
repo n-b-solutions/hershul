@@ -33,11 +33,10 @@ export function RoomMatrix(): React.JSX.Element {
             });
 
         socket.on('roomStatusUpdated', (updatedStatuses: AssetCollection[]) => {
-            console.log("socket on:",updatedStatuses);
-            
+            console.log("socket on:", updatedStatuses);
             setAssetsState(updatedStatuses);
-
         });
+
         return () => {
             socket.off('roomStatusUpdated');
         };
@@ -51,10 +50,12 @@ export function RoomMatrix(): React.JSX.Element {
                     : room
             )
         );
-
+    console.log("handleStatusChange");
+    
         // Emit an event to the server on button click
-        socket.emit('changeRoomStatus', { nameRoom, newStatus });
+        socket.emit('changeRoomStatus', { nameRoom, newStatus, forceUpdate: true });
     };
+    
 
     return (
         <Box sx={{ height: '90vh', display: 'flex', flexDirection: 'column', p: 4 }}>
