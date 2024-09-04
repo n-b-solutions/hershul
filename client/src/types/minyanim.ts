@@ -1,5 +1,5 @@
 export interface TypeOfDate{
-    value: number
+    value: string
     label: string
 }
 

@@ -1,12 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { addSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
+import { addSettingTimes, setSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
+import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { LineItemTable } from '@/types/minyanim';
@@ -29,10 +30,21 @@ const getFormat = (value: number | null | string): React.JSX.Element => {
   );
 };
 
-export function ZmanimTable(): React.JSX.Element {
-  const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
+const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
+export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
+  const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
   const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${props.typeDate}`)
+      .then((res) => {
+        console.log(res.data);
+        dispatch(setSettingTimes({ setting: res.data }));
+      })
+      .catch((err) => console.log('Error fetching data:', err));
+  }, [props.typeDate]);
 
   const handlePlusClick = (index: number): void => {
     dispatch(addSettingTimes({ index, newRow: { id: '', blink: null, startTime: null, endTime: null, room: null } }));
@@ -72,7 +84,7 @@ export function ZmanimTable(): React.JSX.Element {
       name: 'room',
       width: '250px',
       field: 'room',
-      align: 'center'
+      align: 'center',
     },
   ] satisfies ColumnDef<LineItemTable>[];
 
