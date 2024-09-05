@@ -18,6 +18,7 @@
     "vite-plugin-node": "^3.1.0"
   },
   "dependencies": {
+    "@hebcal/core": "^5.4.11",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^22.5.0",
     "cors": "^2.8.5",

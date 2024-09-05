@@ -19,12 +19,12 @@ interface Room {
 }
 
 const rooms = [
-  { id: '1', room: 'Room 1' },
-  { id: '2', room: 'Room 2' },
-  { id: '3', room: 'Room 3' },
-  { id: '4', room: 'Room 4' },
-  { id: '5', room: 'Room 5' },
-  { id: '6', room: 'Room 6' }
+  { id: '1', room: 'room1' },
+  { id: '2', room: 'room2' },
+  { id: '3', room: 'room3' },
+  { id: '4', room: 'room4' },
+  { id: '5', room: 'room5' },
+  { id: '6', room: 'room6' }
 ] satisfies Room[];
 
 export function CreateSystemMessages(props: { open: boolean; handleClose: () => void }): React.JSX.Element {
@@ -43,12 +43,13 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
   const handleSave = async () => {
     if (audioBlob) {
       const newRoom = {
+        selectedRoom,
         name,
         audioBlob,
       };
 
       dispatch(createMessageRoom(newRoom));
-      handleClose()
+      handleClose();
     }
   };
 
@@ -77,7 +78,7 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
                   input={<OutlinedInput label="Room" />}
                 >
                   {rooms.map((room) => (
-                    <Option key={room.id} value={room.id}>
+                    <Option key={room.id} value={room.room}>
                       {room.room}
                     </Option>
                   ))}

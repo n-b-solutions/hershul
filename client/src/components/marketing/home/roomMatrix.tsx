@@ -12,6 +12,7 @@ import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr
 import { Gear as SettingsIcon } from '@phosphor-icons/react/dist/ssr/Gear';
 import axios from 'axios';
 import { socket } from '../../../socket';
+import { SystemMessages } from './systemMessages';
 
 interface AssetCollection {
     nameRoom: string;
@@ -22,6 +23,7 @@ const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
 export function RoomMatrix(): React.JSX.Element {
     const [assetsState, setAssetsState] = React.useState<AssetCollection[]>([]);
+    const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({}); // ניהול state לפי חדר
 
     React.useEffect(() => {
         axios.get(`${API_BASE_URL}/roomStatus`)
@@ -40,7 +42,7 @@ export function RoomMatrix(): React.JSX.Element {
         return () => {
             socket.off('roomStatusUpdated');
         };
-    }, [socket]);
+    }, []);
 
     const handleStatusChange = (nameRoom: string, newStatus: 'on' | 'off' | 'blur') => {
         setAssetsState((prevState) =>
@@ -50,12 +52,25 @@ export function RoomMatrix(): React.JSX.Element {
                     : room
             )
         );
-    console.log("handleStatusChange");
+        console.log("handleStatusChange");
     
         // Emit an event to the server on button click
         socket.emit('changeRoomStatus', { nameRoom, newStatus, forceUpdate: true });
     };
-    
+
+    const handleMessageClick = (roomName: string) => {
+        setDisplayMessages((prevState) => ({
+            ...prevState,
+            [roomName]: true,
+        }));
+    };
+
+    const handleCloseMessage = (roomName: string) => {
+        setDisplayMessages((prevState) => ({
+            ...prevState,
+            [roomName]: false,
+        }));
+    };
 
     return (
         <Box sx={{ height: '90vh', display: 'flex', flexDirection: 'column', p: 4 }}>
@@ -100,7 +115,11 @@ export function RoomMatrix(): React.JSX.Element {
                             </CardContent>
                             <Divider />
                             <CardActions sx={{ justifyContent: 'center' }}>
-                                <IconButton color="secondary" size="small">
+                                <IconButton
+                                    color="secondary"
+                                    size="small"
+                                    onClick={() => handleMessageClick(room.nameRoom)}
+                                >
                                     <SpeakerIcon />
                                 </IconButton>
                                 <IconButton color="secondary" size="small">
@@ -108,6 +127,11 @@ export function RoomMatrix(): React.JSX.Element {
                                 </IconButton>
                             </CardActions>
                         </Card>
+                        <SystemMessages
+                            open={displayMessages[room.nameRoom] || false}
+                            handleClose={() => handleCloseMessage(room.nameRoom)}
+                            room={room.nameRoom}
+                        />
                     </Grid>
                 ))}
             </Grid>

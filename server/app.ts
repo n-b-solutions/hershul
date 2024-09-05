@@ -28,8 +28,6 @@ io.on("connection", (socket) => {
   socket.on("changeRoomStatus", async ({ nameRoom, newStatus }) => {
     console.log(" socket.on");
     try {
-      // Update the steadyFlag and room status
-
       const updatedStatuses1 =
         await ScheduleController.setRoomSteadyFlagAndStatus(
           nameRoom,

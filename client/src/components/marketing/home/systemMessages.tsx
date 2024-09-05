@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Dialog, IconButton, InputAdornment, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -6,22 +7,27 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
-import { IconButton, TextField, InputAdornment, Dialog } from '@mui/material';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { useSelector, useDispatch } from 'react-redux';
+import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
+import { useDispatch, useSelector } from 'react-redux';
+
+import {
+  fetchMessageRooms,
+  selectMessageRoomLoading,
+  selectMessageRooms,
+} from '../../../state/message-room/message-room-slice';
 import type { AppDispatch } from '../../../state/store'; // ייבוא AppDispatch
-import { fetchMessageRooms, selectMessageRooms, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
+
 import { CreateSystemMessages } from './createSystemMessages';
 
-export function SystemMessages(props: { open: boolean; handleClose: () => void }): React.JSX.Element {
-  const { open, handleClose } = props;
+export function SystemMessages(props: { open: boolean; handleClose: () => void; room: string }): React.JSX.Element {
+  const { open, handleClose, room } = props;
   const dispatch = useDispatch<AppDispatch>(); // שימוש ב-AppDispatch
-  
+
   // שליפת הנתונים מ-Redux
   const messages = useSelector(selectMessageRooms);
   const loading = useSelector(selectMessageRoomLoading);
-  
+
   // ניהול המצב המקומי של השאילתא והדיאלוג
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState<boolean>(false);
@@ -47,10 +53,14 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void }
     handleClose();
   };
 
-  const filteredMessages = messages.filter((contact) => 
-    contact.name && contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredMessages = messages.filter(
+    (contact) =>
+      contact.name &&
+      contact.selectedRoom === room && // סינון לפי החדר הנוכחי
+      contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+ 
   return (
     <>
       <Dialog

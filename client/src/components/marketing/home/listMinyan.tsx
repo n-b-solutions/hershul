@@ -12,7 +12,6 @@ import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import { Divider, Tooltip } from '@mui/material';
-import { SystemMessages } from './systemMessages';
 import axios from 'axios';
 
 interface Minyan {
@@ -64,7 +63,7 @@ export function ListMinyan(): React.JSX.Element {
             formatter: (row): React.JSX.Element => {
                 return <>
                     {row.announcement ? <Tooltip title={row.messages}>
-                        <IconButton onClick={() => handleMessageClick()}>
+                        <IconButton >
                             <SpeakerIcon />
                         </IconButton>
                     </Tooltip> : null}
@@ -75,13 +74,7 @@ export function ListMinyan(): React.JSX.Element {
         },
     ] satisfies ColumnDef<Minyan>[];
 
-    const [displayMessage, setDisplayMessage] = React.useState<boolean>(false);
-    const handleMessageClick = () => {
-        setDisplayMessage(true);
-    }
-    const handleCloseMessage = () => {
-        setDisplayMessage(false);
-    }
+ 
 
     return (
         <Box sx={{ height: '90vh', display: 'flex', flexDirection: 'column', p: 3 }}>
@@ -91,7 +84,6 @@ export function ListMinyan(): React.JSX.Element {
                 <Box sx={{ flex: 1, overflow: 'auto' }}>
                     <DataTable<Minyan> columns={columns} rows={minyans} />
                 </Box>
-                <SystemMessages open={displayMessage} handleClose={handleCloseMessage} />
             </Card>
         </Box>
     );
