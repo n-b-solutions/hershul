@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import MinyanListRouter from "./router/minyanListRouter";
 import RoomStatusRouter from "./router/roomStatusRouter";
-import MessageRoomRouter from "./router/MessageRoomRouter";
+import MessageRoomRouter from "./router/messageRoomRouter";
 import connectDB from "./DB/mongoConnect";
 import { CronJob } from "cron";
 import ScheduleController from "./controller/scheduleController";
