@@ -7,7 +7,6 @@
 /server/uploads/audio
 /.pnp
 .pnp.js
-
 # testing
 /coverage
 

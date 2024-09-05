@@ -63,5 +63,4 @@ app.use("/message", MessageRoomRouter);
 server.listen(4000, () => {
   console.log("Server is running on port 4000");
 });
-
 export const viteNodeApp = app;
