@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import axios from 'axios';
+import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { LineItemTable } from '@/types/minyanim';
@@ -47,12 +48,13 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   }, [props.typeDate]);
 
   const handlePlusClick = (index: number): void => {
-    dispatch(addSettingTimes({ index, newRow: { id: '', blink: null, startTime: null, endTime: null, room: null } }));
+    dispatch(addSettingTimes({ index, newRow: { id: '', blink: null, startDate: null, endDate: null, room: null } }));
   };
 
   const columns = [
     {
       formatter: (row): React.JSX.Element => getFormat(row.blink),
+      typeEditinput: 'text',
       name: 'blink',
       width: '250px',
       field: 'blink',
@@ -61,20 +63,22 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       tooltip: 'Time to start Blink before lights on',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.startTime),
+      formatter: (row): React.JSX.Element => getFormat(row.startDate),
+      typeEditinput: 'time',
       padding: 'none',
-      name: 'startTime',
+      name: 'startDate',
       width: '250px',
-      field: 'startTime',
+      field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.endTime),
+      formatter: (row): React.JSX.Element => getFormat(row.endDate),
+      typeEditinput: 'time',
       padding: 'none',
-      name: 'endTime',
+      name: 'endDate',
       width: '250px',
-      field: 'endTime',
+      field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
     },
@@ -93,7 +97,9 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     index: number,
     column: keyof LineItemTable
   ): void => {
-    dispatch(updateSettingTimesValue({ index, column, value: e.target.value }));
+    console.log(e.target.type);
+    const value = e.target.type === 'time' ?e.target.value : e.target.value;
+    dispatch(updateSettingTimesValue({ index, column, value}));
   };
 
   return (

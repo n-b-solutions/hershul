@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { TextField, Tooltip, Typography } from '@mui/material';
+import { OutlinedInput, TextField, Tooltip, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Table from '@mui/material/Table';
 import type { TableProps } from '@mui/material/Table';
@@ -10,6 +10,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
+import dayjs, { Dayjs } from 'dayjs';
 
 import type { LineItemTable, TablePropForEdit } from '@/types/minyanim';
 import { AddRow } from '@/pages/minyanim/components/add-row';
@@ -18,7 +19,7 @@ export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
   field?: keyof TRowModel;
   formatter?: (row: TRowModel, index: number) => React.ReactNode;
-  formatterForEdit?: (row: TRowModel, index: number) => React.ReactNode;
+  typeEditinput?: string;
   hideName?: boolean;
   name: string;
   width?: number | string;
@@ -27,7 +28,6 @@ export interface ColumnDef<TRowModel> {
 }
 type Padding = 'normal' | 'checkbox' | 'none';
 type RowId = number | string;
-
 export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   columns: ColumnDef<TRowModel>[];
   hideHead?: boolean;
@@ -72,7 +72,36 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
   const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({ isclick: false, id: '' });
   const [isShowPlus, setIsShowPlus] = React.useState<boolean>(false);
-
+  const rendereditInput = (index: number, columnName: string, editType?: string): React.JSX.Element => {
+    switch (editType) {
+      case 'text':
+        return (
+          <OutlinedInput
+            value={getValue(index, columnName as keyof TablePropForEdit)}
+            onChange={(e) => {
+              onChangeInput && onChangeInput(e, index, columnName as keyof TablePropForEdit);
+            }}
+            inputRef={cellRef}
+            name={columnName + index}
+            type="text"
+          />
+        );
+      case 'time':
+        return (
+          <OutlinedInput
+            value={getValue(index, columnName as keyof TablePropForEdit)}
+            onChange={(e) => {
+              onChangeInput && onChangeInput(e, index, columnName as keyof TablePropForEdit);
+            }}
+            inputRef={cellRef}
+            name={columnName + index}
+            type="time"
+          />
+        );
+      default:
+        return <></>;
+    }
+  };
   const cellRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     cellRef.current?.focus();
@@ -87,8 +116,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     setIsCellClick({ isclick: true, id });
   };
 
-  const handleBlurInput = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-    const id = (event.currentTarget as HTMLTextAreaElement).id;
+  const handleBlurInput = (event: React.FocusEvent<HTMLTableCellElement, Element>): void => {
+    const id = (event.currentTarget as HTMLTableCellElement).id;
     setIsCellClick({ isclick: false, id });
     setIsShowPlus(false);
   };
@@ -191,29 +220,19 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                     onClick={(e) => {
                       edited && handleClick(e);
                     }}
+                    onBlur={(e) => {
+                      handleBlurInput(e);
+                    }}
                     padding={column?.padding}
                     sx={{ ...(column.align && { textAlign: column.align }) }}
                   >
-                    {edited && isCellClick.isclick && isCellClick.id === column.name + index ? (
-                      <TextField
-                        inputRef={cellRef}
-                        name={column.name + index}
-                        onBlur={(e) => {
-                          handleBlurInput(e);
-                        }}
-                        onChange={(e) => {
-                          onChangeInput && onChangeInput(e, index, column.name as keyof TablePropForEdit);
-                        }}
-                        // type={props.isDate ? 'time' : 'number'}
-                        value={getValue(index, column.name as keyof TablePropForEdit)}
-                      />
-                    ) : (
-                      ((column.formatter
-                        ? column.formatter(row, index)
-                        : column.field
-                          ? row[column.field]
-                          : null) as React.ReactNode)
-                    )}
+                    {edited && isCellClick.isclick && isCellClick.id === column.name + index
+                      ? rendereditInput(index, column.name, column.typeEditinput)
+                      : ((column.formatter
+                          ? column.formatter(row, index)
+                          : column.field
+                            ? row[column.field]
+                            : null) as React.ReactNode)}
                   </TableCell>
                 )
               )}

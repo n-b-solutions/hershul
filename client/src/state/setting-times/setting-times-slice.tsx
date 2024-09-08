@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 import type { LineItemTable } from '@/types/minyanim';
 
@@ -25,7 +25,8 @@ const settingTimesSlice = createSlice({
       action: PayloadAction<{ index: number; value: string; column: keyof LineItemTable }>
     ) => {
       const update = state.settingTimesItem[action.payload.index] as LineItemTable;
-      const newUpdate = { ...update, [action.payload.column]: action.payload.value };
+      console.log(typeof action.payload.value);
+      const newUpdate: LineItemTable = { ...update, [action.payload.column]: action.payload.value };
       [...state.settingTimesItem, (state.settingTimesItem[action.payload.index] = newUpdate)];
     },
     setSettingTimes: (state: Istate, action: PayloadAction<{ setting: LineItemTable[] }>) => {
