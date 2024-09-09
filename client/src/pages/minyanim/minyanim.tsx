@@ -7,7 +7,7 @@ import type { Metadata } from '@/types/metadata';
 import { TypeOfDateComponent } from './components/type-of-date/type-of-date';
 import { ZmanimTable } from './components/zmanim-table';
 
-const metadata: Metadata = { title: 'Minyanim' };
+const metadata: Metadata = { title: 'Setting' };
 
 export function Page(): React.JSX.Element {
   return (

@@ -3,7 +3,7 @@ import type { RouteObject } from 'react-router-dom';
 
 
 export const route: RouteObject = {
-  path: 'minyanim',
+  path: 'setting',
   children: [
     {
       index: true,
