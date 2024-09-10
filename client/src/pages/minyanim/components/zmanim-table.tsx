@@ -48,7 +48,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   }, [props.typeDate]);
 
   const handlePlusClick = (index: number): void => {
-    dispatch(addSettingTimes({ index, newRow: { id: '', blink: null, startDate: null, endDate: null, room: null } }));
+    dispatch(addSettingTimes({ index, newRow: { id: '', blink: null, startDate: null, endDate: null, room: {nameRoom:'',status:''} } }));
   };
 
   const columns = [
@@ -83,7 +83,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       tooltip: 'Lights Off',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.room),
+      formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
       padding: 'none',
       name: 'room',
       width: '250px',

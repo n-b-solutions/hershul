@@ -1,4 +1,5 @@
 import { Dayjs } from "dayjs";
+import { Room } from "./room";
 
 export interface TypeOfDate{
     value: string
@@ -10,7 +11,7 @@ export interface LineItemTable {
     blink: string |null;
     startDate: string|null;
     endDate: string |null;
-    room: number|null;
+    room:Room;
   }
 
   export interface TablePropForEdit {

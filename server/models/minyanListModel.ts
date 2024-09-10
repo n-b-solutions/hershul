@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, ObjectId, SchemaType, SchemaTypes } from "mongoose";
 
 type DateTypes =
   | "sunday"
@@ -10,7 +10,7 @@ type DateTypes =
   | "yomTov"
   | "calendar";
 interface MinyanDocument extends Document {
-  room: string;
+  roomId: ObjectId;
   messages?: string;
   announcement: boolean;
   startDate: Date;
@@ -20,7 +20,7 @@ interface MinyanDocument extends Document {
 }
 
 const MinyanSchema: Schema<MinyanDocument> = new Schema({
-  room: { type: String, required: true },
+  roomId: { type: SchemaTypes.ObjectId, required: true ,ref:'rooms'},
   messages: { type: String, required: true },
   announcement: { type: Boolean, required: true },
   startDate: { type: Date, required: true },

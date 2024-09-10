@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { OutlinedInput, TextField, Tooltip, Typography } from '@mui/material';
+import { OutlinedInput, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Table from '@mui/material/Table';
 import type { TableProps } from '@mui/material/Table';
@@ -14,6 +14,9 @@ import dayjs, { Dayjs } from 'dayjs';
 
 import type { LineItemTable, TablePropForEdit } from '@/types/minyanim';
 import { AddRow } from '@/pages/minyanim/components/add-row';
+
+import { MultiSelect } from './multi-select';
+import { Room } from '@/types/room';
 
 export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
@@ -72,36 +75,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
   const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({ isclick: false, id: '' });
   const [isShowPlus, setIsShowPlus] = React.useState<boolean>(false);
-  const rendereditInput = (index: number, columnName: string, editType?: string): React.JSX.Element => {
-    switch (editType) {
-      case 'text':
-        return (
-          <OutlinedInput
-            value={getValue(index, columnName as keyof TablePropForEdit)}
-            onChange={(e) => {
-              onChangeInput && onChangeInput(e, index, columnName as keyof TablePropForEdit);
-            }}
-            inputRef={cellRef}
-            name={columnName + index}
-            type="text"
-          />
-        );
-      case 'time':
-        return (
-          <OutlinedInput
-            value={getValue(index, columnName as keyof TablePropForEdit)}
-            onChange={(e) => {
-              onChangeInput && onChangeInput(e, index, columnName as keyof TablePropForEdit);
-            }}
-            inputRef={cellRef}
-            name={columnName + index}
-            type="time"
-          />
-        );
-      default:
-        return <></>;
-    }
-  };
+
   const cellRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     cellRef.current?.focus();
@@ -122,7 +96,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     setIsShowPlus(false);
   };
 
-  const getValue = (index: number, column: keyof TablePropForEdit): string | number | null => {
+  const getValue = (index: number, column: keyof TablePropForEdit): string | number | null|Room => {
     const currentRow = rows[index] as unknown as LineItemTable;
     const value = currentRow[column];
     return value;
@@ -220,14 +194,14 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                     onClick={(e) => {
                       edited && handleClick(e);
                     }}
-                    onBlur={(e) => {
-                      handleBlurInput(e);
-                    }}
+                    // onBlur={(e) => {
+                    //   handleBlurInput(e);
+                    // }}
                     padding={column?.padding}
                     sx={{ ...(column.align && { textAlign: column.align }) }}
                   >
                     {edited && isCellClick.isclick && isCellClick.id === column.name + index
-                      ? rendereditInput(index, column.name, column.typeEditinput)
+                      ? null
                       : ((column.formatter
                           ? column.formatter(row, index)
                           : column.field

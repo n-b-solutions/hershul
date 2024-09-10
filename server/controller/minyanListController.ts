@@ -5,8 +5,19 @@ import MinyanListModel from "../models/minyanListModel";
 const MinyanListController = {
   get: async (req: Request, res: Response): Promise<void> => {
     try {
-      const minyanList = await MinyanListModel.find();
-      res.status(200).json(minyanList);
+      const minyanList = await MinyanListModel.find().populate("roomId");
+      const fullMinyanList = minyanList.map((minyan) => {
+        return({
+          'announcement': minyan.announcement,
+          'messages': minyan.messages,
+          'startDate': minyan.startDate,
+          'endDate': minyan.endDate,
+          'dateType': minyan.dateType,
+          'blink': minyan.blink,
+          'room': minyan.roomId,
+        });
+      });
+      res.status(200).json(fullMinyanList);
     } catch (error) {
       console.error("Error fetching minyan list:", error);
       res.status(500).send("Internal Server Error");
@@ -16,7 +27,7 @@ const MinyanListController = {
   getById: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     try {
-      const minyan = await MinyanListModel.findById(id);
+      const minyan = await MinyanListModel.findById(id).populate("roomId");
       if (!minyan) {
         res.status(404).send("Minyan not found");
         return;
@@ -31,10 +42,22 @@ const MinyanListController = {
   getByTypeDate: async (req: Request, res: Response): Promise<void> => {
     const { dateType } = req.params;
     try {
-      const minyanList = await MinyanListModel.find();
+      const minyanList = await MinyanListModel.find().populate("roomId");
+      const fullMinyanList = minyanList.map((minyan) => {
+        return({
+          'announcement': minyan.announcement,
+          'messages': minyan.messages,
+          'startDate': minyan.startDate,
+          'endDate': minyan.endDate,
+          'dateType': minyan.dateType,
+          'blink': minyan.blink,
+          'room': minyan.roomId,
+        });
+      });
+      console.log(fullMinyanList);
       const minyamListByfilter = res
         .status(200)
-        .json(minyanList?.filter((minyan) => minyan.dateType === dateType));
+        .json(fullMinyanList?.filter((minyan) => minyan.dateType === dateType));
       minyamListByfilter
         ? minyamListByfilter
         : res.status(400).send(`Minyan list for ${dateType} not found`);
