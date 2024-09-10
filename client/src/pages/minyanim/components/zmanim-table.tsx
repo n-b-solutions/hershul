@@ -8,10 +8,10 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import axios from 'axios';
-import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { LineItemTable } from '@/types/minyanim';
+import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
@@ -36,26 +36,45 @@ const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
   const dispatch = useDispatch();
-
+  const [rooms, setRooms] = React.useState<Room[]>([]);
+  const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
   React.useEffect(() => {
     axios
       .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${props.typeDate}`)
-      .then((res) => {
-        console.log(res.data);
-        dispatch(setSettingTimes({ setting: res.data }));
-      })
+      .then((res) => dispatch(setSettingTimes({ setting: res.data })))
       .catch((err) => console.log('Error fetching data:', err));
   }, [props.typeDate]);
 
+  React.useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/roomStatus`)
+      .then((res) => {
+        setRoomsOption(
+          res.data.map((option: { nameRoom: string; id: string }) => ({ label: option.nameRoom, value: option.id }))
+        );
+        setRooms(res.data);
+      })
+      .catch((err) => console.log('Error fetching data:', err));
+  }, []);
+
   const handlePlusClick = (index: number): void => {
-    dispatch(addSettingTimes({ index, newRow: { id: '', blink: null, startDate: null, endDate: null, room: {nameRoom:'',status:''} } }));
+    dispatch(
+      addSettingTimes({
+        index,
+        newRow: { id: '', blink: '', startDate: '', endDate: '', room: { id: '', nameRoom: '', status: '' } },
+      })
+    );
+  };
+
+  const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
+    dispatch(updateSettingTimesValue({ index, field, value }));
   };
 
   const columns = [
     {
       formatter: (row): React.JSX.Element => getFormat(row.blink),
-      typeEditinput: 'text',
-      name: 'blink',
+      typeEditinput: 'number',
+      name: 'Blink',
       width: '250px',
       field: 'blink',
       padding: 'none',
@@ -66,7 +85,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       formatter: (row): React.JSX.Element => getFormat(row.startDate),
       typeEditinput: 'time',
       padding: 'none',
-      name: 'startDate',
+      name: 'Start Date',
       width: '250px',
       field: 'startDate',
       align: 'center',
@@ -76,7 +95,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       formatter: (row): React.JSX.Element => getFormat(row.endDate),
       typeEditinput: 'time',
       padding: 'none',
-      name: 'endDate',
+      name: 'End Date',
       width: '250px',
       field: 'endDate',
       align: 'center',
@@ -84,23 +103,17 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     },
     {
       formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
+      typeEditinput: 'select',
+      valueForEdit: (row) => ({ label: row.room.nameRoom, value: row.room.id }),
+      selectOptions: roomsOption,
+      valueOption: rooms,
       padding: 'none',
-      name: 'room',
+      name: 'Room',
       width: '250px',
       field: 'room',
       align: 'center',
     },
   ] satisfies ColumnDef<LineItemTable>[];
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    index: number,
-    column: keyof LineItemTable
-  ): void => {
-    console.log(e.target.type);
-    const value = e.target.type === 'time' ?e.target.value : e.target.value;
-    dispatch(updateSettingTimesValue({ index, column, value}));
-  };
 
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>

@@ -7,10 +7,10 @@ export interface TypeOfDate{
 }
 
 export interface LineItemTable {
-    id?: string|null;
-    blink: string |null;
-    startDate: string|null;
-    endDate: string |null;
+    id: string;
+    blink: string ;
+    startDate: string;
+    endDate: string;
     room:Room;
   }
 
