@@ -1,20 +1,16 @@
+import { Dayjs } from "dayjs";
+import { Room } from "./room";
+
 export interface TypeOfDate{
-    value: number
+    value: string
     label: string
 }
 
 export interface LineItemTable {
-    id?: string|null;
-    blink: string |null;
-    startTime: string|null;
-    endTime: string|null;
-    room: number|null;
-  }
-
-  export interface TablePropForEdit {
-    blink: { isInput: boolean;};
-    startTime:{ isInput: boolean; };
-    endTime: { isInput: boolean; };
-    room: { isInput: boolean; };
+    id: string;
+    blink: string ;
+    startDate: string;
+    endDate: string;
+    room:Room;
   }
   

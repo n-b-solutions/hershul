@@ -1,15 +1,17 @@
 'use client';
 
 import * as React from 'react';
-import { addSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
+import { addSettingTimes, setSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
+import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { LineItemTable } from '@/types/minyanim';
+import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
@@ -29,19 +31,50 @@ const getFormat = (value: number | null | string): React.JSX.Element => {
   );
 };
 
-export function ZmanimTable(): React.JSX.Element {
-  const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
+const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
+export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
+  const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
   const dispatch = useDispatch();
+  const [rooms, setRooms] = React.useState<Room[]>([]);
+  const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
+  React.useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${props.typeDate}`)
+      .then((res) => dispatch(setSettingTimes({ setting: res.data })))
+      .catch((err) => console.log('Error fetching data:', err));
+  }, [props.typeDate]);
+
+  React.useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/roomStatus`)
+      .then((res) => {
+        setRoomsOption(
+          res.data.map((option: { nameRoom: string; id: string }) => ({ label: option.nameRoom, value: option.id }))
+        );
+        setRooms(res.data);
+      })
+      .catch((err) => console.log('Error fetching data:', err));
+  }, []);
 
   const handlePlusClick = (index: number): void => {
-    dispatch(addSettingTimes({ index, newRow: { id: '', blink: null, startTime: null, endTime: null, room: null } }));
+    dispatch(
+      addSettingTimes({
+        index,
+        newRow: { id: '', blink: '', startDate: '', endDate: '', room: { id: '', nameRoom: '', status: '' } },
+      })
+    );
+  };
+
+  const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
+    dispatch(updateSettingTimesValue({ index, field, value }));
   };
 
   const columns = [
     {
       formatter: (row): React.JSX.Element => getFormat(row.blink),
-      name: 'blink',
+      typeEditinput: 'number',
+      name: 'Blink',
       width: '250px',
       field: 'blink',
       padding: 'none',
@@ -49,40 +82,38 @@ export function ZmanimTable(): React.JSX.Element {
       tooltip: 'Time to start Blink before lights on',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.startTime),
+      formatter: (row): React.JSX.Element => getFormat(row.startDate),
+      typeEditinput: 'time',
       padding: 'none',
-      name: 'startTime',
+      name: 'Start Date',
       width: '250px',
-      field: 'startTime',
+      field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.endTime),
+      formatter: (row): React.JSX.Element => getFormat(row.endDate),
+      typeEditinput: 'time',
       padding: 'none',
-      name: 'endTime',
+      name: 'End Date',
       width: '250px',
-      field: 'endTime',
+      field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.room),
+      formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
+      typeEditinput: 'select',
+      valueForEdit: (row) => ({ label: row.room.nameRoom, value: row.room.id }),
+      selectOptions: roomsOption,
+      valueOption: rooms,
       padding: 'none',
-      name: 'room',
+      name: 'Room',
       width: '250px',
       field: 'room',
-      align: 'center'
+      align: 'center',
     },
   ] satisfies ColumnDef<LineItemTable>[];
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    index: number,
-    column: keyof LineItemTable
-  ): void => {
-    dispatch(updateSettingTimesValue({ index, column, value: e.target.value }));
-  };
 
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>

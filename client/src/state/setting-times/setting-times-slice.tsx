@@ -1,58 +1,15 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 import type { LineItemTable } from '@/types/minyanim';
+import { Room } from '@/types/room';
 
 export interface Istate {
   settingTimesItem: LineItemTable[];
 }
 const initialState: Istate = {
-  settingTimesItem: [
-    {
-      id: '0',
-      blink: '3',
-      startTime: dayjs(new Date()).format('hh:mm'),
-      endTime: dayjs(new Date()).format('hh:mm'),
-      room: 1,
-    },
-    {
-      id: '1',
-      blink: '',
-      startTime: dayjs(new Date()).format('hh:mm'),
-      endTime: dayjs(new Date()).format('hh:mm'),
-      room: 0,
-    },
-    {
-      id: '2',
-      blink: '',
-      startTime: dayjs(new Date()).format('hh:mm'),
-      endTime: dayjs(new Date()).format('hh:mm'),
-      room: 5,
-    },
-    {
-      id: '3',
-      blink: '5',
-      startTime: dayjs(new Date()).format('hh:mm'),
-      endTime: dayjs(new Date()).format('hh:mm'),
-      room: 65,
-    },
-    {
-      id: '4',
-      blink: '',
-      startTime: dayjs(new Date()).format('hh:mm'),
-      endTime: dayjs(new Date()).format('hh:mm'),
-      room: 4,
-    },
-    {
-      id: '5',
-      blink: '',
-      startTime: dayjs(new Date()).format('hh:mm'),
-      endTime: dayjs(new Date()).format('hh:mm'),
-      room: 6,
-    },
-    { id: '6', blink: '', startTime: '', endTime: '', room: null },
-  ],
+  settingTimesItem: [],
 };
 
 const settingTimesSlice = createSlice({
@@ -66,15 +23,18 @@ const settingTimesSlice = createSlice({
     },
     updateSettingTimesValue: (
       state,
-      action: PayloadAction<{ index: number; value: string; column: keyof LineItemTable }>
+      action: PayloadAction<{ index: number; value: string|Room; field: string }>
     ) => {
       const update = state.settingTimesItem[action.payload.index] as LineItemTable;
-      const newUpdate = { ...update, [action.payload.column]: action.payload.value };
+      const newUpdate: LineItemTable = { ...update, [action.payload.field]: action.payload.value };
       [...state.settingTimesItem, (state.settingTimesItem[action.payload.index] = newUpdate)];
+    },
+    setSettingTimes: (state: Istate, action: PayloadAction<{ setting: LineItemTable[] }>) => {
+      state.settingTimesItem = action.payload.setting;
     },
   },
 });
 
-export const { addSettingTimes, updateSettingTimesValue } = settingTimesSlice.actions;
+export const { addSettingTimes, updateSettingTimesValue, setSettingTimes } = settingTimesSlice.actions;
 
 export default settingTimesSlice.reducer;
