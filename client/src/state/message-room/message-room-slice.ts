@@ -3,6 +3,7 @@ import { RootState } from "../store";
 import axios from "axios";
 
 interface MessageRoom {
+  selectedRoom:string;
   id?: string;
   name: string;
   audioUrl?: string;
@@ -43,6 +44,9 @@ export const createMessageRoom = createAsyncThunk(
   'messageRoom/createMessageRoom',
   async (newRoom: Omit<MessageRoom, 'id'>) => {
     const formData = new FormData();
+    formData.append('selectedRoom',newRoom.selectedRoom)
+    console.log(newRoom.selectedRoom);
+    
     formData.append('name', newRoom.name);
     if (newRoom.audioBlob) {
       formData.append('audioBlob', newRoom.audioBlob, 'audio.wav');

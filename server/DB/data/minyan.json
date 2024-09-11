@@ -1,89 +1,92 @@
 [
   {
-      "room": "room1",
-      "announcement": true,
-      "messages": "room1",
-      "startDate": "2024-08-20T13:00:00.000Z",
-      "endDate": "2024-09-20T13:05:00.000Z",
-      "dateType":"sunday",
-      "blink":"7"
+    "room": "room1",
+    "announcement": true,
+    "messages": "room1",
+    "startDate": "2024-08-20T13:00:00.000Z",
+    "endDate": "2024-09-20T13:05:00.000Z",
+    "blink": 4,
+    "dateType": "sunday"
   },
   {
-      "room": "room2",
-      "announcement": false,
-      "messages": "room2",
-      "startDate": "2024-08-20T13:05:00.000Z",
-      "endDate": "2024-08-20T13:10:00.000Z",
-      "dateType":"sunday",
-      "blink":"6"
+    "room": "room2",
+    "announcement": false,
+    "messages": "room2",
+    "startDate": "2024-08-20T13:05:00.000Z",
+    "endDate": "2024-08-20T13:10:00.000Z",
+    "blink": 6,
+    "dateType": "sunday"
   },
   {
-      "room": "room3",
-      "announcement": true,
-      "messages": "room3",
-      "startDate": "2024-08-20T13:10:00.000Z",
-      "endDate": "2024-08-20T13:15:00.000Z",
-      "dateType":"sunday",
-      "blink":"8"
+    "room": "room3",
+    "announcement": true,
+    "messages": "room3",
+    "startDate": "2024-08-20T13:10:00.000Z",
+    "endDate": "2024-08-20T13:15:00.000Z",
+    "blink": 2,
+    "dateType": "sunday"
   },
   {
-      "room": "room3",
-      "announcement": true,
-      "messages": "room3",
-      "startDate": "2024-08-20T13:15:00.000Z",
-      "endDate": "2024-08-20T13:20:00.000Z",
-      "dateType":"sunday",
-      "blink":"3"
+    "room": "room3",
+    "announcement": true,
+    "messages": "room3",
+    "startDate": "2024-08-20T13:15:00.000Z",
+    "endDate": "2024-08-20T13:20:00.000Z",
+    "blink": 7,
+    "dateType": "sunday"
   },
   {
-      "room": "room3",
-      "announcement": false,
-      "messages": "room3",
-      "startDate": "2024-08-20T13:20:00.000Z",
-      "endDate": "2024-08-20T13:25:00.000Z",
-      "dateType":"sunday",
-      "blink":"1"
+    "room": "room3",
+    "announcement": false,
+    "messages": "room3",
+    "startDate": "2024-08-20T13:20:00.000Z",
+    "endDate": "2024-08-20T13:25:00.000Z",
+    "blink": 1,
+    "dateType": "sunday"
   },
   {
-      "room": "room1",
-      "announcement": true,
-      "messages": "room1",
-      "startDate": "2024-08-20T13:25:00.000Z",
-      "endDate": "2024-08-20T13:30:00.000Z",
-      "dateType":"sunday",
-      "blink":"7"
+    "room": "room1",
+    "announcement": true,
+    "messages": "room1",
+    "startDate": "2024-08-20T13:25:00.000Z",
+    "endDate": "2024-08-20T13:30:00.000Z",
+    "blink": 5,
+    "dateType": "sunday"
   },
   {
-      "room": "room2",
-      "announcement": false,
-      "messages": "room2",
-      "startDate": "2024-08-20T13:30:00.000Z",
-      "endDate": "2024-08-20T13:35:00.000Z",
-      "dateType":"sunday",
-      "blink":"7"
+    "room": "room2",
+    "announcement": false,
+    "messages": "room2",
+    "startDate": "2024-08-20T13:30:00.000Z",
+    "endDate": "2024-08-20T13:35:00.000Z",
+    "blink": 3,
+    "dateType": "sunday"
   },
   {
-      "room": "room3",
-      "announcement": true,
-      "messages": "room3",
-      "startDate": "2024-08-20T13:35:00.000Z",
-      "endDate": "2024-08-20T13:40:00.000Z",
-      "dateType":"monday"
+    "room": "room3",
+    "announcement": true,
+    "messages": "room3",
+    "startDate": "2024-08-20T13:35:00.000Z",
+    "endDate": "2024-08-20T13:40:00.000Z",
+    "blink": 0,
+    "dateType": "monday"
   },
   {
-      "room": "room3",
-      "announcement": true,
-      "messages": "room3",
-      "startDate": "2024-08-20T13:40:00.000Z",
-      "endDate": "2024-08-20T13:45:00.000Z",
-      "dateType":"taanit"
+    "room": "room3",
+    "announcement": true,
+    "messages": "room3",
+    "startDate": "2024-08-20T13:40:00.000Z",
+    "endDate": "2024-08-20T13:45:00.000Z",
+    "blink": 2,
+    "dateType": "taanit"
   },
   {
-      "room": "room3",
-      "announcement": false,
-      "messages": "room3",
-      "startDate": "2024-08-20T13:45:00.000Z",
-      "endDate": "2024-08-20T13:50:00.000Z",
-      "dateType":"taanit"
+    "room": "room3",
+    "announcement": false,
+    "messages": "room3",
+    "startDate": "2024-08-20T13:45:00.000Z",
+    "endDate": "2024-08-20T13:50:00.000Z",
+    "blink": 6,
+    "dateType": "taanit"
   }
 ]
