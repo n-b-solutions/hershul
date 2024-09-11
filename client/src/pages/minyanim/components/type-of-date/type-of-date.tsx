@@ -1,31 +1,30 @@
 import * as React from 'react';
-import type { TypeOfDate } from '@/types/minyanim';
 import Tab from '@mui/material/Tab/Tab';
 import Tabs from '@mui/material/Tabs';
 
+import type { TypeOfDate } from '@/types/minyanim';
+
 const typesOfDates: TypeOfDate[] = [
-    { value: 0, label: 'Sunday & Tuesday & Wednesday' },
-    { value: 1, label: "Monday & Thursday" },
-    { value: 3, label: "Friday" },
-    { value: 4, label: "Saturday" },
-    { value: 5, label: "RoshHodesh" },
-    { value: 6, label: "Taanit" },
-    { value: 7, label: "Yom Tov" },
-    { value: 8, label: "Calendar" },
+  { value: 'sunday', label: 'Sunday & Tuesday & Wednesday' },
+  { value: 'monday', label: 'Monday & Thursday' },
+  { value: 'friday', label: 'Friday' },
+  { value: 'saturday', label: 'Saturday' },
+  { value: 'roshHodesh', label: 'Rosh Hodesh' },
+  { value: 'taanit', label: 'Taanit' },
+  { value: 'yomTov', label: 'Yom Tov' },
+  { value: 'calendar', label: 'Calendar' },
 ];
 
-export function TypeOfDateComponent(): React.JSX.Element {
-
-    const [value, setValue] = React.useState(0);
-    const handleChange = (event: React.SyntheticEvent, newValue: number) : void => {
-        setValue(newValue);
-    }
-    return (
-            <Tabs onChange={handleChange} sx={{padding:'24px'}} value={value}>
-                {typesOfDates.map((typeOfDate: TypeOfDate) => (
-                  <Tab {...typeOfDate} key={typeOfDate.value} />
-                ))}
-            </Tabs>
-    )
-
+export function TypeOfDateComponent(
+   props:{ onTypeChange:(_: React.SyntheticEvent, value: string)=>void,
+    value:string}
+): React.JSX.Element {
+   
+  return (
+    <Tabs onChange={props.onTypeChange} sx={{ px: 3 }} value={props.value} variant="scrollable">
+      {typesOfDates.map((tab) => (
+        <Tab key={tab.value} label={tab.label} value={tab.value} />
+      ))}
+    </Tabs>
+  );
 }
