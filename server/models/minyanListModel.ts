@@ -1,22 +1,42 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, {
+  Schema,
+  Document,
+  ObjectId,
+  SchemaType,
+  SchemaTypes,
+} from "mongoose";
 
+type DateTypes =
+  | "sunday"
+  | "monday"
+  | "friday"
+  | "saturday"
+  | "roshHodesh"
+  | "taanit"
+  | "yomTov"
+  | "calendar";
 interface MinyanDocument extends Document {
-    room: string;
-    messages?: string;
-    announcement: boolean;
-    startDate: Date;
-    endDate: Date;
-    
+  roomId: ObjectId;
+  messages?: string;
+  announcement: boolean;
+  startDate: Date;
+  endDate: Date;
+  dateType: DateTypes;
+  blink?: Number;
+  steadyFlag: Boolean;
 }
 
 const MinyanSchema: Schema<MinyanDocument> = new Schema({
-    room: { type: String, required: true },
-    messages: { type: String, required: true },
-    announcement: { type: Boolean, required: true },
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true }
+  roomId: { type: SchemaTypes.ObjectId, required: true, ref: "rooms" },
+  messages: { type: String, required: true },
+  announcement: { type: Boolean, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  blink: { type: Number },
+  steadyFlag: { type: Boolean, required: true },
+  dateType: { type: String, required: true },
 });
 
-const MinyanListModel = mongoose.model<MinyanDocument>('minyans', MinyanSchema);
+const MinyanListModel = mongoose.model<MinyanDocument>("minyans", MinyanSchema);
 
 export default MinyanListModel;
