@@ -47,6 +47,8 @@ io.on("connection", (socket) => {
 const job = new CronJob("* * * * *", async () => {
   console.log("Running cron job to update rooms...");
   const updatedStatuses = await ScheduleController.updateRoomStatuses();
+
+  await ScheduleController.logBeforeShkiah();
   io.emit("roomStatusUpdated", updatedStatuses);
 });
 
