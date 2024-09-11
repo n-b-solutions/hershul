@@ -8,7 +8,7 @@ import { TypeOfDate } from '@/types/minyanim';
 import { TypeOfDateComponent } from './components/type-of-date/type-of-date';
 import { ZmanimTable } from './components/zmanim-table';
 
-const metadata: Metadata = { title: 'Minyanim' };
+const metadata: Metadata = { title: 'Setting' };
 
 const typesOfDates = [
   { value: 'sunday', label: 'Sunday & Tuesday & Wednesday' },
