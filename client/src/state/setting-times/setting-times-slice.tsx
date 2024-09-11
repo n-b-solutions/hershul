@@ -26,7 +26,6 @@ const settingTimesSlice = createSlice({
       action: PayloadAction<{ index: number; value: string|Room; field: string }>
     ) => {
       const update = state.settingTimesItem[action.payload.index] as LineItemTable;
-      console.log(typeof action.payload.value);
       const newUpdate: LineItemTable = { ...update, [action.payload.field]: action.payload.value };
       [...state.settingTimesItem, (state.settingTimesItem[action.payload.index] = newUpdate)];
     },

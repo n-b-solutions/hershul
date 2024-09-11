@@ -13,11 +13,4 @@ export interface LineItemTable {
     endDate: string;
     room:Room;
   }
-
-  export interface TablePropForEdit {
-    blink: { isInput: boolean;};
-    startDate:{ isInput: boolean; };
-    endDate: { isInput: boolean; };
-    room: { isInput: boolean; };
-  }
   
