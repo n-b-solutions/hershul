@@ -13,9 +13,9 @@ export interface LayoutConfig {
 export const layoutConfig = {
   navItems: [
     {
-      key: 'minyanim',
-      title: "Minyanim",
-      href: paths.minyanim
+      key: 'setting',
+      title: "Setting",
+      href: paths.setting
     },
     {
       key: 'dashboards',
