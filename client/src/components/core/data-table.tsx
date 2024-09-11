@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { TextField, Tooltip, Typography } from '@mui/material';
+import { OutlinedInput, SelectChangeEvent, TextField, Tooltip, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Table from '@mui/material/Table';
 import type { TableProps } from '@mui/material/Table';
@@ -11,23 +11,27 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
-import type { LineItemTable, TablePropForEdit } from '@/types/minyanim';
+import { SelectOption } from '@/types/room';
 import { AddRow } from '@/pages/minyanim/components/add-row';
+
+import { EditTableCellInputs } from './edit-table-cell-inputs';
 
 export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
   field?: keyof TRowModel;
   formatter?: (row: TRowModel, index: number) => React.ReactNode;
-  formatterForEdit?: (row: TRowModel, index: number) => React.ReactNode;
+  valueForEdit?: (row: TRowModel) => any;
+  valueOption?: any & { id: string }[];
+  typeEditinput?: string;
   hideName?: boolean;
   name: string;
   width?: number | string;
   padding?: Padding;
   tooltip?: string;
+  selectOptions?: SelectOption[];
 }
 type Padding = 'normal' | 'checkbox' | 'none';
 type RowId = number | string;
-
 export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   columns: ColumnDef<TRowModel>[];
   hideHead?: boolean;
@@ -43,11 +47,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   uniqueRowId?: (row: TRowModel) => RowId;
   onAddRowClick?: (index: number) => void;
   edited?: boolean;
-  onChangeInput?: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    index: number,
-    column: keyof LineItemTable
-  ) => void;
+  onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null }>({
@@ -70,6 +70,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
 }: DataTableProps<TRowModel>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
+
   const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({ isclick: false, id: '' });
   const [isShowPlus, setIsShowPlus] = React.useState<boolean>(false);
 
@@ -87,17 +88,18 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     setIsCellClick({ isclick: true, id });
   };
 
-  const handleBlurInput = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-    const id = (event.currentTarget as HTMLTextAreaElement).id;
+  const handleBlurInput = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>): void => {
+    const id = (event.currentTarget as HTMLInputElement).id;
     setIsCellClick({ isclick: false, id });
     setIsShowPlus(false);
   };
 
-  const getValue = (index: number, column: keyof TablePropForEdit): string | number | null => {
-    const currentRow = rows[index] as unknown as LineItemTable;
-    const value = currentRow[column];
+  const getValue = (index: number, field: keyof TRowModel): TRowModel[keyof TRowModel] => {
+    const currentRow = rows[index];
+    const value = currentRow[field];
     return value;
   };
+
   return (
     <Table {...props}>
       <TableHead sx={{ ...(hideHead && { visibility: 'collapse', '--TableCell-borderWidth': 0 }) }}>
@@ -186,7 +188,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
               {columns.map(
                 (column): React.JSX.Element => (
                   <TableCell
-                    id={column.name + index}
+                    id={column.field && column.field?.toString() + index}
                     key={column.name}
                     onClick={(e) => {
                       edited && handleClick(e);
@@ -194,18 +196,21 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                     padding={column?.padding}
                     sx={{ ...(column.align && { textAlign: column.align }) }}
                   >
-                    {edited && isCellClick.isclick && isCellClick.id === column.name + index ? (
-                      <TextField
-                        inputRef={cellRef}
-                        name={column.name + index}
-                        onBlur={(e) => {
-                          handleBlurInput(e);
-                        }}
-                        onChange={(e) => {
-                          onChangeInput && onChangeInput(e, index, column.name as keyof TablePropForEdit);
-                        }}
-                        // type={props.isDate ? 'time' : 'number'}
-                        value={getValue(index, column.name as keyof TablePropForEdit)}
+                    {edited &&
+                    column.field &&
+                    isCellClick.isclick &&
+                    onChangeInput &&
+                    isCellClick.id === column.field.toString() + index ? (
+                      <EditTableCellInputs
+                        fieldName={column.field}
+                        cellRef={cellRef}
+                        index={index}
+                        onBlurInput={handleBlurInput}
+                        value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
+                        handleChangeInput={onChangeInput}
+                        editType={column.typeEditinput}
+                        valueOption={column.valueOption && column.valueOption}
+                        selectOptions={column.selectOptions && column.selectOptions}
                       />
                     ) : (
                       ((column.formatter
