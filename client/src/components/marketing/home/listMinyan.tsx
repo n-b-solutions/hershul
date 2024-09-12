@@ -126,7 +126,7 @@ export function ListMinyan(): React.JSX.Element {
           </Typography>
         </div>
       ),
-      name: 'Start time',
+      name: 'Time',
       width: '70px',
     },
     {
