@@ -7,15 +7,15 @@ const MinyanListController = {
     try {
       const minyanList = await MinyanListModel.find().populate("roomId");
       const fullMinyanList = minyanList.map((minyan) => {
-        return({
-          'announcement': minyan.announcement,
-          'messages': minyan.messages,
-          'startDate': minyan.startDate,
-          'endDate': minyan.endDate,
-          'dateType': minyan.dateType,
-          'blink': minyan.blink,
-          'room': minyan.roomId,
-        });
+        return {
+          announcement: minyan.announcement,
+          messages: minyan.messages,
+          startDate: minyan.startDate,
+          endDate: minyan.endDate,
+          dateType: minyan.dateType,
+          blink: minyan.blink,
+          room: minyan.roomId,
+        };
       });
       res.status(200).json(fullMinyanList);
     } catch (error) {
@@ -42,25 +42,24 @@ const MinyanListController = {
   getByTypeDate: async (req: Request, res: Response): Promise<void> => {
     const { dateType } = req.params;
     try {
-      const minyanList = await MinyanListModel.find().populate("roomId");
+      const minyanList = await MinyanListModel.find({
+        dateType: dateType,
+      }).populate("roomId");
       const fullMinyanList = minyanList.map((minyan) => {
-        return({
-          'announcement': minyan.announcement,
-          'messages': minyan.messages,
-          'startDate': minyan.startDate,
-          'endDate': minyan.endDate,
-          'dateType': minyan.dateType,
-          'blink': minyan.blink,
-          'room': minyan.roomId,
-        });
+        return {
+          announcement: minyan.announcement,
+          messages: minyan.messages,
+          startDate: minyan.startDate,
+          endDate: minyan.endDate,
+          dateType: minyan.dateType,
+          blink: minyan.blink,
+          room: minyan.roomId,
+          id: minyan.id,
+        };
       });
-      console.log(fullMinyanList);
-      const minyamListByfilter = res
-        .status(200)
-        .json(fullMinyanList?.filter((minyan) => minyan.dateType === dateType));
-      minyamListByfilter
-        ? minyamListByfilter
-        : res.status(400).send(`Minyan list for ${dateType} not found`);
+      if (!fullMinyanList)
+        res.status(404).send(`Minyan of ${dateType} not found`);
+      res.status(200).json(fullMinyanList);
     } catch (error) {
       console.error(`Error fetching minyan for ${dateType}:`, error);
       res.status(500).send("Internal Server Error");
@@ -84,19 +83,39 @@ const MinyanListController = {
     }
   },
 
+  // put: async (req: Request, res: Response): Promise<void> => {
+  //   const { id } = req.params;
+  //   try {
+  //     const updatedMinyan = await MinyanListModel.findByIdAndUpdate(
+  //       id,
+  //       req.body,
+  //       { new: true, runValidators: true }
+  //     );
+  //     if (!updatedMinyan) {
+  //       res.status(404).send("Minyan not found");
+  //       return;
+  //     }
+  //     res.status(200).json(updatedMinyan);
+  //   } catch (error) {
+  //     console.error(`Error updating minyan with ID ${id}:`, error);
+  //     res.status(500).send("Internal Server Error");
+  //   }
+  // },
+
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
+    const { fieldForEdit, value } = req.body;
     try {
       const updatedMinyan = await MinyanListModel.findByIdAndUpdate(
         id,
-        req.body,
+        { [fieldForEdit]: value },
         { new: true, runValidators: true }
       );
       if (!updatedMinyan) {
         res.status(404).send("Minyan not found");
         return;
       }
-      res.status(200).json(updatedMinyan);
+      res.status(200).json(updatedMinyan[fieldForEdit]);
     } catch (error) {
       console.error(`Error updating minyan with ID ${id}:`, error);
       res.status(500).send("Internal Server Error");
