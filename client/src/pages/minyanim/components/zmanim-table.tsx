@@ -1,7 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { addSettingTimes, setSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
+import {
+  addSettingTimes,
+  deleteMinyan,
+  setSettingTimes,
+  updateSettingTimesValue,
+} from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -70,17 +75,26 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     dispatch(updateSettingTimesValue({ index, field, value }));
   };
 
-  const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
-    const update = settingTimesItem[index];
+  const handleDelete = (index: number) => {
+    const minyanId = settingTimesItem[index].id;
     axios
-      .put(`${API_BASE_URL}/minyan/${update['id']}`, {
+      .delete<{deletedMinyan:LineItemTable}>(`${API_BASE_URL}/minyan/${minyanId}`)
+      .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
+      .catch((err) => console.log('Error fetching data:', err));
+  };
+
+  const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
+    const updateId = settingTimesItem[index].id;
+    axios
+      .put(`${API_BASE_URL}/minyan/${updateId}`, {
         value: value,
         fieldForEdit: field === 'room' ? 'roomId' : field,
       })
       .then((res) => {
         const value = rooms?.find((value: Room) => value.id === res.data);
         if (value) dispatch(updateSettingTimesValue({ index, field, value }));
-      }).catch((err) => console.log('Error fetching data:', err));
+      })
+      .catch((err) => console.log('Error fetching data:', err));
   };
 
   const columns = [
@@ -139,6 +153,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
             onAddRowClick={handlePlusClick}
             onChangeInput={handleChange}
             onBlurInput={handleBlurInput}
+            onDeleteClick={handleDelete}
             rows={settingTimesItem}
           />
         </Box>

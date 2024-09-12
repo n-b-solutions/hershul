@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { OutlinedInput, SelectChangeEvent, TextField, Tooltip, Typography } from '@mui/material';
+import { Grid, IconButton, OutlinedInput, SelectChangeEvent, TextField, Tooltip, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Table from '@mui/material/Table';
 import type { TableProps } from '@mui/material/Table';
@@ -9,6 +9,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { Trash } from '@phosphor-icons/react';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
 import { SelectOption } from '@/types/room';
@@ -49,6 +50,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   edited?: boolean;
   onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
+  onDeleteClick?: (index: number) => void;
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null }>({
@@ -68,6 +70,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   edited,
   onChangeInput,
   onBlurInput,
+  onDeleteClick,
   ...props
 }: DataTableProps<TRowModel>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
@@ -75,6 +78,10 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
 
   const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({ isclick: false, id: '' });
   const [isShowPlus, setIsShowPlus] = React.useState<boolean>(false);
+  const [isShowDelete, setIsToShowDelete] = React.useState<{ hover: boolean; index: number }>({
+    hover: false,
+    index: 0,
+  });
 
   const cellRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -163,6 +170,9 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
 
           return (
             <TableRow
+              onMouseOver={() => {
+                setIsToShowDelete && setIsToShowDelete({ hover: true, index });
+              }}
               hover={hover}
               key={rowId ?? index}
               selected={rowSelected}
@@ -238,6 +248,23 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   sx={{ padding: '0px', width: '0px', pointerEvents: isShowPlus ? 'none' : 'auto' }}
                 >
                   <AddRow index={index} isFinal={index === rows.length - 1} onPlusClick={onAddRowClick} />
+                </TableCell>
+              ) : null}
+              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index ? (
+                <TableCell
+                  sx={{
+                    padding: '0px',
+                    width: '0px',
+                    pointerEvents: isShowPlus ? 'none' : 'auto',
+                    position: 'relative',
+                  }}
+                >
+                  <IconButton
+                    onClick={() => onDeleteClick(index)}
+                    sx={{ position: 'absolute', right: '20px', top: '9px' }}
+                  >
+                    <Trash size={24} />
+                  </IconButton>
                 </TableCell>
               ) : null}
             </TableRow>
