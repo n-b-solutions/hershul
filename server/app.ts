@@ -22,7 +22,7 @@ const io = new Server(server, {
 app.use(cors());
 
 io.on("connection", (socket) => {
-  console.log("A user connected "+socket.id);
+  console.log("A user connected " + socket.id);
 
   socket.on("changeRoomStatus", async ({ nameRoom, newStatus }) => {
     console.log(" socket.on");
