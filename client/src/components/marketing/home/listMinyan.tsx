@@ -30,9 +30,12 @@ interface Minyan {
   startDate: Date;
   endDate: Date;
 }
+
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
+
 export function ListMinyan(): React.JSX.Element {
-  const [minyans, setMinyans] = React.useState<Minyan[]>([]);
+  const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]); // כל המניינים שהגיעו מהשרת
+  const [minyans, setMinyans] = React.useState<Minyan[]>([]); // המניינים המסוננים לפי השעה
 
   React.useEffect(() => {
     axios
@@ -40,18 +43,37 @@ export function ListMinyan(): React.JSX.Element {
       .then((res) => {
         const minyansData = res.data?.map((minyanApi) => {
           const {
-              room: { nameRoom: roomName },
-              ...minyan
+            room: { nameRoom: roomName },
+            ...minyan
           } = minyanApi;
           return { ...minyan, roomName };
         });
-        console.log(minyansData);
-        setMinyans(minyansData);
+        setAllMinyans(minyansData);
+        filterMinyans(minyansData); 
       })
       .catch((err) => {
         console.error('Error fetching data:', err);
       });
   }, []);
+
+  const filterMinyans = React.useCallback((data: Minyan[]) => {
+    const now = dayjs();
+    const filtered = data
+      .filter((minyan) => dayjs(minyan.startDate).isAfter(now, 'minute'))
+      .sort((a, b) => dayjs(a.startDate).diff(dayjs(b.startDate)))
+      .slice(0, 20);
+    console.log(filtered);
+    console.log(data);
+
+    setMinyans(filtered);
+  }, []);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      filterMinyans(allMinyans);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [allMinyans, filterMinyans]);
 
   const columns = [
     {
@@ -90,7 +112,7 @@ export function ListMinyan(): React.JSX.Element {
           </>
         );
       },
-      name: 'Status',
+      name: 'Announcement',
       width: '70px',
     },
   ] satisfies ColumnDef<Minyan>[];

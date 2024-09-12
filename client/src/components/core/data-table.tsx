@@ -96,7 +96,6 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     index: number = 0,
     fieldName?: keyof TRowModel
   ): void => {
-    debugger;
     onBlurInput && value && fieldName && onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
     const id = (event.currentTarget as HTMLInputElement).id;
     setIsCellClick({ isclick: false, id });
