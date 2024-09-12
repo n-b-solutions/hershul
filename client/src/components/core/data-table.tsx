@@ -48,6 +48,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onAddRowClick?: (index: number) => void;
   edited?: boolean;
   onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
+  onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null }>({
@@ -66,6 +67,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   onAddRowClick,
   edited,
   onChangeInput,
+  onBlurInput,
   ...props
 }: DataTableProps<TRowModel>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
@@ -88,7 +90,14 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     setIsCellClick({ isclick: true, id });
   };
 
-  const handleBlurInput = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>): void => {
+  const handleBlurInput = (
+    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+    value?: TRowModel[keyof TRowModel],
+    index: number = 0,
+    fieldName?: keyof TRowModel
+  ): void => {
+    debugger;
+    onBlurInput && value && fieldName && onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
     const id = (event.currentTarget as HTMLInputElement).id;
     setIsCellClick({ isclick: false, id });
     setIsShowPlus(false);
@@ -205,7 +214,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                         fieldName={column.field}
                         cellRef={cellRef}
                         index={index}
-                        onBlurInput={handleBlurInput}
+                        handleBlur={handleBlurInput}
                         value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
                         handleChangeInput={onChangeInput}
                         editType={column.typeEditinput}

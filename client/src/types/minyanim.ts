@@ -8,7 +8,7 @@ export interface TypeOfDate{
 
 export interface LineItemTable {
     id: string;
-    blink: string ;
+    blink: number ;
     startDate: string;
     endDate: string;
     room:Room;

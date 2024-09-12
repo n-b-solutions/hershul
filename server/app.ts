@@ -8,6 +8,7 @@ import { CronJob } from "cron";
 import ScheduleController from "./controller/scheduleController";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import helmet from 'helmet';
 
 connectDB();
 const app = express();
@@ -19,6 +20,12 @@ const io = new Server(server, {
   },
 });
 
+// set security HTTP headers
+app.use(helmet());
+// parse json request body
+app.use(express.json({ limit: '50mb' }));
+// parse urlencoded request body
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors());
 
 io.on("connection", (socket) => {

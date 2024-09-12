@@ -61,13 +61,26 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     dispatch(
       addSettingTimes({
         index,
-        newRow: { id: '', blink: '', startDate: '', endDate: '', room: { id: '', nameRoom: '', status: '' } },
+        newRow: { id: '', blink: 0, startDate: '', endDate: '', room: { id: '', nameRoom: '', status: '' } },
       })
     );
   };
 
   const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
     dispatch(updateSettingTimesValue({ index, field, value }));
+  };
+
+  const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
+    const update = settingTimesItem[index];
+    axios
+      .put(`${API_BASE_URL}/minyan/${update['id']}`, {
+        value: value,
+        fieldForEdit: field === 'room' ? 'roomId' : field,
+      })
+      .then((res) => {
+        const value = rooms?.find((value: Room) => value.id === res.data);
+        if (value) dispatch(updateSettingTimesValue({ index, field, value }));
+      }).catch((err) => console.log('Error fetching data:', err));
   };
 
   const columns = [
@@ -125,6 +138,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
             edited
             onAddRowClick={handlePlusClick}
             onChangeInput={handleChange}
+            onBlurInput={handleBlurInput}
             rows={settingTimesItem}
           />
         </Box>
