@@ -31,9 +31,13 @@ interface Minyan {
   action: string;
 }
 
+
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
+
 export function ListMinyan(): React.JSX.Element {
+  const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]); // כל המניינים שהגיעו מהשרת
+  const [minyans, setMinyans] = React.useState<Minyan[]>([]); // המניינים המסוננים לפי השעה
   const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]); // כל המניינים שהגיעו מהשרת
   const [minyans, setMinyans] = React.useState<Minyan[]>([]); // המניינים המסוננים לפי השעה
 

@@ -83,7 +83,9 @@ const MinyanListController = {
   getByTypeDate: async (req: Request, res: Response): Promise<void> => {
     const { dateType } = req.params;
     try {
-      const minyanList = await MinyanListModel.find()
+      const minyanList = await MinyanListModel.find({
+        dateType: dateType,
+      })
         .populate("roomId")
         .populate("startDate.messageId")
         .populate("endDate.messageId")

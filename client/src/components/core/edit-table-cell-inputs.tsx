@@ -10,17 +10,27 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   cellRef: Ref<any>;
   index: number;
   fieldName: keyof TRowModel;
-  onBlurInput: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>) => void;
+  handleBlur: (
+    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+    value?: TRowModel[keyof TRowModel],
+    index?: number,
+    fieldName?: keyof TRowModel
+  ) => void;
   editType?: string;
   selectOptions?: SelectOption[];
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
   const [select, setSelect] = useState(props.value.value);
+  const [inputValue, setInputValue] = useState(props.value);
 
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
     const editValue = props.valueOption?.find((value: any) => value.id === event.target.value);
     props.handleChangeInput && props.handleChangeInput(editValue, props.index, props.fieldName);
+  };
+
+  const handle = (value: TRowModel[keyof TRowModel]) => {
+    props.handleChangeInput && props.handleChangeInput(value, props.index, props.fieldName);
   };
 
   switch (props.editType) {
@@ -29,14 +39,13 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
         <OutlinedInput
           value={props.value}
           onChange={(e) => {
-            props.handleChangeInput &&
-              props.handleChangeInput(e.target.value as TRowModel[keyof TRowModel], props.index, props.fieldName);
+            handle(parseInt(e.target.value) as TRowModel[keyof TRowModel]);
           }}
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
           type="number"
           onBlur={(e) => {
-            props.onBlurInput(e);
+            props.handleBlur(e, parseInt(e.target.value) as TRowModel[keyof TRowModel], props.index, props.fieldName);
           }}
         />
       );
@@ -45,14 +54,13 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
         <OutlinedInput
           value={props.value}
           onChange={(e) => {
-            props.handleChangeInput &&
-              props.handleChangeInput(e.target.value as TRowModel[keyof TRowModel], props.index, props.fieldName);
+            handle(e.target.value as TRowModel[keyof TRowModel]);
           }}
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
           type="time"
           onBlur={(e) => {
-            props.onBlurInput(e);
+            props.handleBlur(e, e.target.value as TRowModel[keyof TRowModel], props.index, props.fieldName);
           }}
         />
       );
@@ -63,7 +71,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
           onChange={handleChange}
           inputRef={props.cellRef}
           onBlur={(e) => {
-            props.onBlurInput(e);
+            props.handleBlur(e, e.target.value as TRowModel[keyof TRowModel], props.index, props.fieldName);
           }}
         >
           {props.selectOptions.map((option: SelectOption) => (
