@@ -31,18 +31,14 @@ interface Minyan {
   action: string;
 }
 
-
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
-
 
 export function ListMinyan(): React.JSX.Element {
   const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]); // כל המניינים שהגיעו מהשרת
   const [minyans, setMinyans] = React.useState<Minyan[]>([]); // המניינים המסוננים לפי השעה
-  const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]); // כל המניינים שהגיעו מהשרת
-  const [minyans, setMinyans] = React.useState<Minyan[]>([]); // המניינים המסוננים לפי השעה
 
   React.useEffect(() => {
-axios
+    axios
       .get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
       .then((res) => {
         const minyansData = res.data;
@@ -54,14 +50,14 @@ axios
           const endDate = new Date(minyan.endDate.time);
           const onAction = {
             roomName,
-            messages: minyan.startDate.message?.name ?? '', 
+            messages: minyan.startDate.message?.name ?? '',
             startDate,
             action: 'on',
           };
 
           const offAction = {
             roomName,
-            messages: minyan.endDate.message?.name ?? '', 
+            messages: minyan.endDate.message?.name ?? '',
             startDate: endDate,
             action: 'off',
           };
@@ -71,7 +67,7 @@ axios
             ? [
                 {
                   roomName,
-                  messages: minyan.blink.message?.name ?? '', 
+                  messages: minyan.blink.message?.name ?? '',
                   startDate: new Date(startDate.getTime() - minyan.blink.secondsNum * 1000), // מפחיתים את מספר השניות מ-startDate
                   action: 'blink',
                 },
@@ -94,24 +90,25 @@ axios
     const now = dayjs();
     const nowHour = now.hour();
     const nowMinute = now.minute();
-    
-    const filtered = data.filter((minyan) => {
-      const minyanTime = dayjs(minyan.startDate);
-      const minyanHour = minyanTime.hour();
-      const minyanMinute = minyanTime.minute();
-      
-      const isInNextTwoHours = (minyanHour > nowHour || (minyanHour === nowHour && minyanMinute > nowMinute)) 
-        && (minyanHour <= nowHour + 3);
-  
-      return isInNextTwoHours;
-    }).sort((a, b) => dayjs(a.startDate).diff(dayjs(b.startDate)))
-  
+
+    const filtered = data
+      .filter((minyan) => {
+        const minyanTime = dayjs(minyan.startDate);
+        const minyanHour = minyanTime.hour();
+        const minyanMinute = minyanTime.minute();
+
+        const isInNextTwoHours =
+          (minyanHour > nowHour || (minyanHour === nowHour && minyanMinute > nowMinute)) && minyanHour <= nowHour + 3;
+
+        return isInNextTwoHours;
+      })
+      .sort((a, b) => dayjs(a.startDate).diff(dayjs(b.startDate)));
+
     console.log(filtered);
     console.log(data);
-  
+
     setMinyans(filtered);
   }, []);
-  
 
   React.useEffect(() => {
     const interval = setInterval(() => {
