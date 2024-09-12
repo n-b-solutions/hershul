@@ -196,11 +196,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                     padding={column?.padding}
                     sx={{ ...(column.align && { textAlign: column.align }) }}
                   >
-                    {edited &&
-                    column.field &&
-                    isCellClick.isclick &&
-                    onChangeInput &&
-                    isCellClick.id === column.field.toString() + index ? (
+                    {(edited &&
+                      column.field &&
+                      isCellClick.isclick &&
+                      onChangeInput &&
+                      isCellClick.id === column.field.toString() + index) ? (
                       <EditTableCellInputs
                         fieldName={column.field}
                         cellRef={cellRef}

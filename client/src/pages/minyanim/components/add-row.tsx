@@ -3,6 +3,7 @@ import { Grid } from '@mui/material';
 import { PlusCircle } from '@phosphor-icons/react/dist/ssr/PlusCircle';
 
 export function AddRow(props: {
+  
   isFinal?: boolean;
   index: number;
   onPlusClick: (index: number) => void;
