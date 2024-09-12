@@ -83,25 +83,6 @@ const MinyanListController = {
     }
   },
 
-  // put: async (req: Request, res: Response): Promise<void> => {
-  //   const { id } = req.params;
-  //   try {
-  //     const updatedMinyan = await MinyanListModel.findByIdAndUpdate(
-  //       id,
-  //       req.body,
-  //       { new: true, runValidators: true }
-  //     );
-  //     if (!updatedMinyan) {
-  //       res.status(404).send("Minyan not found");
-  //       return;
-  //     }
-  //     res.status(200).json(updatedMinyan);
-  //   } catch (error) {
-  //     console.error(`Error updating minyan with ID ${id}:`, error);
-  //     res.status(500).send("Internal Server Error");
-  //   }
-  // },
-
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { fieldForEdit, value } = req.body;
