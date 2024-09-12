@@ -24,7 +24,6 @@ app.use(cors());
 io.on("connection", (socket) => {
   console.log("A user connected");
 
-  // Handle the changeRoomStatus event
   socket.on("changeRoomStatus", async ({ nameRoom, newStatus }) => {
     console.log(" socket.on");
     try {
