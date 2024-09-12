@@ -13,4 +13,13 @@ export interface LineItemTable {
     endDate: string;
     room:Room;
   }
+export interface AlertType {
+    time: Date;
+    messageId?: string;
+  }
+  export interface BlinkAlertType {
+    secondsNum: number;
+    messageId?: string;
+  } 
+
   

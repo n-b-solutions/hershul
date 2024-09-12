@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
 
+import { AlertType, BlinkAlertType } from '@/types/minyanim';
 import { Room } from '@/types/room';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
@@ -18,40 +19,102 @@ import type { ColumnDef } from '@/components/core/data-table';
 interface MinyanApi {
   room: Room;
   messages: string;
-  announcement: boolean;
-  startDate: Date;
-  endDate: Date;
+  startDate: AlertType;
+  endDate: AlertType;
+  blink?: BlinkAlertType;
 }
 
 interface Minyan {
   roomName: string;
-  messages: string;
-  announcement: boolean;
+  messages?: string;
   startDate: Date;
-  endDate: Date;
+  action: string;
 }
+
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
+
 export function ListMinyan(): React.JSX.Element {
-  const [minyans, setMinyans] = React.useState<Minyan[]>([]);
+  const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]); // כל המניינים שהגיעו מהשרת
+  const [minyans, setMinyans] = React.useState<Minyan[]>([]); // המניינים המסוננים לפי השעה
 
   React.useEffect(() => {
-    axios
+axios
       .get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
       .then((res) => {
-        const minyansData = res.data?.map((minyanApi) => {
-          const {
-              room: { nameRoom: roomName },
-              ...minyan
-          } = minyanApi;
-          return { ...minyan, roomName };
-        });
+        const minyansData = res.data;
         console.log(minyansData);
-        setMinyans(minyansData);
+
+        const processedMinyans = minyansData.reduce<Minyan[]>((acc, minyan) => {
+          const roomName = minyan.room.nameRoom;
+          const startDate = new Date(minyan.startDate.time);
+          const endDate = new Date(minyan.endDate.time);
+          const onAction = {
+            roomName,
+            messages: minyan.startDate.message?.name ?? '', 
+            startDate,
+            action: 'on',
+          };
+
+          const offAction = {
+            roomName,
+            messages: minyan.endDate.message?.name ?? '', 
+            startDate: endDate,
+            action: 'off',
+          };
+
+          // במקרה של blink - הפחתה של מספר שניות
+          const blinkActions = minyan.blink
+            ? [
+                {
+                  roomName,
+                  messages: minyan.blink.message?.name ?? '', 
+                  startDate: new Date(startDate.getTime() - minyan.blink.secondsNum * 1000), // מפחיתים את מספר השניות מ-startDate
+                  action: 'blink',
+                },
+              ]
+            : [];
+
+          return [...acc, onAction, offAction, ...blinkActions];
+        }, []);
+        setMinyans(processedMinyans);
+
+        filterMinyans(processedMinyans);
+        console.log(processedMinyans);
       })
       .catch((err) => {
         console.error('Error fetching data:', err);
       });
   }, []);
+
+  const filterMinyans = React.useCallback((data: Minyan[]) => {
+    const now = dayjs();
+    const nowHour = now.hour();
+    const nowMinute = now.minute();
+    
+    const filtered = data.filter((minyan) => {
+      const minyanTime = dayjs(minyan.startDate);
+      const minyanHour = minyanTime.hour();
+      const minyanMinute = minyanTime.minute();
+      
+      const isInNextTwoHours = (minyanHour > nowHour || (minyanHour === nowHour && minyanMinute > nowMinute)) 
+        && (minyanHour <= nowHour + 3);
+  
+      return isInNextTwoHours;
+    }).sort((a, b) => dayjs(a.startDate).diff(dayjs(b.startDate)))
+  
+    console.log(filtered);
+    console.log(data);
+  
+    setMinyans(filtered);
+  }, []);
+  
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      filterMinyans(allMinyans);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [allMinyans, filterMinyans]);
 
   const columns = [
     {
@@ -69,6 +132,17 @@ export function ListMinyan(): React.JSX.Element {
       formatter: (row): React.JSX.Element => (
         <div>
           <Typography sx={{ whiteSpace: 'nowrap' }} variant="subtitle2">
+            {row.action}
+          </Typography>
+        </div>
+      ),
+      name: 'Action',
+      width: '70px',
+    },
+    {
+      formatter: (row): React.JSX.Element => (
+        <div>
+          <Typography sx={{ whiteSpace: 'nowrap' }} variant="subtitle2">
             {row.roomName}
           </Typography>
         </div>
@@ -80,7 +154,7 @@ export function ListMinyan(): React.JSX.Element {
       formatter: (row): React.JSX.Element => {
         return (
           <>
-            {row.announcement ? (
+            {row.messages ? (
               <Tooltip title={row.messages}>
                 <IconButton>
                   <SpeakerIcon />
@@ -90,7 +164,7 @@ export function ListMinyan(): React.JSX.Element {
           </>
         );
       },
-      name: 'Status',
+      name: 'Message',
       width: '70px',
     },
   ] satisfies ColumnDef<Minyan>[];
@@ -98,7 +172,7 @@ export function ListMinyan(): React.JSX.Element {
   return (
     <Box sx={{ height: '90vh', display: 'flex', flexDirection: 'column', p: 3 }}>
       <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <CardHeader title="Next Minyans" />
+        <CardHeader title="Schedule" />
         <Divider />
         <Box sx={{ flex: 1, overflow: 'auto' }}>
           <DataTable<Minyan> columns={columns} rows={minyans} />
