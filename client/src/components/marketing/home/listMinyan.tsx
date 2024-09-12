@@ -125,7 +125,7 @@ axios
           </Typography>
         </div>
       ),
-      name: 'Start time',
+      name: 'Time',
       width: '70px',
     },
     {
