@@ -1,10 +1,9 @@
 
 module.exports = {
   async up(db, client) {
-    await db.collection('minyans').deleteMany({}); // Clear the minyans collection
+    await db.collection('minyans').deleteMany({}); 
 
     try {
-      // Fetch all rooms and messages
       const rooms = await db.collection('rooms').find().toArray();
       const messages = await db.collection('messages').find().toArray();
 
@@ -19,21 +18,21 @@ module.exports = {
       };
 
       const minyans = rooms.map((room, index) => ({
-        roomId: room._id, // Use the room's ObjectId
+        roomId: room._id, 
         startDate: {
-          time: new Date(new Date().getTime() + index * 24 * 60 * 60 * 1000), // 1 day later for each room
-          messageId: getRandomMessageId(), // Random messageId
+          time: new Date(new Date().getTime() + index * 24 * 60 * 60 * 1000), 
+          messageId: getRandomMessageId(), 
         },
         endDate: {
-          time: new Date(new Date().getTime() + (index + 1) * 24 * 60 * 60 * 1000), // 1 day after startDate
-          messageId: getRandomMessageId(), // Random messageId
+          time: new Date(new Date().getTime() + (index + 1) * 24 * 60 * 60 * 1000), 
+          messageId: getRandomMessageId(), 
         },
         blink: {
-          secondsNum: 5, // Example value
-          messageId: getRandomMessageId(), // Random messageId
+          secondsNum: 5, 
+          messageId: getRandomMessageId(),
         },
-        steadyFlag: false, // Just an example condition
-        dateType: index % 2 === 0 ? 'sunday' : 'monday' // Alternate between sunday and monday
+        steadyFlag: false,
+        dateType: index % 2 === 0 ? 'sunday' : 'monday' 
       }));
 
       await db.collection('minyans').insertMany(minyans);
@@ -45,7 +44,7 @@ module.exports = {
 
   async down(db, client) {
     try {
-      await db.collection('minyans').deleteMany({}); // Remove all minyans
+      await db.collection('minyans').deleteMany({}); 
       console.log('Dummy minyans removed successfully!');
     } catch (error) {
       console.log('Error during migration down:', error);
