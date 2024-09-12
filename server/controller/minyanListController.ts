@@ -16,6 +16,15 @@ const MinyanListController = {
           blink: minyan.blink,
           room: minyan.roomId,
         };
+        return {
+          announcement: minyan.announcement,
+          messages: minyan.messages,
+          startDate: minyan.startDate,
+          endDate: minyan.endDate,
+          dateType: minyan.dateType,
+          blink: minyan.blink,
+          room: minyan.roomId,
+        };
       });
       res.status(200).json(fullMinyanList);
     } catch (error) {
@@ -44,13 +53,15 @@ const MinyanListController = {
     try {
       const minyanList = await MinyanListModel.find({
         dateType: dateType,
-      }).populate("roomId");
+      })
+        .populate("roomId")
+        // .sort({ startDate: 1 });
       const fullMinyanList = minyanList.map((minyan) => {
         return {
           announcement: minyan.announcement,
           messages: minyan.messages,
-          startDate: minyan.startDate,
-          endDate: minyan.endDate,
+          startDate: dayjs(minyan.startDate).format("hh:mm"),
+          endDate: dayjs(minyan.endDate).format("hh:mm"),
           dateType: minyan.dateType,
           blink: minyan.blink,
           room: minyan.roomId,
@@ -68,12 +79,26 @@ const MinyanListController = {
 
   post: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { room, announcement, messages, startDate } = req.body;
+      const {
+        roomId,
+        announcement,
+        messages,
+        startDate,
+        endDate,
+        dateType,
+        blink,
+        index,
+        steadyFlag,
+      } = req.body;
       const newMinyan = new MinyanListModel({
-        room,
+        roomId,
         announcement,
         messages,
         startDate: dayjs(startDate).toDate(),
+        endDate: dayjs(endDate).toDate(),
+        blink,
+        dateType,
+        steadyFlag,
       });
       await newMinyan.save();
       res.status(201).json(newMinyan);

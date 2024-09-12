@@ -270,6 +270,10 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
             </TableRow>
           );
         })}
+        {onAddRowClick && (
+          <TableRow ><TableCell ></TableCell>
+          </TableRow>
+        )}
       </TableBody>
     </Table>
   );
