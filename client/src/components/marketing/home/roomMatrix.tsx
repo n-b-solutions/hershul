@@ -9,14 +9,13 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
-import { Gear as SettingsIcon } from '@phosphor-icons/react/dist/ssr/Gear';
 import axios from 'axios';
 import { socket } from '../../../socket';
 import { SystemMessages } from './systemMessages';
 
 interface AssetCollection {
     nameRoom: string;
-    status: 'on' | 'off' | 'blur';
+    status: 'on' | 'off' | 'blink';
 }
 
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
@@ -44,7 +43,7 @@ export function RoomMatrix(): React.JSX.Element {
         };
     }, []);
 
-    const handleStatusChange = (nameRoom: string, newStatus: 'on' | 'off' | 'blur') => {
+    const handleStatusChange = (nameRoom: string, newStatus: 'on' | 'off' | 'blink') => {
         setAssetsState((prevState) =>
             prevState.map((room) =>
                 room.nameRoom === nameRoom
@@ -54,7 +53,6 @@ export function RoomMatrix(): React.JSX.Element {
         );
         console.log("handleStatusChange");
     
-        // Emit an event to the server on button click
         socket.emit('changeRoomStatus', { nameRoom, newStatus, forceUpdate: true });
     };
 
@@ -106,11 +104,11 @@ export function RoomMatrix(): React.JSX.Element {
                                     OFF
                                 </Button>
                                 <Button
-                                    variant={room.status === 'blur' ? 'contained' : 'outlined'}
+                                    variant={room.status === 'blink' ? 'contained' : 'outlined'}
                                     sx={{ margin: '5px' }}
-                                    onClick={() => handleStatusChange(room.nameRoom, 'blur')}
+                                    onClick={() => handleStatusChange(room.nameRoom, 'blink')}
                                 >
-                                    BLUR
+                                    BLINK
                                 </Button>
                             </CardContent>
                             <Divider />
@@ -122,9 +120,7 @@ export function RoomMatrix(): React.JSX.Element {
                                 >
                                     <SpeakerIcon />
                                 </IconButton>
-                                <IconButton color="secondary" size="small">
-                                    <SettingsIcon />
-                                </IconButton>
+
                             </CardActions>
                         </Card>
                         <SystemMessages
