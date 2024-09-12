@@ -63,7 +63,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     console.log(index);
     const newRow: NewMinyan = getNewMinyan(index);
     await axios.post<NewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
-      debugger;
       const currentRoom = rooms.find((m) => m.id === res.data.roomId);
       const { roomId: room, ...data } = res.data;
       dispatch(

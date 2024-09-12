@@ -154,87 +154,93 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
           const rowSelected = rowId ? selected?.has(rowId) : false;
 
           return (
-            <TableRow
-              hover={hover}
-              key={rowId ?? index}
-              selected={rowSelected}
-              {...(onClick && {
-                onClick: (event: React.MouseEvent) => {
-                  onClick(event, row);
-                },
-              })}
-              sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
-            >
-              {selectable ? (
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={rowId ? rowSelected : false}
-                    onChange={(event: React.ChangeEvent) => {
-                      if (rowSelected) {
-                        onDeselectOne?.(event, row);
-                      } else {
-                        onSelectOne?.(event, row);
-                      }
-                    }}
-                    onClick={(event: React.MouseEvent) => {
-                      if (onClick) {
-                        event.stopPropagation();
-                      }
-                    }}
-                  />
-                </TableCell>
-              ) : null}
+              <TableRow
+                hover={hover}
+                key={rowId ?? index}
+                selected={rowSelected}
+                {...(onClick && {
+                  onClick: (event: React.MouseEvent) => {
+                    onClick(event, row);
+                  },
+                })}
+                sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
+              >
+                {selectable ? (
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={rowId ? rowSelected : false}
+                      onChange={(event: React.ChangeEvent) => {
+                        if (rowSelected) {
+                          onDeselectOne?.(event, row);
+                        } else {
+                          onSelectOne?.(event, row);
+                        }
+                      }}
+                      onClick={(event: React.MouseEvent) => {
+                        if (onClick) {
+                          event.stopPropagation();
+                        }
+                      }}
+                    />
+                  </TableCell>
+                ) : null}
 
-              {columns.map(
-                (column): React.JSX.Element => (
-                  <TableCell
-                    id={column.field && column.field?.toString() + index}
-                    key={column.name}
-                    onClick={(e) => {
-                      edited && handleClick(e);
-                    }}
-                    padding={column?.padding}
-                    sx={{ ...(column.align && { textAlign: column.align }) }}
-                  >
-                    {(edited &&
+                {columns.map(
+                  (column): React.JSX.Element => (
+                    <TableCell
+                      id={column.field && column.field?.toString() + index}
+                      key={column.name}
+                      onClick={(e) => {
+                        edited && handleClick(e);
+                      }}
+                      padding={column?.padding}
+                      sx={{ ...(column.align && { textAlign: column.align }) }}
+                    >
+                      {edited &&
                       column.field &&
                       isCellClick.isclick &&
                       onChangeInput &&
-                      isCellClick.id === column.field.toString() + index) ? (
-                      <EditTableCellInputs
-                        fieldName={column.field}
-                        cellRef={cellRef}
-                        index={index}
-                        onBlurInput={handleBlurInput}
-                        value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
-                        handleChangeInput={onChangeInput}
-                        editType={column.typeEditinput}
-                        valueOption={column.valueOption && column.valueOption}
-                        selectOptions={column.selectOptions && column.selectOptions}
-                      />
-                    ) : (
-                      ((column.formatter
-                        ? column.formatter(row, index)
-                        : column.field
-                          ? row[column.field]
-                          : null) as React.ReactNode)
-                    )}
+                      isCellClick.id === column.field.toString() + index ? (
+                        <EditTableCellInputs
+                          fieldName={column.field}
+                          cellRef={cellRef}
+                          index={index}
+                          onBlurInput={handleBlurInput}
+                          value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
+                          handleChangeInput={onChangeInput}
+                          editType={column.typeEditinput}
+                          valueOption={column.valueOption && column.valueOption}
+                          selectOptions={column.selectOptions && column.selectOptions}
+                        />
+                      ) : (
+                        ((column.formatter
+                          ? column.formatter(row, index)
+                          : column.field
+                            ? row[column.field]
+                            : null) as React.ReactNode)
+                      )}
+                    </TableCell>
+                  )
+                )}
+                {onAddRowClick && !isShowPlus ? (
+                  <TableCell
+                    onClick={(e) => {
+                      handleStatusClick(e);
+                    }}
+                    sx={{ padding: '0px', width: '0px', pointerEvents: isShowPlus ? 'none' : 'auto' }}
+                  >
+                    <AddRow index={index} 
+                    // isFinal={index === rows.length - 1} 
+                    onPlusClick={onAddRowClick} />
                   </TableCell>
-                )
-              )}
-              {onAddRowClick && !isShowPlus ? (
-                <TableCell
-                  onClick={(e) => {
-                    handleStatusClick(e);
-                  }}
-                  sx={{ padding: '0px', width: '0px', pointerEvents: isShowPlus ? 'none' : 'auto' }}
-                >
-                  <AddRow index={index} isFinal={index === rows.length - 1} onPlusClick={onAddRowClick} />
-                </TableCell>
-              ) : null}
-            </TableRow>
+                ) : null}
+              </TableRow>
           );
         })}
+        {onAddRowClick && (
+          <TableRow ><TableCell ></TableCell>
+          </TableRow>
+        )}
       </TableBody>
     </Table>
   );
