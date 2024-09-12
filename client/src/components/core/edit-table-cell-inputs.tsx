@@ -3,6 +3,7 @@ import { OutlinedInput, Select, SelectChangeEvent } from '@mui/material';
 
 import { SelectOption } from '@/types/room';
 import { Option } from '@/components/core/option';
+import dayjs from 'dayjs';
 
 export function EditTableCellInputs<TRowModel extends object>(props: {
   value: any;
@@ -20,8 +21,8 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   selectOptions?: SelectOption[];
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
-  const [select, setSelect] = useState(props.value.value);
-  const [inputValue, setInputValue] = useState(props.value);
+  
+  const [select, setSelect] = useState((props.value?.value)&&(props.value.value));
 
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
@@ -37,7 +38,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
     case 'number':
       return (
         <OutlinedInput
-          value={props.value}
+          value={props.value||''}
           onChange={(e) => {
             handle(parseInt(e.target.value) as TRowModel[keyof TRowModel]);
           }}
@@ -60,7 +61,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
           name={props.fieldName.toString() + props.index}
           type="time"
           onBlur={(e) => {
-            props.handleBlur(e, e.target.value as TRowModel[keyof TRowModel], props.index, props.fieldName);
+            props.handleBlur(e, dayjs(e.target.value).toDate() as TRowModel[keyof TRowModel], props.index, props.fieldName);
           }}
         />
       );
