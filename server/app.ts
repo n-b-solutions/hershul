@@ -15,7 +15,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL,
     methods: ["GET", "POST"],
   },
 });
@@ -29,9 +29,8 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors());
 
 io.on("connection", (socket) => {
-  console.log("A user connected");
+  console.log("A user connected " + socket.id);
 
-  // Handle the changeRoomStatus event
   socket.on("changeRoomStatus", async ({ nameRoom, newStatus }) => {
     console.log(" socket.on");
     try {

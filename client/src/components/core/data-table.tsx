@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { OutlinedInput, SelectChangeEvent, TextField, Tooltip, Typography } from '@mui/material';
+import { Grid, IconButton, OutlinedInput, SelectChangeEvent, TextField, Tooltip, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Table from '@mui/material/Table';
 import type { TableProps } from '@mui/material/Table';
@@ -9,6 +9,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { Trash } from '@phosphor-icons/react';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
 import { SelectOption } from '@/types/room';
@@ -48,6 +49,8 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onAddRowClick?: (index: number) => void;
   edited?: boolean;
   onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
+  onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
+  onDeleteClick?: (index: number) => void;
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null }>({
@@ -66,6 +69,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   onAddRowClick,
   edited,
   onChangeInput,
+  onBlurInput,
+  onDeleteClick,
   ...props
 }: DataTableProps<TRowModel>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
@@ -73,6 +78,10 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
 
   const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({ isclick: false, id: '' });
   const [isShowPlus, setIsShowPlus] = React.useState<boolean>(false);
+  const [isShowDelete, setIsToShowDelete] = React.useState<{ hover: boolean; index: number }>({
+    hover: false,
+    index: 0,
+  });
 
   const cellRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -88,7 +97,13 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     setIsCellClick({ isclick: true, id });
   };
 
-  const handleBlurInput = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>): void => {
+  const handleBlurInput = (
+    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+    value?: TRowModel[keyof TRowModel],
+    index: number = 0,
+    fieldName?: keyof TRowModel
+  ): void => {
+    onBlurInput && value && fieldName && onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
     const id = (event.currentTarget as HTMLInputElement).id;
     setIsCellClick({ isclick: false, id });
     setIsShowPlus(false);
@@ -154,87 +169,105 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
           const rowSelected = rowId ? selected?.has(rowId) : false;
 
           return (
-              <TableRow
-                hover={hover}
-                key={rowId ?? index}
-                selected={rowSelected}
-                {...(onClick && {
-                  onClick: (event: React.MouseEvent) => {
-                    onClick(event, row);
-                  },
-                })}
-                sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
-              >
-                {selectable ? (
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={rowId ? rowSelected : false}
-                      onChange={(event: React.ChangeEvent) => {
-                        if (rowSelected) {
-                          onDeselectOne?.(event, row);
-                        } else {
-                          onSelectOne?.(event, row);
-                        }
-                      }}
-                      onClick={(event: React.MouseEvent) => {
-                        if (onClick) {
-                          event.stopPropagation();
-                        }
-                      }}
-                    />
-                  </TableCell>
-                ) : null}
-
-                {columns.map(
-                  (column): React.JSX.Element => (
-                    <TableCell
-                      id={column.field && column.field?.toString() + index}
-                      key={column.name}
-                      onClick={(e) => {
-                        edited && handleClick(e);
-                      }}
-                      padding={column?.padding}
-                      sx={{ ...(column.align && { textAlign: column.align }) }}
-                    >
-                      {edited &&
-                      column.field &&
-                      isCellClick.isclick &&
-                      onChangeInput &&
-                      isCellClick.id === column.field.toString() + index ? (
-                        <EditTableCellInputs
-                          fieldName={column.field}
-                          cellRef={cellRef}
-                          index={index}
-                          onBlurInput={handleBlurInput}
-                          value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
-                          handleChangeInput={onChangeInput}
-                          editType={column.typeEditinput}
-                          valueOption={column.valueOption && column.valueOption}
-                          selectOptions={column.selectOptions && column.selectOptions}
-                        />
-                      ) : (
-                        ((column.formatter
-                          ? column.formatter(row, index)
-                          : column.field
-                            ? row[column.field]
-                            : null) as React.ReactNode)
-                      )}
-                    </TableCell>
-                  )
-                )}
-                {onAddRowClick && !isShowPlus ? (
-                  <TableCell
-                    onClick={(e) => {
-                      handleStatusClick(e);
+            <TableRow
+              onMouseOver={() => {
+                setIsToShowDelete && setIsToShowDelete({ hover: true, index });
+              }}
+              hover={hover}
+              key={rowId ?? index}
+              selected={rowSelected}
+              {...(onClick && {
+                onClick: (event: React.MouseEvent) => {
+                  onClick(event, row);
+                },
+              })}
+              sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
+            >
+              {selectable ? (
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={rowId ? rowSelected : false}
+                    onChange={(event: React.ChangeEvent) => {
+                      if (rowSelected) {
+                        onDeselectOne?.(event, row);
+                      } else {
+                        onSelectOne?.(event, row);
+                      }
                     }}
-                    sx={{ padding: '0px', width: '0px', pointerEvents: isShowPlus ? 'none' : 'auto' }}
+                    onClick={(event: React.MouseEvent) => {
+                      if (onClick) {
+                        event.stopPropagation();
+                      }
+                    }}
+                  />
+                </TableCell>
+              ) : null}
+
+              {columns.map(
+                (column): React.JSX.Element => (
+                  <TableCell
+                    id={column.field && column.field?.toString() + index}
+                    key={column.name}
+                    onClick={(e) => {
+                      edited && handleClick(e);
+                    }}
+                    padding={column?.padding}
+                    sx={{ ...(column.align && { textAlign: column.align }) }}
                   >
-                    <AddRow index={index} 
-                    // isFinal={index === rows.length - 1} 
-                    onPlusClick={onAddRowClick} />
+                    {edited &&
+                    column.field &&
+                    isCellClick.isclick &&
+                    onChangeInput &&
+                    isCellClick.id === column.field.toString() + index ? (
+                      <EditTableCellInputs
+                        fieldName={column.field}
+                        cellRef={cellRef}
+                        index={index}
+                        handleBlur={handleBlurInput}
+                        value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
+                        handleChangeInput={onChangeInput}
+                        editType={column.typeEditinput}
+                        valueOption={column.valueOption && column.valueOption}
+                        selectOptions={column.selectOptions && column.selectOptions}
+                      />
+                    ) : (
+                      ((column.formatter
+                        ? column.formatter(row, index)
+                        : column.field
+                          ? row[column.field]
+                          : null) as React.ReactNode)
+                    )}
                   </TableCell>
-                ) : null}
-              </TableRow>
+                )
+              )}
+              {onAddRowClick && !isShowPlus ? (
+                <TableCell
+                  onClick={(e) => {
+                    handleStatusClick(e);
+                  }}
+                  sx={{ padding: '0px', width: '0px', pointerEvents: isShowPlus ? 'none' : 'auto' }}
+                >
+                  <AddRow index={index} isFinal={index === rows.length - 1} onPlusClick={onAddRowClick} />
+                </TableCell>
+              ) : null}
+              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index ? (
+                <TableCell
+                  sx={{
+                    padding: '0px',
+                    width: '0px',
+                    pointerEvents: isShowPlus ? 'none' : 'auto',
+                    position: 'relative',
+                  }}
+                >
+                  <IconButton
+                    onClick={() => onDeleteClick(index)}
+                    sx={{ position: 'absolute', right: '20px', top: '9px' }}
+                  >
+                    <Trash size={24} />
+                  </IconButton>
+                </TableCell>
+              ) : null}
+            </TableRow>
           );
         })}
         {onAddRowClick && (

@@ -28,9 +28,12 @@ const settingTimesSlice = createSlice({
     setSettingTimes: (state: Istate, action: PayloadAction<{ setting: LineItemTable[] }>) => {
       state.settingTimesItem = action.payload.setting.sort((a) => (a.startDate ? 1 : -1));
     },
+    deleteMinyan: (state: Istate, action: PayloadAction<{ minyanId: string }>) => {
+      state.settingTimesItem = state.settingTimesItem.filter( (m) => m.id !== action.payload.minyanId );
+    },
   },
 });
 
-export const { addSettingTimes, updateSettingTimesValue, setSettingTimes } = settingTimesSlice.actions;
+export const { addSettingTimes, updateSettingTimesValue, setSettingTimes, deleteMinyan } = settingTimesSlice.actions;
 
 export default settingTimesSlice.reducer;
