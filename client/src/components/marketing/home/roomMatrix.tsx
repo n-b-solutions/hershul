@@ -10,127 +10,128 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
+
 import { socket } from '../../../socket';
 import { SystemMessages } from './systemMessages';
 
 interface AssetCollection {
-    nameRoom: string;
-    status: 'on' | 'off' | 'blink';
+    id:string,
+  nameRoom: string;
+  status: 'on' | 'off' | 'blink';
 }
 
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
 export function RoomMatrix(): React.JSX.Element {
-    const [assetsState, setAssetsState] = React.useState<AssetCollection[]>([]);
-    const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({}); // ניהול state לפי חדר
+  const [assetsState, setAssetsState] = React.useState<AssetCollection[]>([]);
+  const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({}); // ניהול state לפי חדר
 
-    React.useEffect(() => {
-        axios.get(`${API_BASE_URL}/roomStatus`)
-            .then(res => {
-                setAssetsState(res.data);
-            })
-            .catch(err => {
-                console.error("Error fetching data:", err);
-            });
+  React.useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/roomStatus`)
+      .then((res) => {
+        setAssetsState(res.data);
+      })
+      .catch((err) => {
+        console.error('Error fetching data:', err);
+      });
 
-        socket.on('roomStatusUpdated', (updatedStatuses: AssetCollection[]) => {
-            console.log("socket on:", updatedStatuses);
-            setAssetsState(updatedStatuses);
-        });
+    socket.on('roomStatusUpdated', (updatedStatuses: AssetCollection[]) => {
+      console.log('socket on:', updatedStatuses);
+      setAssetsState(updatedStatuses);
+    });
 
-        return () => {
-            socket.off('roomStatusUpdated');
-        };
-    }, []);
-
-    const handleStatusChange = (nameRoom: string, newStatus: 'on' | 'off' | 'blink') => {
-        setAssetsState((prevState) =>
-            prevState.map((room) =>
-                room.nameRoom === nameRoom
-                    ? { ...room, status: newStatus }
-                    : room
-            )
-        );
-        console.log("handleStatusChange");
-    
-        socket.emit('changeRoomStatus', { nameRoom, newStatus, forceUpdate: true });
+    return () => {
+      socket.off('roomStatusUpdated');
     };
+  }, []);
 
-    const handleMessageClick = (roomName: string) => {
-        setDisplayMessages((prevState) => ({
-            ...prevState,
-            [roomName]: true,
-        }));
-    };
-
-    const handleCloseMessage = (roomName: string) => {
-        setDisplayMessages((prevState) => ({
-            ...prevState,
-            [roomName]: false,
-        }));
-    };
-
-    return (
-        <Box sx={{ height: '90vh', display: 'flex', flexDirection: 'column', p: 4 }}>
-            <Grid container spacing={3} sx={{ flex: 1, overflow: 'auto' }}>
-                {assetsState.map((room) => (
-                    <Grid key={room.nameRoom} xs={12} sm={12} md={6} lg={6}>
-                        <Card>
-                            <Box
-                                sx={{
-                                    alignItems: 'center',
-                                    display: 'flex',
-                                    height: '70px',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <Typography noWrap variant="subtitle2">
-                                    {room.nameRoom}
-                                </Typography>
-                            </Box>
-                            <CardContent sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
-                                <Button
-                                    variant={room.status === 'on' ? 'contained' : 'outlined'}
-                                    sx={{ margin: '5px' }}
-                                    onClick={() => handleStatusChange(room.nameRoom, 'on')}
-                                >
-                                    ON
-                                </Button>
-                                <Button
-                                    variant={room.status === 'off' ? 'contained' : 'outlined'}
-                                    sx={{ margin: '5px' }}
-                                    onClick={() => handleStatusChange(room.nameRoom, 'off')}
-                                >
-                                    OFF
-                                </Button>
-                                <Button
-                                    variant={room.status === 'blink' ? 'contained' : 'outlined'}
-                                    sx={{ margin: '5px' }}
-                                    onClick={() => handleStatusChange(room.nameRoom, 'blink')}
-                                >
-                                    BLINK
-                                </Button>
-                            </CardContent>
-                            <Divider />
-                            <CardActions sx={{ justifyContent: 'center' }}>
-                                <IconButton
-                                    color="secondary"
-                                    size="small"
-                                    onClick={() => handleMessageClick(room.nameRoom)}
-                                >
-                                    <SpeakerIcon />
-                                </IconButton>
-
-                            </CardActions>
-                        </Card>
-                        <SystemMessages
-                            open={displayMessages[room.nameRoom] || false}
-                            handleClose={() => handleCloseMessage(room.nameRoom)}
-                            room={room.nameRoom}
-                        />
-                    </Grid>
-                ))}
-            </Grid>
-        </Box>
+  const handleStatusChange = (nameRoom: string, newStatus: 'on' | 'off' | 'blink',id:string) => {
+    setAssetsState((prevState) =>
+      prevState.map((room) => (room.nameRoom === nameRoom ? { ...room, status: newStatus } : room))
     );
+    axios
+      .put(`${API_BASE_URL}/roomStatus/${id}`, {
+        status: newStatus, // הסטטוס החדש
+      })
+      .then((response) => {
+        console.log('Status updated:', response.data);
+      })
+      .catch((error) => {
+        console.error('Error updating status:', error);
+      });
+  };
+
+  const handleMessageClick = (roomName: string) => {
+    setDisplayMessages((prevState) => ({
+      ...prevState,
+      [roomName]: true,
+    }));
+  };
+
+  const handleCloseMessage = (roomName: string) => {
+    setDisplayMessages((prevState) => ({
+      ...prevState,
+      [roomName]: false,
+    }));
+  };
+
+  return (
+    <Box sx={{ height: '90vh', display: 'flex', flexDirection: 'column', p: 4 }}>
+      <Grid container spacing={3} sx={{ flex: 1, overflow: 'auto' }}>
+        {assetsState.map((room) => (
+          <Grid key={room.nameRoom} xs={12} sm={12} md={6} lg={6}>
+            <Card>
+              <Box
+                sx={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  height: '70px',
+                  justifyContent: 'center',
+                }}
+              >
+                <Typography noWrap variant="subtitle2">
+                  {room.nameRoom}
+                </Typography>
+              </Box>
+              <CardContent sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Button
+                  variant={room.status === 'on' ? 'contained' : 'outlined'}
+                  sx={{ margin: '5px' }}
+                  onClick={() => handleStatusChange(room.nameRoom, 'on',room.id)}
+                >
+                  ON
+                </Button>
+                <Button
+                  variant={room.status === 'off' ? 'contained' : 'outlined'}
+                  sx={{ margin: '5px' }}
+                  onClick={() => handleStatusChange(room.nameRoom, 'off',room.id)}
+                >
+                  OFF
+                </Button>
+                <Button
+                  variant={room.status === 'blink' ? 'contained' : 'outlined'}
+                  sx={{ margin: '5px' }}
+                  onClick={() => handleStatusChange(room.nameRoom, 'blink',room.id)}
+                >
+                  BLINK
+                </Button>
+              </CardContent>
+              <Divider />
+              <CardActions sx={{ justifyContent: 'center' }}>
+                <IconButton color="secondary" size="small" onClick={() => handleMessageClick(room.nameRoom)}>
+                  <SpeakerIcon />
+                </IconButton>
+              </CardActions>
+            </Card>
+            <SystemMessages
+              open={displayMessages[room.nameRoom] || false}
+              handleClose={() => handleCloseMessage(room.nameRoom)}
+              room={room.nameRoom}
+            />
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  );
 }

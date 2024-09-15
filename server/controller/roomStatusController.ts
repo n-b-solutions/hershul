@@ -1,5 +1,6 @@
-import { Request, Response } from 'express';
-import RoomStatusModel from '../models/roomStatusModel';
+import { Request, Response } from "express";
+import RoomStatusModel from "../models/roomStatusModel";
+import MinyanListModel from "../models/minyanListModel";
 
 const RoomStatusController = {
   get: async (req: Request, res: Response): Promise<void> => {
@@ -43,34 +44,35 @@ const RoomStatusController = {
   put: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const updatedRoom = await RoomStatusModel.findByIdAndUpdate(id, req.body, { new: true });
+      const { status } = req.body;
 
-      if (!updatedRoom) {
+      const room = await RoomStatusModel.findById(id);
+      const now = new Date();
+      const minyans = await MinyanListModel.find({ room: room?.nameRoom });
+
+      if (!room) {
         res.status(404).send("Room not found");
         return;
       }
-      res.status(200).json(updatedRoom);
+      let activeMinyan = minyans.find(
+        (minyan) => now >= minyan.startDate && now <= minyan.endDate
+      );
+      console.log(activeMinyan);
+
+      if (activeMinyan) {
+        activeMinyan.steadyFlag = true;
+        await activeMinyan.save();
+      }
+      room.status = status;
+      await room.save();
+
+      res.status(200).json(room);
     } catch (error) {
+      console.error(error);
       res.status(500).send("Internal Server Error");
     }
   },
-  put_: async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { id } = req.params; 
-        const { status } = req.body; 
-        const room = await RoomStatusModel.findById(id);
-        if (!room) {
-            res.status(404).send("Room not found");
-            return;
-        }
-        room.status = status; 
-        await room.save();
-        res.status(200).json(room);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
-    }
-},
+
   delete: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
@@ -84,7 +86,7 @@ const RoomStatusController = {
     } catch (error) {
       res.status(500).send("Internal Server Error");
     }
-  }
+  },
 };
 
 export default RoomStatusController;
