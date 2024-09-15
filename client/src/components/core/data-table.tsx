@@ -173,6 +173,9 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
               onMouseOver={() => {
                 setIsToShowDelete && setIsToShowDelete({ hover: true, index });
               }}
+              onMouseLeave={() => {
+                setIsToShowDelete && setIsToShowDelete({ hover: false, index });
+              }}
               hover={hover}
               key={rowId ?? index}
               selected={rowSelected}
@@ -247,7 +250,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   }}
                   sx={{ padding: '0px', width: '0px', pointerEvents: isShowPlus ? 'none' : 'auto' }}
                 >
-                  <AddRow index={index} isFinal={index === rows.length - 1} onPlusClick={onAddRowClick} />
+                  <AddRow index={index} onPlusClick={onAddRowClick} />
                 </TableCell>
               ) : null}
               {onDeleteClick && isShowDelete.hover && isShowDelete.index === index ? (
