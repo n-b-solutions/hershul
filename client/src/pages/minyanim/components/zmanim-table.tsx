@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import axios from 'axios';
+import dayjs, { Dayjs } from 'dayjs';
 import { response } from 'express';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -20,7 +21,6 @@ import type { LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
-import dayjs, { Dayjs} from 'dayjs';
 
 const styleTypography = {
   display: 'grid',
@@ -48,7 +48,20 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   React.useEffect(() => {
     axios
       .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${props.typeDate}`)
-      .then((res) => dispatch(setSettingTimes({ setting: res.data })))
+      .then((res) =>
+        dispatch(
+          setSettingTimes({
+            setting: res.data.map((minyan: any) => {
+              return {
+                ...minyan,
+                blink: minyan.blink?.secondsNum,
+                startDate: minyan.startDate?.time,
+                endDate: minyan.endDate?.time,
+              };
+            }),
+          })
+        )
+      )
       .catch((err) => console.log('Error fetching data:', err));
   }, [props.typeDate]);
 
@@ -119,7 +132,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const handleDelete = (index: number) => {
     const minyanId = settingTimesItem[index].id;
     axios
-      .delete<{deletedMinyan:LineItemTable}>(`${API_BASE_URL}/minyan/${minyanId}`)
+      .delete<{ deletedMinyan: LineItemTable }>(`${API_BASE_URL}/minyan/${minyanId}`)
       .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
       .catch((err) => console.log('Error fetching data:', err));
   };
@@ -140,7 +153,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   const columns = [
     {
-      formatter: (row): React.JSX.Element => getFormat(row.blink ? row.blink:''),
+      formatter: (row): React.JSX.Element => getFormat(row.blink ? row.blink : ''),
       typeEditinput: 'number',
       name: 'Blink',
       width: '250px',

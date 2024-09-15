@@ -15,24 +15,37 @@ type DateTypes =
   | "taanit"
   | "yomTov"
   | "calendar";
+interface AlertType {
+  time: Date;
+  messageId?: ObjectId;
+}
+interface BlinkAlertType {
+  secondsNum: number;
+  messageId?: ObjectId;
+}
 interface MinyanDocument extends Document {
   roomId: ObjectId;
-  messages?: string;
-  announcement: boolean;
-  startDate: Date;
-  endDate: Date;
+  startDate: AlertType;
+  endDate: AlertType;
   dateType: DateTypes;
-  blink?: Number;
+  blink?: BlinkAlertType;
   steadyFlag: Boolean;
 }
 
 const MinyanSchema: Schema<MinyanDocument> = new Schema({
   roomId: { type: SchemaTypes.ObjectId, required: true, ref: "rooms" },
-  messages: { type: String, required: true },
-  announcement: { type: Boolean, required: true },
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
-  blink: { type: Number },
+  startDate: {
+    time: { type: Date, required: true },
+    messageId: { type: SchemaTypes.ObjectId, ref: "messages" },
+  },
+  endDate: {
+    time: { type: Date, required: true },
+    messageId: { type: SchemaTypes.ObjectId, ref: "messages" },
+  },
+  blink: {
+    secondsNum: { type: Number },
+    messageId: { type: SchemaTypes.ObjectId, ref: "messages" }, 
+  },
   steadyFlag: { type: Boolean, required: true },
   dateType: { type: String, required: true },
 });

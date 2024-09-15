@@ -21,14 +21,22 @@ export interface NewMinyan {
   startDate: Date;
   endDate: Date;
   roomId: string;
-  dateType:string;
-  steadyFlag:boolean;
-  blink?:number;
+  dateType: string;
+  steadyFlag: boolean;
+  blink?: number;
 }
 
 export interface NewMinyan1 {
   startDate: Date;
   endDate: Date;
   room: string;
-  blink?:number;
+  blink?: number;
+}
+export interface AlertType {
+  time: Date;
+  messageId?: string;
+}
+export interface BlinkAlertType {
+  secondsNum: number;
+  messageId?: string;
 }
