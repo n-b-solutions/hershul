@@ -27,11 +27,7 @@ export function Page(): React.JSX.Element {
         }}
       >
         <Grid container>
-          <Grid item xs={16} sx={{ display: 'grid', justifyContent: 'end', paddingRight: '24px' }}>
-            <IconButton color="secondary" size="small" href="/setting">
-              <SettingsIcon />
-            </IconButton>
-          </Grid>
+       
         </Grid>
         <Header/>
         <Grid container spacing={2}>
