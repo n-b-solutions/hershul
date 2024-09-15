@@ -1,20 +1,26 @@
-import React from 'react';
-import { Box, Grid, IconButton, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Event, HDate, HebrewCalendar } from '@hebcal/core'; // יבוא מהספרייה של hebcal
+import { Box, Grid, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import { he } from 'date-fns/locale';
-// import Clock from 'react-live-clock';
 
 import type { Metadata } from '@/types/metadata';
 import { config } from '@/config';
-import Moment from 'react-moment';
 
 function Header() {
   const metadata = { title: config.site.name, description: config.site.description } satisfies Metadata;
+  const hebrewDate = new HDate(new Date()).renderGematriya();
+  const today = new HDate(new Date());
+  const events: Event[] = HebrewCalendar.getHolidaysOnDate(today) || [];
+  const specialDay = events.length > 0 ? events[0].getDesc() : '';
 
-  const holiday = 'Erev Rosh Hashana'; // You can change this dynamically
-  const hebrewDate = 'Wed, 29th of Elul, 5784'; // Dynamic Hebrew date
-  const time = format(new Date(), 'HH:mm:ss'); // Dynamic time
-
+  const [time, setTime] = useState<string>(format(new Date(), 'HH:mm:ss'));
+  useEffect(() => {
+    const updateTime = () => {
+      setTime(format(new Date(), 'HH:mm:ss'));
+    };
+    const intervalId = setInterval(updateTime, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
   return (
     <>
       <Typography
@@ -36,18 +42,14 @@ function Header() {
             color: '#1a73e8',
           }}
         >
-          {holiday}
+          {specialDay}
         </Typography>
         <Typography variant="body2" color="textSecondary">
           {hebrewDate}
         </Typography>
       </Grid>
 
-      <Typography>
-      {/* <Clock format={'HH:mm:ss'} ticking={true} timezone={'US/Pacific'} /> */}
-      {/* <Moment format="HH:mm:ss" interval={1000} /> */}
-      </Typography>
-
+      <Typography>{time}</Typography>
     </>
   );
 }
