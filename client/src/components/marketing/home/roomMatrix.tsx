@@ -15,7 +15,7 @@ import { socket } from '../../../socket';
 import { SystemMessages } from './systemMessages';
 
 interface AssetCollection {
-    id:string,
+  id: string;
   nameRoom: string;
   status: 'on' | 'off' | 'blink';
 }
@@ -46,13 +46,13 @@ export function RoomMatrix(): React.JSX.Element {
     };
   }, []);
 
-  const handleStatusChange = (nameRoom: string, newStatus: 'on' | 'off' | 'blink',id:string) => {
+  const handleStatusChange = (nameRoom: string, newStatus: 'on' | 'off' | 'blink', id: string) => {
     setAssetsState((prevState) =>
       prevState.map((room) => (room.nameRoom === nameRoom ? { ...room, status: newStatus } : room))
     );
     axios
       .put(`${API_BASE_URL}/roomStatus/${id}`, {
-        status: newStatus, 
+        status: newStatus,
       })
       .then((response) => {
         console.log('Status updated:', response.data);
@@ -98,21 +98,21 @@ export function RoomMatrix(): React.JSX.Element {
                 <Button
                   variant={room.status === 'on' ? 'contained' : 'outlined'}
                   sx={{ margin: '5px' }}
-                  onClick={() => handleStatusChange(room.nameRoom, 'on',room.id)}
+                  onClick={() => handleStatusChange(room.nameRoom, 'on', room.id)}
                 >
                   ON
                 </Button>
                 <Button
                   variant={room.status === 'off' ? 'contained' : 'outlined'}
                   sx={{ margin: '5px' }}
-                  onClick={() => handleStatusChange(room.nameRoom, 'off',room.id)}
+                  onClick={() => handleStatusChange(room.nameRoom, 'off', room.id)}
                 >
                   OFF
                 </Button>
                 <Button
                   variant={room.status === 'blink' ? 'contained' : 'outlined'}
                   sx={{ margin: '5px' }}
-                  onClick={() => handleStatusChange(room.nameRoom, 'blink',room.id)}
+                  onClick={() => handleStatusChange(room.nameRoom, 'blink', room.id)}
                 >
                   BLINK
                 </Button>
