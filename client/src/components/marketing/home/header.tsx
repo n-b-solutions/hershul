@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Event, HDate, HebrewCalendar } from '@hebcal/core'; // יבוא מהספרייה של hebcal
-import { Box, Grid, Typography } from '@mui/material';
+import { Event, HDate, HebrewCalendar } from '@hebcal/core';
+import { Grid, Typography } from '@mui/material';
 import { format } from 'date-fns';
 
 import type { Metadata } from '@/types/metadata';
@@ -8,19 +8,28 @@ import { config } from '@/config';
 
 function Header() {
   const metadata = { title: config.site.name, description: config.site.description } satisfies Metadata;
-  const hebrewDate = new HDate(new Date()).renderGematriya();
-  const today = new HDate(new Date());
-  const events: Event[] = HebrewCalendar.getHolidaysOnDate(today) || [];
-  const specialDay = events.length > 0 ? events[0].getDesc() : '';
 
   const [time, setTime] = useState<string>(format(new Date(), 'HH:mm:ss'));
+  const [hebrewDate, setHebrewDate] = useState<string>(new HDate(new Date()).toString());
+  const [specialDay, setSpecialDay] = useState<string>('');
+
   useEffect(() => {
-    const updateTime = () => {
-      setTime(format(new Date(), 'HH:mm:ss'));
+    const updateDate = () => {
+      const now = new Date();
+      setTime(format(now, 'HH:mm:ss'));
+      const newHebrewDate = new HDate(now).toString();
+      setHebrewDate(newHebrewDate);
+
+      const events: Event[] = HebrewCalendar.getHolidaysOnDate(new HDate(now)) || [];
+      setSpecialDay(events.length > 0 ? events[0].getDesc() : '');
     };
-    const intervalId = setInterval(updateTime, 1000);
+
+    updateDate(); 
+
+    const intervalId = setInterval(updateDate, 1000 * 60);
     return () => clearInterval(intervalId);
   }, []);
+
   return (
     <>
       <Typography
