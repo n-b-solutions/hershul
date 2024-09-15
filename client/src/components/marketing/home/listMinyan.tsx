@@ -76,8 +76,9 @@ axios
 
           return [...acc, onAction, offAction, ...blinkActions];
         }, []);
+      
         setMinyans(processedMinyans);
-
+        setAllMinyans(processedMinyans)
         filterMinyans(processedMinyans);
         console.log(processedMinyans);
       })
@@ -88,25 +89,29 @@ axios
 
   const filterMinyans = React.useCallback((data: Minyan[]) => {
     const now = dayjs();
-    const nowHour = now.hour();
-    const nowMinute = now.minute();
+    const currentMinutesOfDay = now.hour() * 60 + now.minute(); // הזמן הנוכחי בדקות מתחילת היום
+    const minutesInTwoHours = currentMinutesOfDay + 2 * 60; // שעתיים קדימה בדקות
     
-    const filtered = data.filter((minyan) => {
+    const filteredMinyans = data.filter((minyan) => {
       const minyanTime = dayjs(minyan.startDate);
-      const minyanHour = minyanTime.hour();
-      const minyanMinute = minyanTime.minute();
-      
-      const isInNextTwoHours = (minyanHour > nowHour || (minyanHour === nowHour && minyanMinute > nowMinute)) 
-        && (minyanHour <= nowHour + 3);
+      const minyanMinutesOfDay = minyanTime.hour() * 60 + minyanTime.minute(); // הזמן של המניין בדקות מאז תחילת היום
   
-      return isInNextTwoHours;
-    }).sort((a, b) => dayjs(a.startDate).diff(dayjs(b.startDate)))
+      // מציגים רק את המניינים שהזמן שלהם עוד לא עבר ושיתקיימו בשעתיים הקרובות
+      return minyanMinutesOfDay > currentMinutesOfDay && minyanMinutesOfDay <= minutesInTwoHours;
+    });
   
-    console.log(filtered);
-    console.log(data);
+    const sortMinyans = filteredMinyans.sort((a, b) => {
+      const timeA = dayjs(a.startDate).hour() * 60 + dayjs(a.startDate).minute();
+      const timeB = dayjs(b.startDate).hour() * 60 + dayjs(b.startDate).minute();
   
-    setMinyans(filtered);
+      return timeA - timeB;
+    });
+  
+    setMinyans(sortMinyans); // עדכון המניינים המסוננים והממוינים
+    
+    console.log(filteredMinyans); // הדפסת המניינים המסוננים לצורכי דיבוג
   }, []);
+  
   
 
   React.useEffect(() => {
