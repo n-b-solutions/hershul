@@ -50,7 +50,6 @@ export function ListMinyan(): React.JSX.Element {
         console.error('Error fetching data:', err);
       });
 
-    // האזנה לעדכוני minyan דרך socket
     socket.on('minyanUpdated', (updatedMinyans) => {
       const processedMinyans = processMinyanData(updatedMinyans);
       setAllMinyans(processedMinyans);
@@ -166,9 +165,7 @@ export function ListMinyan(): React.JSX.Element {
           <>
             {row.messages ? (
               <Tooltip title={row.messages}>
-                <IconButton>
-                  <SpeakerIcon />
-                </IconButton>
+                  <SpeakerIcon size={24}/>
               </Tooltip>
             ) : null}
           </>
