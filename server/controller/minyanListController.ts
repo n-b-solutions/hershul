@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import dayjs from "dayjs";
 import MinyanListModel from "../models/minyanListModel";
-import { io } from "../app"; 
+import { io } from "../app";
 const MinyanListController = {
   // Get all minyanim (לא צריך לשנות כאן)
   get: async (req: Request, res: Response): Promise<void> => {
@@ -39,10 +39,10 @@ const MinyanListController = {
     }
   },
 
-  // Create a new minyan
   post: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { roomId, startDate, endDate, dateType, blink, steadyFlag } = req.body;
+      const { roomId, startDate, endDate, dateType, blink, steadyFlag } =
+        req.body;
       const newMinyan = new MinyanListModel({
         roomId,
         startDate: { time: dayjs(startDate).toDate(), message: null },
@@ -53,9 +53,7 @@ const MinyanListController = {
       });
       await newMinyan.save();
 
-      // Emit the event to all clients
-     io.emit("minyanUpdated", await MinyanListModel.find());
- // לשלוח הודעה לכולם
+      io.emit("minyanUpdated", await MinyanListModel.find());
 
       res.status(201).json(newMinyan);
     } catch (error) {
@@ -64,7 +62,6 @@ const MinyanListController = {
     }
   },
 
-  // Update a minyan
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { fieldForEdit, value } = req.body;
@@ -79,9 +76,7 @@ const MinyanListController = {
         return;
       }
 
-      // Emit the event to all clients
-     io.emit("minyanUpdated", await MinyanListModel.find());
- // לשלוח הודעה לכולם
+      io.emit("minyanUpdated", await MinyanListModel.find());
 
       res.status(200).json(updatedMinyan[fieldForEdit]);
     } catch (error) {
@@ -90,7 +85,6 @@ const MinyanListController = {
     }
   },
 
-  // Delete a minyan
   delete: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     try {
@@ -100,9 +94,7 @@ const MinyanListController = {
         return;
       }
 
-      // Emit the event to all clients
-     io.emit("minyanUpdated", await MinyanListModel.find());
- // לשלוח הודעה לכולם
+      io.emit("minyanUpdated", await MinyanListModel.find());
 
       res.status(200).json({ message: "Minyan deleted", deletedMinyan });
     } catch (error) {

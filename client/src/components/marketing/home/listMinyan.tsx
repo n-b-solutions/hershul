@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { socket } from '@/socket';
 import { Divider, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -15,7 +16,6 @@ import { Room } from '@/types/room';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
-import { socket } from '@/socket';
 
 interface MinyanApi {
   room: Room;
@@ -35,11 +35,12 @@ interface Minyan {
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
 export function ListMinyan(): React.JSX.Element {
-  const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]); // כל המניינים שהגיעו מהשרת
-  const [minyans, setMinyans] = React.useState<Minyan[]>([]); // המניינים המסוננים לפי השעה
+  const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]);
+  const [minyans, setMinyans] = React.useState<Minyan[]>([]); 
 
   React.useEffect(() => {
-    axios.get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
+    axios
+      .get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
       .then((res) => {
         const processedMinyans = processMinyanData(res.data);
         setAllMinyans(processedMinyans);
@@ -57,8 +58,7 @@ export function ListMinyan(): React.JSX.Element {
     });
 
     return () => {
-      socket.off('minyanUpdated'); // ניקוי ההאזנה כשעוזבים את הקומפוננטה
-    };
+      socket.off('minyanUpdated');     };
   }, []);
 
   const processMinyanData = (data: MinyanApi[]) => {
@@ -81,45 +81,43 @@ export function ListMinyan(): React.JSX.Element {
       };
 
       const blinkActions = minyan.blink
-        ? [{
-            roomName,
-            messages: minyan.blink.message?.name ?? '',
-            startDate: new Date(startDate.getTime() - minyan.blink.secondsNum * 1000),
-            action: 'blink',
-          }]
+        ? [
+            {
+              roomName,
+              messages: minyan.blink.message?.name ?? '',
+              startDate: new Date(startDate.getTime() - minyan.blink.secondsNum * 1000),
+              action: 'blink',
+            },
+          ]
         : [];
 
       return [...acc, onAction, offAction, ...blinkActions];
     }, []);
   };
 
-
   const filterMinyans = React.useCallback((data: Minyan[]) => {
     const now = dayjs();
-    const currentMinutesOfDay = now.hour() * 60 + now.minute(); // הזמן הנוכחי בדקות מתחילת היום
-    const minutesInTwoHours = currentMinutesOfDay + 2 * 60; // שעתיים קדימה בדקות
-    
+    const currentMinutesOfDay = now.hour() * 60 + now.minute(); 
+    const minutesInTwoHours = currentMinutesOfDay + 2 * 60; 
+
     const filteredMinyans = data.filter((minyan) => {
       const minyanTime = dayjs(minyan.startDate);
-      const minyanMinutesOfDay = minyanTime.hour() * 60 + minyanTime.minute(); // הזמן של המניין בדקות מאז תחילת היום
-  
-      // מציגים רק את המניינים שהזמן שלהם עוד לא עבר ושיתקיימו בשעתיים הקרובות
+      const minyanMinutesOfDay = minyanTime.hour() * 60 + minyanTime.minute(); 
+
       return minyanMinutesOfDay > currentMinutesOfDay && minyanMinutesOfDay <= minutesInTwoHours;
     });
-  
+
     const sortMinyans = filteredMinyans.sort((a, b) => {
       const timeA = dayjs(a.startDate).hour() * 60 + dayjs(a.startDate).minute();
       const timeB = dayjs(b.startDate).hour() * 60 + dayjs(b.startDate).minute();
-  
+
       return timeA - timeB;
     });
-  
-    setMinyans(sortMinyans); // עדכון המניינים המסוננים והממוינים
-    
-    console.log(filteredMinyans); // הדפסת המניינים המסוננים לצורכי דיבוג
+
+    setMinyans(sortMinyans); 
+
+    console.log(filteredMinyans); 
   }, []);
-  
-  
 
   React.useEffect(() => {
     const interval = setInterval(() => {
