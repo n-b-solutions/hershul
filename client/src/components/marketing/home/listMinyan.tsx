@@ -15,6 +15,7 @@ import { Room } from '@/types/room';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
+import { socket } from '@/socket';
 
 interface MinyanApi {
   room: Room;
@@ -38,54 +39,60 @@ export function ListMinyan(): React.JSX.Element {
   const [minyans, setMinyans] = React.useState<Minyan[]>([]); // המניינים המסוננים לפי השעה
 
   React.useEffect(() => {
-    axios
-      .get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
+    axios.get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
       .then((res) => {
-        const minyansData = res.data;
-        console.log(minyansData);
-
-        const processedMinyans = minyansData.reduce<Minyan[]>((acc, minyan) => {
-          const roomName = minyan.room.nameRoom;
-          const startDate = new Date(minyan.startDate.time);
-          const endDate = new Date(minyan.endDate.time);
-          const onAction = {
-            roomName,
-            messages: minyan.startDate.message?.name ?? '',
-            startDate,
-            action: 'on',
-          };
-
-          const offAction = {
-            roomName,
-            messages: minyan.endDate.message?.name ?? '',
-            startDate: endDate,
-            action: 'off',
-          };
-
-          // במקרה של blink - הפחתה של מספר שניות
-          const blinkActions = minyan.blink
-            ? [
-                {
-                  roomName,
-                  messages: minyan.blink.message?.name ?? '',
-                  startDate: new Date(startDate.getTime() - minyan.blink.secondsNum * 1000), // מפחיתים את מספר השניות מ-startDate
-                  action: 'blink',
-                },
-              ]
-            : [];
-
-          return [...acc, onAction, offAction, ...blinkActions];
-        }, []);
-      
-        setMinyans(processedMinyans);
-        setAllMinyans(processedMinyans)
+        const processedMinyans = processMinyanData(res.data);
+        setAllMinyans(processedMinyans);
         filterMinyans(processedMinyans);
-        console.log(processedMinyans);
       })
       .catch((err) => {
         console.error('Error fetching data:', err);
       });
+
+    // האזנה לעדכוני minyan דרך socket
+    socket.on('minyanUpdated', (updatedMinyans) => {
+      const processedMinyans = processMinyanData(updatedMinyans);
+      setAllMinyans(processedMinyans);
+      filterMinyans(processedMinyans);
+    });
+
+    return () => {
+      socket.off('minyanUpdated'); // ניקוי ההאזנה כשעוזבים את הקומפוננטה
+    };
   }, []);
+
+  const processMinyanData = (data: MinyanApi[]) => {
+    return data.reduce<Minyan[]>((acc, minyan) => {
+      const roomName = minyan.room.nameRoom;
+      const startDate = new Date(minyan.startDate.time);
+      const endDate = new Date(minyan.endDate.time);
+      const onAction = {
+        roomName,
+        messages: minyan.startDate.message?.name ?? '',
+        startDate,
+        action: 'on',
+      };
+
+      const offAction = {
+        roomName,
+        messages: minyan.endDate.message?.name ?? '',
+        startDate: endDate,
+        action: 'off',
+      };
+
+      const blinkActions = minyan.blink
+        ? [{
+            roomName,
+            messages: minyan.blink.message?.name ?? '',
+            startDate: new Date(startDate.getTime() - minyan.blink.secondsNum * 1000),
+            action: 'blink',
+          }]
+        : [];
+
+      return [...acc, onAction, offAction, ...blinkActions];
+    }, []);
+  };
+
 
   const filterMinyans = React.useCallback((data: Minyan[]) => {
     const now = dayjs();

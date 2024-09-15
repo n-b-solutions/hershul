@@ -19,7 +19,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
-
+export { io }; 
 // set security HTTP headers
 app.use(helmet());
 // parse json request body
