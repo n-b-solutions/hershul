@@ -10,8 +10,8 @@ export interface TypeOfDate {
 export interface LineItemTable {
   id: string;
   blink?: number;
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
   room: Room;
 }
 

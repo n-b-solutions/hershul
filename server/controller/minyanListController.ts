@@ -95,11 +95,11 @@ const MinyanListController = {
         .filter((minyan) => minyan.dateType === dateType)
         .map((minyan) => ({
           startDate: {
-            time: dayjs(minyan.startDate.time).format("hh:mm"),
+            time: minyan.startDate.time,
             message: minyan.startDate.messageId, // populated message details
           },
           endDate: {
-            time: dayjs(minyan.endDate.time).format("hh:mm"),
+            time: minyan.endDate.time,
             message: minyan.endDate.messageId, // populated message details
           },
           blink: minyan.blink
@@ -110,6 +110,7 @@ const MinyanListController = {
             : null,
           dateType: minyan.dateType,
           room: minyan.roomId,
+          id:minyan._id
         }));
 
       if (filteredMinyanList.length > 0) {
