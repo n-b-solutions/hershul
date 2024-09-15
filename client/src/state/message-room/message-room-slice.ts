@@ -1,20 +1,10 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import axios from "axios";
+import { MessageRoom, MessageRoomState } from "@/types/message";
 
-interface MessageRoom {
-  selectedRoom:string;
-  id?: string;
-  name: string;
-  audioUrl?: string;
-  audioBlob?: Blob;
-}
 
-interface MessageRoomState {
-  rooms: MessageRoom[];
-  loading: boolean;
-  error: string | null;
-}
+
 
 const initialState: MessageRoomState = {
   rooms: [],

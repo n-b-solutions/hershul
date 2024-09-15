@@ -1,7 +1,7 @@
 export interface Room{
     nameRoom: string;
-    status: string;
-    id:string;
+    status?: string;
+    id?:string;
 }
 
 export interface SelectOption{

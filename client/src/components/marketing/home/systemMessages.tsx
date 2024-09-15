@@ -24,15 +24,12 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void; 
   const { open, handleClose, room } = props;
   const dispatch = useDispatch<AppDispatch>(); // שימוש ב-AppDispatch
 
-  // שליפת הנתונים מ-Redux
   const messages = useSelector(selectMessageRooms);
   const loading = useSelector(selectMessageRoomLoading);
 
-  // ניהול המצב המקומי של השאילתא והדיאלוג
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState<boolean>(false);
 
-  // שליחת פעולה לקבלת ההודעות כאשר הקומפוננטה נטענת
   React.useEffect(() => {
     if (open) {
       dispatch(fetchMessageRooms());

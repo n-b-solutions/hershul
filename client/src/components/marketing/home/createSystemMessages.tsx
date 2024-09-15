@@ -12,19 +12,14 @@ import { Option } from '@/components/core/option';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '../../../state/store';
 import { createMessageRoom, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
-
-interface Room {
-  id: string;
-  room: string;
-}
-
+import { Room } from '@/types/room';
 const rooms = [
-  { id: '1', room: 'room1' },
-  { id: '2', room: 'room2' },
-  { id: '3', room: 'room3' },
-  { id: '4', room: 'room4' },
-  { id: '5', room: 'room5' },
-  { id: '6', room: 'room6' }
+  { id: '1', nameRoom: 'room1' },
+  { id: '2', nameRoom: 'room2' },
+  { id: '3', nameRoom: 'room3' },
+  { id: '4', nameRoom: 'room4' },
+  { id: '5', nameRoom: 'room5' },
+  { id: '6', nameRoom: 'room6' }
 ] satisfies Room[];
 
 export function CreateSystemMessages(props: { open: boolean; handleClose: () => void }): React.JSX.Element {
@@ -78,8 +73,8 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
                   input={<OutlinedInput label="Room" />}
                 >
                   {rooms.map((room) => (
-                    <Option key={room.id} value={room.room}>
-                      {room.room}
+                    <Option key={room.id} value={room.nameRoom}>
+                      {room.nameRoom}
                     </Option>
                   ))}
                 </Select>
