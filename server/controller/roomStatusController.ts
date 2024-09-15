@@ -55,7 +55,7 @@ const RoomStatusController = {
         return;
       }
       let activeMinyan = minyans.find(
-        (minyan) => now >= minyan.startDate && now <= minyan.endDate
+        (minyan) => now >= minyan.startDate.time && now <= minyan.endDate.time
       );
       console.log(activeMinyan);
 
