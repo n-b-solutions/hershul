@@ -38,7 +38,7 @@ export function ListMinyan(): React.JSX.Element {
   const [minyans, setMinyans] = React.useState<Minyan[]>([]); // המניינים המסוננים לפי השעה
 
   React.useEffect(() => {
-axios
+    axios
       .get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
       .then((res) => {
         const minyansData = res.data;
@@ -50,14 +50,14 @@ axios
           const endDate = new Date(minyan.endDate.time);
           const onAction = {
             roomName,
-            messages: minyan.startDate.message?.name ?? '', 
+            messages: minyan.startDate.message?.name ?? '',
             startDate,
             action: 'on',
           };
 
           const offAction = {
             roomName,
-            messages: minyan.endDate.message?.name ?? '', 
+            messages: minyan.endDate.message?.name ?? '',
             startDate: endDate,
             action: 'off',
           };
@@ -67,7 +67,7 @@ axios
             ? [
                 {
                   roomName,
-                  messages: minyan.blink.message?.name ?? '', 
+                  messages: minyan.blink.message?.name ?? '',
                   startDate: new Date(startDate.getTime() - minyan.blink.secondsNum * 1000), // מפחיתים את מספר השניות מ-startDate
                   action: 'blink',
                 },

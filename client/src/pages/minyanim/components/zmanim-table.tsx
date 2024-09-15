@@ -1,16 +1,23 @@
 'use client';
 
 import * as React from 'react';
-import { addSettingTimes, setSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
+import {
+  addSettingTimes,
+  deleteMinyan,
+  setSettingTimes,
+  updateSettingTimesValue,
+} from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import axios from 'axios';
+import dayjs, { Dayjs } from 'dayjs';
+import { response } from 'express';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { LineItemTable } from '@/types/minyanim';
+import type { LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
@@ -23,7 +30,7 @@ const styleTypography = {
   height: '54px',
 };
 
-const getFormat = (value: number | null | string): React.JSX.Element => {
+const getFormat = (value: number | string): React.JSX.Element => {
   return (
     <Typography component="span" position="relative" sx={{ ...styleTypography }} variant="inherit">
       {value}
@@ -41,7 +48,20 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   React.useEffect(() => {
     axios
       .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${props.typeDate}`)
-      .then((res) => dispatch(setSettingTimes({ setting: res.data })))
+      .then((res) =>
+        dispatch(
+          setSettingTimes({
+            setting: res.data.map((minyan: any) => {
+              return {
+                ...minyan,
+                blink: minyan.blink?.secondsNum,
+                startDate: minyan.startDate?.time,
+                endDate: minyan.endDate?.time,
+              };
+            }),
+          })
+        )
+      )
       .catch((err) => console.log('Error fetching data:', err));
   }, [props.typeDate]);
 
@@ -57,22 +77,83 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   }, []);
 
-  const handlePlusClick = (index: number): void => {
-    dispatch(
-      addSettingTimes({
-        index,
-        newRow: { id: '', blink: '', startDate: '', endDate: '', room: { id: '', nameRoom: '', status: '' } },
-      })
-    );
+  const handlePlusClick = async (index: number): Promise<any> => {
+    console.log(index);
+    const newRow: NewMinyan = getNewMinyan(index);
+    await axios.post<NewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
+      const currentRoom = rooms.find((m) => m.id === res.data.roomId);
+      const { roomId: room, ...data } = res.data;
+      dispatch(
+        addSettingTimes({
+          index,
+          newRow: {
+            ...data,
+            endDate: dayjs(data.endDate).format('hh:mm'),
+            startDate: dayjs(data.startDate).format('hh:mm'),
+            room: currentRoom!,
+            id: '',
+          },
+        })
+      );
+    });
+  };
+
+  const getNewMinyan = (index: number) => {
+    return {
+      startDate: getBetweenTime(
+        dayjs(settingTimesItem[index - 1].startDate, 'hh:mm'),
+        dayjs(settingTimesItem[index].startDate, 'hh:mm')
+      ),
+      endDate: getBetweenTime(
+        dayjs(settingTimesItem[index - 1].endDate, 'hh:mm'),
+        dayjs(settingTimesItem[index].endDate, 'hh:mm')
+      ),
+      roomId: rooms[0].id,
+      dateType: props.typeDate,
+      announcement: true,
+      messages: 'room',
+      steadyFlag: false,
+    };
+  };
+
+  const getBetweenTime = (beforeTime: Dayjs, aftertime: Dayjs): Date => {
+    const diff = dayjs(aftertime.diff(beforeTime));
+    let betweenH = diff.get('hour') / 2;
+    let betweenM = diff.get('minute') / 2;
+    beforeTime.add(betweenH, 'hour');
+    beforeTime.add(betweenM, 'minute');
+    return dayjs(betweenH).toDate();
   };
 
   const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
-    dispatch(updateSettingTimesValue({ index, field, value }));
+    value && dispatch(updateSettingTimesValue({ index, field, value }));
+  };
+
+  const handleDelete = (index: number) => {
+    const minyanId = settingTimesItem[index].id;
+    axios
+      .delete<{ deletedMinyan: LineItemTable }>(`${API_BASE_URL}/minyan/${minyanId}`)
+      .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
+      .catch((err) => console.log('Error fetching data:', err));
+  };
+
+  const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
+    const updateId = settingTimesItem[index].id;
+    axios
+      .put(`${API_BASE_URL}/minyan/${updateId}`, {
+        value: value,
+        fieldForEdit: field === 'room' ? 'roomId' : field,
+      })
+      .then((res) => {
+        const value = rooms?.find((value: Room) => value.id === res.data);
+        if (value) dispatch(updateSettingTimesValue({ index, field, value }));
+      })
+      .catch((err) => console.log('Error fetching data:', err));
   };
 
   const columns = [
     {
-      formatter: (row): React.JSX.Element => getFormat(row.blink),
+      formatter: (row): React.JSX.Element => getFormat(row.blink ? row.blink : ''),
       typeEditinput: 'number',
       name: 'Blink',
       width: '250px',
@@ -125,6 +206,8 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
             edited
             onAddRowClick={handlePlusClick}
             onChangeInput={handleChange}
+            onBlurInput={handleBlurInput}
+            onDeleteClick={handleDelete}
             rows={settingTimesItem}
           />
         </Box>

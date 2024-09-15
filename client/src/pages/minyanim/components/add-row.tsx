@@ -2,11 +2,7 @@ import * as React from 'react';
 import { Grid } from '@mui/material';
 import { PlusCircle } from '@phosphor-icons/react/dist/ssr/PlusCircle';
 
-export function AddRow(props: {
-  isFinal?: boolean;
-  index: number;
-  onPlusClick: (index: number) => void;
-}): React.JSX.Element {
+export function AddRow(props: { index: number; onPlusClick: (index: number) => void }): React.JSX.Element {
   const [isHover, setIsHover] = React.useState<{ isHover: boolean; line: number }>({
     isHover: false,
     line: 0,
@@ -61,7 +57,7 @@ export function AddRow(props: {
           </Grid>
         ) : null}
       </Grid>
-      {!props.isFinal && (
+      {
         <Grid
           item
           onMouseLeave={handleLeave}
@@ -83,7 +79,7 @@ export function AddRow(props: {
             </Grid>
           ) : null}
         </Grid>
-      )}
+      }
     </Grid>
   );
 }
