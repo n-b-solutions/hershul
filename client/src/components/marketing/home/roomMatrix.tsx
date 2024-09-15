@@ -52,7 +52,7 @@ export function RoomMatrix(): React.JSX.Element {
     );
     axios
       .put(`${API_BASE_URL}/roomStatus/${id}`, {
-        status: newStatus, // הסטטוס החדש
+        status: newStatus, 
       })
       .then((response) => {
         console.log('Status updated:', response.data);
