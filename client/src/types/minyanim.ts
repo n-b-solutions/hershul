@@ -15,6 +15,18 @@ export interface LineItemTable {
   room: Room;
 }
 
+export interface GetNewMinyan {
+  messages: string;
+  announcement: boolean;
+  startDate: Date;
+  endDate: Date;
+  roomId: string;
+  dateType: string;
+  steadyFlag: boolean;
+  blink?: number;
+  id:string;
+}
+
 export interface NewMinyan {
   messages: string;
   announcement: boolean;

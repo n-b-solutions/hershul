@@ -17,7 +17,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { response } from 'express';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { LineItemTable, NewMinyan } from '@/types/minyanim';
+import type { GetNewMinyan, LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
@@ -81,18 +81,17 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const handlePlusClick = async (index: number): Promise<any> => {
     console.log(index);
     const newRow: NewMinyan = getNewMinyan(index);
-    await axios.post<NewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
+    await axios.post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
       const currentRoom = rooms.find((m) => m.id === res.data.roomId);
       const { roomId: room, ...data } = res.data;
       dispatch(
         addSettingTimes({
           index,
           newRow: {
-            ...data,
             endDate: data.endDate,
             startDate: data.startDate,
             room: currentRoom!,
-            id: '',
+            id:data.id
           },
         })
       );
