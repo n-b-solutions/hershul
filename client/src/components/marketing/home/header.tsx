@@ -35,52 +35,46 @@ function Header() {
   }, []);
 
   const isHomePage = location.pathname === '/';
-  console.log('Current Path:', location.pathname);
-  console.log('Is Home Page:', isHomePage);
 
   return (
-    <Grid container direction="row" alignItems="center" justifyContent="center" spacing={2}>
-      
-      
-      <Grid item>
+    <Grid container direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{
+      borderBottom: '2px solid #000', 
+      paddingBottom: '8px', 
+      paddingLeft: '16px', 
+    }}>
+      <Grid item xs={6}>
         <Typography
           variant="h6"
-          sx={{
-            fontWeight: 'bold',
-            fontFamily: 'Heebo, Arial',
-            fontSize: '24px',
-          }}
+         
         >
           {metadata.description}
         </Typography>
       </Grid>
 
-      <Grid item>
-        <Typography
-          variant="body1"
-          sx={{
-            color: '#1a73e8',
-          }}
-        >
-          {specialDay}
-        </Typography>
-        </Grid>
-      <Grid item>
-        <Typography variant="body2" color="textSecondary">
-          {hebrewDate}
-        </Typography>
+      <Grid item xs={6}>
+        <Grid container direction="row" alignItems="center" justifyContent="flex-end" spacing={2}>
+          <Grid item>
+            <Typography variant="body1" sx={{ color: '#1a73e8' }}>
+              {specialDay}
+            </Typography>
+          </Grid>
 
+          <Grid item>
+            <Typography variant="body2" color="textSecondary">
+              {hebrewDate}
+            </Typography>
+          </Grid>
+
+          <Grid item>
+            <Typography variant="body1">{time}</Typography>
+          </Grid>
+
+          <Grid item>
+            <IconButton color="secondary" size="small" href={isHomePage ? '/settings' : '/'}>
+              {isHomePage ? <SettingsIcon /> : <BackIcon />}
+            </IconButton>
+          </Grid>
         </Grid>
-        <Grid item>
-        <Typography variant="body1">
-          {time}
-        </Typography>
-        
-      </Grid>
-      <Grid item>
-        <IconButton color="secondary" size="small" href={isHomePage ? '/settings' : '/'}>
-          {isHomePage ? <SettingsIcon /> : <BackIcon />}
-        </IconButton>
       </Grid>
     </Grid>
   );
