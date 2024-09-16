@@ -5,11 +5,9 @@ import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 import MessageModel from "../models/messageModel";
 
-// Get __filename and __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Extend Express Request type to include Multer file properties
 declare global {
   namespace Express {
     interface Request {

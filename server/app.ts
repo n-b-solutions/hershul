@@ -19,32 +19,13 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
-export { io }; 
-// set security HTTP headers
 app.use(helmet());
-// parse json request body
 app.use(express.json({ limit: "50mb" }));
-// parse urlencoded request body
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cors());
 
 io.on("connection", (socket) => {
   console.log("A user connected " + socket.id);
-
-  socket.on("changeRoomStatus", async ({ nameRoom, newStatus }) => {
-    console.log(" socket.on");
-    try {
-      const updatedStatuses1 =
-        await ScheduleController.setRoomSteadyFlagAndStatus(
-          nameRoom,
-          newStatus
-        );
-      io.emit("roomStatusUpdated", updatedStatuses1);
-    } catch (error) {
-      console.error("Error handling changeRoomStatus event:", error);
-    }
-  });
-
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });
@@ -72,3 +53,4 @@ server.listen(4000, () => {
   console.log("Server is running on port 4000");
 });
 export const viteNodeApp = app;
+export { io }; 

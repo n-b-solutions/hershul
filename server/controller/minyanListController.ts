@@ -3,7 +3,6 @@ import dayjs from "dayjs";
 import MinyanListModel from "../models/minyanListModel";
 import { io } from "../app";
 const MinyanListController = {
-  // Get all minyanim (לא צריך לשנות כאן)
   get: async (req: Request, res: Response): Promise<void> => {
     try {
       const minyanList = await MinyanListModel.find()
