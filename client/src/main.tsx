@@ -10,6 +10,7 @@ import { ScrollRestoration } from '@/components/core/scroll-restoration';
 import { store } from './state/store';
 
 const root = createRoot(document.getElementById('root')!);
+document.title = import.meta.env.VITE_NAME || 'Default Title';
 
 const router = createBrowserRouter([
   {
