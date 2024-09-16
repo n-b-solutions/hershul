@@ -29,7 +29,6 @@ export function Page(): React.JSX.Element {
         <Grid container>
        
         </Grid>
-        <Header/>
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <RoomMatrix />
