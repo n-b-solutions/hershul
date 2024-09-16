@@ -15,14 +15,13 @@ import Divider from '@mui/material/Divider';
 import { DatePicker } from '@mui/x-date-pickers';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
-import { response } from 'express';
 import { useDispatch, useSelector } from 'react-redux';
-
 import type { LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
-import { Calendar } from './calendar';
+import Switch from '@mui/material/Switch';
+import { CheckCircle } from '@phosphor-icons/react';
 
 const styleTypography = {
   display: 'grid',
@@ -42,33 +41,30 @@ const getFormat = (value: number | string): React.JSX.Element => {
 
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
-export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
+export function Calendar(): React.JSX.Element {
   const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
-
   React.useEffect(() => {
-    if (props.typeDate !== 'calendar') {
-      axios
-        .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${props.typeDate}`)
-        .then((res) =>
-          dispatch(
-            setSettingTimes({
-              setting: res.data.map((minyan: any) => {
-                return {
-                  ...minyan,
-                  blink: minyan.blink?.secondsNum,
-                  startDate: minyan.startDate?.time,
-                  endDate: minyan.endDate?.time,
-                };
-              }),
-            })
-          )
+    axios
+      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/calendar`)
+      .then((res) =>
+        dispatch(
+          setSettingTimes({
+            setting: res.data.map((minyan: any) => {
+              return {
+                ...minyan,
+                blink: minyan.blink?.secondsNum,
+                startDate: minyan.startDate?.time,
+                endDate: minyan.endDate?.time,
+              };
+            }),
+          })
         )
-        .catch((err) => console.log('Error fetching data:', err));
-    }
-  }, [props.typeDate]);
+      )
+      .catch((err) => console.log('Error fetching data:', err));
+  }, ['calendar']);
 
   React.useEffect(() => {
     axios
@@ -114,7 +110,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
         dayjs(settingTimesItem[index].endDate, 'hh:mm')
       ),
       roomId: rooms[0].id,
-      dateType: props.typeDate,
+      dateType: 'calendar',
       announcement: true,
       messages: 'room',
       steadyFlag: false,
@@ -199,29 +195,39 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       field: 'room',
       align: 'center',
     },
+    {
+        formatter: (row, isEditing): React.JSX.Element => (
+          isEditing ? (
+            <Switch />
+          ) : (
+            <CheckCircle size={24} weight="bold" />
+        )
+        ),
+        typeEditinput: 'button',
+        name: 'Is Routine',
+        width: '150px',
+        padding: 'none',
+        align: 'center',
+      },
   ] satisfies ColumnDef<LineItemTable>[];
 
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
-      {props.typeDate === 'calendar' ? (
-        <Calendar typeDate={props.typeDate}/>
-      ) : (
-        <Card>
-          <Divider />
-          <Box sx={{ overflowX: 'auto', position: 'relative' }}>
-            <DataTable<LineItemTable>
-              columns={columns}
-              edited
-              onAddRowClick={handlePlusClick}
-              onChangeInput={handleChange}
-              onBlurInput={handleBlurInput}
-              onDeleteClick={handleDelete}
-              rows={settingTimesItem}
-            />
-          </Box>
-        </Card>
-      )}
+      <DatePicker format="MMM D, YYYY" label="spesifcDate" value={dayjs()} minDate={dayjs()} />
+      <Card>
+        <Divider />
+        <Box sx={{ overflowX: 'auto', position: 'relative' }}>
+          <DataTable<LineItemTable>
+            columns={columns}
+            edited
+            onAddRowClick={handlePlusClick}
+            onChangeInput={handleChange}
+            onBlurInput={handleBlurInput}
+            onDeleteClick={handleDelete}
+            rows={settingTimesItem}
+          />
+        </Box>
+      </Card>
     </Box>
   );
 }
-
