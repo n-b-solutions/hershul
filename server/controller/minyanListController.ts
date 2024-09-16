@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import dayjs from "dayjs";
 import MinyanListModel from "../models/minyanListModel";
-import { io } from "../app";
+import { io } from "../socketio";
+
 const MinyanListController = {
   // Get all minyanim (לא צריך לשנות כאן)
   get: async (req: Request, res: Response): Promise<void> => {
