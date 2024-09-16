@@ -13,6 +13,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '../../../state/store';
 import { createMessageRoom, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
 import { Room } from '@/types/room';
+import Tooltip from '@mui/material/Tooltip';
+import { useLocation } from 'react-router-dom';
+
+
 const rooms = [
   { id: '1', nameRoom: 'room1' },
   { id: '2', nameRoom: 'room2' },
@@ -22,14 +26,25 @@ const rooms = [
   { id: '6', nameRoom: 'room6' }
 ] satisfies Room[];
 
-export function CreateSystemMessages(props: { open: boolean; handleClose: () => void }): React.JSX.Element {
-  const [selectedRoom, setSelectedRoom] = React.useState<string>('');
+export function CreateSystemMessages(props: { open: boolean; handleClose: () => void; room?: string }): React.JSX.Element {
+  const [selectedRoom, setSelectedRoom] = React.useState<string>(props.room || '');
   const [name, setName] = React.useState<string>('');
   const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
-  const { open, handleClose } = props;
+  const { open, handleClose, room } = props;
 
   const dispatch = useDispatch<AppDispatch>();
   const loading = useSelector(selectMessageRoomLoading);
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
+  React.useEffect(() => {
+    if (!open) {
+      // Reset form fields when modal closes
+      setSelectedRoom(room || '');
+      setName('');
+      setAudioBlob(null);
+    }
+  }, [open, room]);
 
   const handleRoomChange = (event: SelectChangeEvent<string>) => {
     setSelectedRoom(event.target.value);
@@ -48,6 +63,9 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
     }
   };
 
+  // Determine if the Save button should be disabled
+  const isSaveDisabled = !name || !audioBlob;
+
   return (
     <Dialog open={open} onClose={handleClose}>
       <Box sx={{ p: 3 }}>
@@ -65,7 +83,7 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
             </Grid>
 
             <Grid sm={6} xs={12}>
-              <FormControl fullWidth>
+              <FormControl fullWidth disabled={!!room}>
                 <InputLabel>Room</InputLabel>
                 <Select
                   value={selectedRoom}
@@ -88,12 +106,17 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
             <Button onClick={handleClose} variant="outlined" sx={{ mr: 1 }}>
               Cancel
             </Button>
-            <Button onClick={handleSave} variant="contained" disabled={loading}>
-              Save
-            </Button>
+            <Tooltip title="Please fill all the new audio details" arrow>
+              <span>
+                <Button onClick={handleSave} variant="contained" disabled={isSaveDisabled || loading}>
+                  Save
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
         </Box>
       </Box>
     </Dialog>
   );
 }
+
