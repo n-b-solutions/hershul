@@ -3,12 +3,14 @@ import { Server as SocketioServer } from "socket.io";
 
 import { CronJob } from "cron";
 
-import ScheduleController from'./controller/scheduleController'
+import ScheduleController from "./controller/scheduleController";
+
+let io;
 
 export const initSocketio = (
   server: HttpServer<typeof IncomingMessage, typeof ServerResponse>
 ) => {
-  const io = new SocketioServer(server, {
+  io = new SocketioServer(server, {
     cors: {
       origin: process.env.CLIENT_URL,
       methods: ["GET", "POST"],
@@ -37,14 +39,16 @@ export const initSocketio = (
     });
   });
 
-    const job = new CronJob("* * * * *", async () => {
-      console.log("Running cron job to update rooms...");
-      const updatedStatuses = await ScheduleController.updateRoomStatuses();
+  const job = new CronJob("* * * * *", async () => {
+    console.log("Running cron job to update rooms...");
+    const updatedStatuses = await ScheduleController.updateRoomStatuses();
 
-      await ScheduleController.logBeforeShkiah();
-      io.emit("roomStatusUpdated", updatedStatuses);
-    });
+    await ScheduleController.logBeforeShkiah();
+    io.emit("roomStatusUpdated", updatedStatuses);
+  });
 
-    job.start();
+  job.start();
   return io;
 };
+
+export { io };
