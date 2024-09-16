@@ -70,7 +70,7 @@ function Header() {
           </Grid>
 
           <Grid item>
-            <IconButton color="secondary" size="small" href={isHomePage ? '/settings' : '/'}>
+            <IconButton color="secondary" size="small" href={isHomePage ? '/setting' : '/'}>
               {isHomePage ? <SettingsIcon /> : <BackIcon />}
             </IconButton>
           </Grid>
