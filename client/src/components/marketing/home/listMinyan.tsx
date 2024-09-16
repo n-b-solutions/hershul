@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { socket } from '@/socket';
 import { Divider, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -133,17 +133,28 @@ export function ListMinyan(): React.JSX.Element {
       return minyanMinutesOfDay > currentMinutesOfDay && minyanMinutesOfDay <= minutesInTwoHours;
     });
 
-    const sortMinyans = filteredMinyans.sort((a, b) => {
-      const timeA = dayjs(a.startDate).hour() * 60 + dayjs(a.startDate).minute();
-      const timeB = dayjs(b.startDate).hour() * 60 + dayjs(b.startDate).minute();
-
-      return timeA - timeB;
-    });
+    const sortMinyans = (data: Minyan[]) => {
+      return data.sort((a, b) => {
+        const timeA = dayjs(a.startDate).hour() * 60 + dayjs(a.startDate).minute();
+        const timeB = dayjs(b.startDate).hour() * 60 + dayjs(b.startDate).minute();
+    
+        if (timeA === timeB) {
+          if (a.action === 'blink' && b.action === 'on') {
+            return -1; 
+          }
+          if (a.action === 'on' && b.action === 'blink') {
+            return 1; 
+          }
+        }
+    
+        return timeA - timeB;
+      });
+    };
 
     setMinyans(sortMinyans);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     axios
       .get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
       .then((res) => {
@@ -166,7 +177,7 @@ export function ListMinyan(): React.JSX.Element {
     };
   }, [filterMinyans]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       filterMinyans(allMinyans);
     }, 60000);
