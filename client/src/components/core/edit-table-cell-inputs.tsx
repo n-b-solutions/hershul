@@ -1,9 +1,10 @@
 import React, { Ref, useState } from 'react';
-import { OutlinedInput, Select, SelectChangeEvent } from '@mui/material';
+import { OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
+import { TimeField } from '@mui/x-date-pickers/TimeField';
+import dayjs from 'dayjs';
 
 import { SelectOption } from '@/types/room';
 import { Option } from '@/components/core/option';
-import dayjs from 'dayjs';
 
 export function EditTableCellInputs<TRowModel extends object>(props: {
   value: any;
@@ -21,8 +22,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   selectOptions?: SelectOption[];
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
-  
-  const [select, setSelect] = useState((props.value?.value)&&(props.value.value));
+  const [select, setSelect] = useState(props.value?.value && props.value.value);
 
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
@@ -38,7 +38,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
     case 'number':
       return (
         <OutlinedInput
-          value={props.value||''}
+          value={props.value || ''}
           onChange={(e) => {
             handle(parseInt(e.target.value) as TRowModel[keyof TRowModel]);
           }}
@@ -52,16 +52,20 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
       );
     case 'time':
       return (
-        <OutlinedInput
+        <TimeField
           value={props.value}
           onChange={(e) => {
-            handle(dayjs(e.target.value,"hh:mm").toISOString() as TRowModel[keyof TRowModel]);
+            handle(e.toISOString() as TRowModel[keyof TRowModel]);
           }}
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
-          type="time"
           onBlur={(e) => {
-            props.handleBlur(e, dayjs(e.target.value,"hh:mm").toISOString() as TRowModel[keyof TRowModel], props.index, props.fieldName);
+            props.handleBlur(
+              e,
+              dayjs(e.target.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel],
+              props.index,
+              props.fieldName
+            );
           }}
         />
       );
