@@ -1,10 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
+import { RoomStatus } from '../types/room';
 
 
-interface RoomStatus extends Document {
-  nameRoom: string;
-  status: string;
-}
 
 const RoomStatusSchema = new Schema<RoomStatus>({
   nameRoom: {
