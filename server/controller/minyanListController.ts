@@ -114,8 +114,6 @@ const MinyanListController = {
 
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
-console.log(req);
-
     try {
       if (req.query.dateType) queryDateType = req.query.dateType.toString();
       else {

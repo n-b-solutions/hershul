@@ -6,7 +6,6 @@ import { Divider, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
@@ -25,7 +24,6 @@ export function ListMinyan(): React.JSX.Element {
   React.useEffect(() => {
     axios
       .get<MinyanApi[]>(`${API_BASE_URL}/minyan/getMinyanimByDateType`)
-
       .then((res) => {
         const processedMinyans = processMinyanData(res.data);
         setAllMinyans(processedMinyans);
