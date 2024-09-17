@@ -81,7 +81,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   }, []);
 
   const handlePlusClick = async (index: number, location: number): Promise<any> => {
-    console.log(index);
     const newRow: NewMinyan = getNewMinyan(index, location);
     await axios
       .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
@@ -167,7 +166,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       tooltip: 'Time to start Blink before lights on',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(dayjs(row.startDate).format('hh:mm')),
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.startDate).format('hh:mm A')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'Start Date',
@@ -175,10 +174,10 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate).format('hh:mm'),
+      valueForEdit: (row) => dayjs(row.startDate),
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(dayjs(row.endDate).format('hh:mm')),
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.endDate).format('hh:mm A')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'End Date',
@@ -186,7 +185,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate).format('hh:mm'),
+      valueForEdit: (row) => dayjs(row.endDate),
     },
     {
       formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
