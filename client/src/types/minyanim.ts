@@ -1,5 +1,3 @@
-import { Dayjs } from 'dayjs';
-
 import { Room } from './room';
 
 export interface TypeOfDate {
@@ -49,4 +47,18 @@ export interface AlertType {
 export interface BlinkAlertType {
   secondsNum: number;
   messageId?: string;
+}
+export interface Minyan {
+  roomName: string;
+  messages?: string;
+  startDate: Date;
+  action: string;
+}
+
+export interface MinyanApi {
+  room: Room;
+  messages: string;
+  startDate: AlertType;
+  endDate: AlertType;
+  blink?: BlinkAlertType;
 }

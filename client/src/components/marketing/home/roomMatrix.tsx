@@ -13,17 +13,12 @@ import axios from 'axios';
 
 import { socket } from '../../../socket';
 import { SystemMessages } from './systemMessages';
-
-interface AssetCollection {
-  id: string;
-  nameRoom: string;
-  status: 'on' | 'off' | 'blink';
-}
+import { Room } from '@/types/room';
 
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
 export function RoomMatrix(): React.JSX.Element {
-  const [assetsState, setAssetsState] = React.useState<AssetCollection[]>([]);
+  const [assetsState, setAssetsState] = React.useState<Room[]>([]);
   const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({}); // ניהול state לפי חדר
 
   React.useEffect(() => {
@@ -36,7 +31,7 @@ export function RoomMatrix(): React.JSX.Element {
         console.error('Error fetching data:', err);
       });
 
-    socket.on('roomStatusUpdated', (updatedStatuses: AssetCollection[]) => {
+    socket.on('roomStatusUpdated', (updatedStatuses: Room[]) => {
       console.log('socket on:', updatedStatuses);
       setAssetsState(updatedStatuses);
     });
