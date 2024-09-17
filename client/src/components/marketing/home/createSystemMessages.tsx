@@ -63,7 +63,6 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
     }
   };
 
-  // Determine if the Save button should be disabled
   const isSaveDisabled = !name || !audioBlob;
 
   return (
@@ -106,17 +105,22 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
             <Button onClick={handleClose} variant="outlined" sx={{ mr: 1 }}>
               Cancel
             </Button>
-            <Tooltip title="Please fill all the new audio details" arrow>
-              <span>
-                <Button onClick={handleSave} variant="contained" disabled={isSaveDisabled || loading}>
-                  Save
-                </Button>
-              </span>
-            </Tooltip>
+            {isSaveDisabled || loading ? (
+              <Tooltip title="Please fill all the new audio details" arrow>
+                <span>
+                  <Button onClick={handleSave} variant="contained" disabled={isSaveDisabled || loading}>
+                    Save
+                  </Button>
+                </span>
+              </Tooltip>
+            ) : (
+              <Button onClick={handleSave} variant="contained" disabled={isSaveDisabled || loading}>
+                Save
+              </Button>
+            )}
           </Box>
         </Box>
       </Box>
     </Dialog>
   );
 }
-
