@@ -1,5 +1,3 @@
-import { Dayjs } from 'dayjs';
-
 import { Room } from './room';
 
 export interface TypeOfDate {
@@ -18,18 +16,16 @@ export interface LineItemTable {
 export interface GetNewMinyan {
   messages: string;
   announcement: boolean;
-  startDate: Date;
-  endDate: Date;
+  startDate: AlertType;
+  endDate: AlertType;
   roomId: string;
   dateType: string;
   steadyFlag: boolean;
-  blink?: number;
-  id:string;
+  blink?: BlinkAlertType;
+  id: string;
 }
 
 export interface NewMinyan {
-  messages: string;
-  announcement: boolean;
   startDate: Date;
   endDate: Date;
   roomId: string;
@@ -51,4 +47,18 @@ export interface AlertType {
 export interface BlinkAlertType {
   secondsNum: number;
   messageId?: string;
+}
+export interface Minyan {
+  roomName: string;
+  messages?: string;
+  startDate: Date;
+  action: string;
+}
+
+export interface MinyanApi {
+  room: Room;
+  messages: string;
+  startDate: AlertType;
+  endDate: AlertType;
+  blink?: BlinkAlertType;
 }

@@ -1,6 +1,6 @@
 export interface Room{
     nameRoom: string;
-    status: string;
+    status?: string;
     id:string;
 }
 

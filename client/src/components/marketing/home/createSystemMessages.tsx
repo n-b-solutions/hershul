@@ -12,21 +12,18 @@ import { Option } from '@/components/core/option';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '../../../state/store';
 import { createMessageRoom, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
+import { Room } from '@/types/room';
 import Tooltip from '@mui/material/Tooltip';
 import { useLocation } from 'react-router-dom';
 
-interface Room {
-  id: string;
-  room: string;
-}
 
 const rooms = [
-  { id: '1', room: 'room1' },
-  { id: '2', room: 'room2' },
-  { id: '3', room: 'room3' },
-  { id: '4', room: 'room4' },
-  { id: '5', room: 'room5' },
-  { id: '6', room: 'room6' }
+  { id: '1', nameRoom: 'room1' },
+  { id: '2', nameRoom: 'room2' },
+  { id: '3', nameRoom: 'room3' },
+  { id: '4', nameRoom: 'room4' },
+  { id: '5', nameRoom: 'room5' },
+  { id: '6', nameRoom: 'room6' }
 ] satisfies Room[];
 
 export function CreateSystemMessages(props: { open: boolean; handleClose: () => void; room?: string }): React.JSX.Element {
@@ -66,7 +63,6 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
     }
   };
 
-  // Determine if the Save button should be disabled
   const isSaveDisabled = !name || !audioBlob;
 
   return (
@@ -94,8 +90,8 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
                   input={<OutlinedInput label="Room" />}
                 >
                   {rooms.map((room) => (
-                    <Option key={room.id} value={room.room}>
-                      {room.room}
+                    <Option key={room.id} value={room.nameRoom}>
+                      {room.nameRoom}
                     </Option>
                   ))}
                 </Select>
@@ -109,17 +105,22 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
             <Button onClick={handleClose} variant="outlined" sx={{ mr: 1 }}>
               Cancel
             </Button>
-            <Tooltip title="Please fill all the new audio details" arrow>
-              <span>
-                <Button onClick={handleSave} variant="contained" disabled={isSaveDisabled || loading}>
-                  Save
-                </Button>
-              </span>
-            </Tooltip>
+            {isSaveDisabled || loading ? (
+              <Tooltip title="Please fill all the new audio details" arrow>
+                <span>
+                  <Button onClick={handleSave} variant="contained" disabled={isSaveDisabled || loading}>
+                    Save
+                  </Button>
+                </span>
+              </Tooltip>
+            ) : (
+              <Button onClick={handleSave} variant="contained" disabled={isSaveDisabled || loading}>
+                Save
+              </Button>
+            )}
           </Box>
         </Box>
       </Box>
     </Dialog>
   );
 }
-

@@ -1,8 +1,12 @@
 import * as React from 'react';
+import { eLocationClick } from '@/consts/setting-minyans';
 import { Grid } from '@mui/material';
 import { PlusCircle } from '@phosphor-icons/react/dist/ssr/PlusCircle';
 
-export function AddRow(props: { index: number; onPlusClick: (index: number) => void }): React.JSX.Element {
+export function AddRow(props: {
+  index: number;
+  onPlusClick: (index: number, location: number) => void;
+}): React.JSX.Element {
   const [isHover, setIsHover] = React.useState<{ isHover: boolean; line: number }>({
     isHover: false,
     line: 0,
@@ -40,16 +44,16 @@ export function AddRow(props: { index: number; onPlusClick: (index: number) => v
         item
         onMouseLeave={handleLeave}
         onMouseOver={() => {
-          handleHover(props.index, 1);
+          handleHover(props.index, eLocationClick.top);
         }}
         sx={{ ...rowStyle, top: getTop(props.index) }}
         xs={16}
       >
-        {isHover.isHover && isHover.line === 1 ? (
+        {isHover.isHover && isHover.line === eLocationClick.top ? (
           <Grid
             item
             onClick={() => {
-              props.onPlusClick(props.index);
+              props.onPlusClick(props.index, eLocationClick.top);
             }}
             sx={{ ...plusStyle, bottom: '5px' }}
           >
@@ -62,16 +66,16 @@ export function AddRow(props: { index: number; onPlusClick: (index: number) => v
           item
           onMouseLeave={handleLeave}
           onMouseOver={() => {
-            handleHover(props.index, 2);
+            handleHover(props.index, eLocationClick.bottom);
           }}
           sx={{ ...rowStyle }}
           xs={16}
         >
-          {isHover.isHover && isHover.line === 2 ? (
+          {isHover.isHover && isHover.line === eLocationClick.bottom ? (
             <Grid
               item
               onClick={() => {
-                props.onPlusClick(props.index + 1);
+                props.onPlusClick(props.index, eLocationClick.bottom);
               }}
               sx={{ ...plusStyle, top: '12px' }}
             >

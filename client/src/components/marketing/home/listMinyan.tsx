@@ -11,26 +11,10 @@ import Typography from '@mui/material/Typography';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
 
-import { AlertType, BlinkAlertType } from '@/types/minyanim';
-import { Room } from '@/types/room';
+import { Minyan, MinyanApi } from '@/types/minyanim';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
-
-interface MinyanApi {
-  room: Room;
-  messages: string;
-  startDate: AlertType;
-  endDate: AlertType;
-  blink?: BlinkAlertType;
-}
-
-interface Minyan {
-  roomName: string;
-  messages?: string;
-  startDate: Date;
-  action: string;
-}
 
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 

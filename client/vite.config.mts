@@ -1,9 +1,9 @@
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
+import { config } from 'dotenv';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
-import { config } from "dotenv";
 
 config();
 
