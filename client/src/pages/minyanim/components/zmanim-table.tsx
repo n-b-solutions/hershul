@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { getMiddleTime } from '@/helpers/functions-times';
 import {
   addSettingTimes,
   deleteMinyan,
@@ -13,22 +14,21 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import axios from 'axios';
-import dayjs, { Dayjs } from 'dayjs';
-import { response } from 'express';
+import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { GetNewMinyan, LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
-import zIndex from '@mui/material/styles/zIndex';
+import { eLocationClick } from '@/consts/setting-minyans';
 
 const styleTypography = {
   display: 'grid',
   justifyItems: 'center',
   alignItems: 'center',
   whiteSpace: 'nowrap',
-  height: '54px'
+  height: '54px',
 };
 
 const getFormat = (value: number | string): React.JSX.Element => {
@@ -78,51 +78,36 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   }, []);
 
-  const handlePlusClick = async (index: number): Promise<any> => {
+  const handlePlusClick = async (index: number, location: number): Promise<any> => {
     console.log(index);
-    const newRow: NewMinyan = getNewMinyan(index);
+    const newRow: NewMinyan = getNewMinyan(index, location);
     await axios.post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
       const currentRoom = rooms.find((m) => m.id === res.data.roomId);
       const { roomId: room, ...data } = res.data;
       dispatch(
         addSettingTimes({
-          index,
           newRow: {
-            endDate: data.endDate,
-            startDate: data.startDate,
+            blink: data.blink?.secondsNum,
+            endDate: data.endDate?.time,
+            startDate: data.startDate?.time,
             room: currentRoom!,
-            id:data.id
+            id: data.id,
           },
         })
       );
     });
   };
 
-  const getNewMinyan = (index: number) => {
+  const getNewMinyan = (index: number, location: number) => {
+    const indexBefore = location === eLocationClick.top ? index - 1 : index;
+    const indexAfter = location === eLocationClick.top ? index : index + 1;
     return {
-      startDate: getBetweenTime(
-        dayjs(settingTimesItem[index - 1].startDate, 'hh:mm'),
-        dayjs(settingTimesItem[index].startDate, 'hh:mm')
-      ),
-      endDate: getBetweenTime(
-        dayjs(settingTimesItem[index - 1].endDate, 'hh:mm'),
-        dayjs(settingTimesItem[index].endDate, 'hh:mm')
-      ),
+      startDate: getMiddleTime(settingTimesItem[indexBefore]?.startDate, settingTimesItem[indexAfter]?.startDate),
+      endDate: getMiddleTime(settingTimesItem[indexBefore]?.endDate, settingTimesItem[indexAfter]?.endDate),
       roomId: rooms[0].id,
       dateType: props.typeDate,
-      announcement: true,
-      messages: 'room',
       steadyFlag: false,
     };
-  };
-
-  const getBetweenTime = (beforeTime: Dayjs, aftertime: Dayjs): Date => {
-    const diff = dayjs(aftertime.diff(beforeTime));
-    let betweenH = diff.get('hour') / 2;
-    let betweenM = diff.get('minute') / 2;
-    beforeTime.add(betweenH, 'hour');
-    beforeTime.add(betweenM, 'minute');
-    return dayjs(betweenH).toDate();
   };
 
   const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {

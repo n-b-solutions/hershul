@@ -46,7 +46,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   selectable?: boolean;
   selected?: Set<RowId>;
   uniqueRowId?: (row: TRowModel) => RowId;
-  onAddRowClick?: (index: number) => void;
+  onAddRowClick?: (index: number, location: number) => void;
   edited?: boolean;
   onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
@@ -182,6 +182,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                 },
               })}
               sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
+
             >
               {selectable ? (
                 <TableCell padding="checkbox">
@@ -235,7 +236,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                         ? column.formatter(row, index)
                         : column.field
                           ? row[column.field]
-                          : null ) as React.ReactNode)
+                          : null) as React.ReactNode)
                     )}
                   </TableCell>
                 )
@@ -245,9 +246,9 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   onClick={(e) => {
                     handleStatusClick(e);
                   }}
-                  sx={{ padding: '0px', width: '0px'}}
+                  sx={{ padding: '0px', width: '0px' }}
                 >
-                  <AddRow index={index} onPlusClick={onAddRowClick}/>
+                  <AddRow index={index} onPlusClick={onAddRowClick} />
                 </TableCell>
               ) : null}
               {onDeleteClick && isShowDelete.hover && isShowDelete.index === index ? (
@@ -270,7 +271,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
           );
         })}
         {onAddRowClick && (
-          <TableRow ><TableCell ></TableCell>
+          <TableRow>
+            <TableCell></TableCell>
           </TableRow>
         )}
       </TableBody>
