@@ -23,8 +23,8 @@ export interface GetNewMinyan {
   roomId: string;
   dateType: string;
   steadyFlag: boolean;
-  blink?:BlinkAlertType ;
-  id:string;
+  blink?: BlinkAlertType;
+  id: string;
 }
 
 export interface NewMinyan {

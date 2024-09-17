@@ -1,8 +1,9 @@
+import { sortByTime } from '@/helpers/functions-times';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+
 import type { LineItemTable } from '@/types/minyanim';
 import { Room } from '@/types/room';
-import { sortByTime } from '@/helpers/functions-times';
 
 export interface Istate {
   settingTimesItem: LineItemTable[];
@@ -38,6 +39,7 @@ const settingTimesSlice = createSlice({
   },
 });
 
-export const { addSettingTimes, updateSettingTimesValue, setSettingTimes, deleteMinyan,sortSettingTimesItem } = settingTimesSlice.actions;
+export const { addSettingTimes, updateSettingTimesValue, setSettingTimes, deleteMinyan, sortSettingTimesItem } =
+  settingTimesSlice.actions;
 
 export default settingTimesSlice.reducer;

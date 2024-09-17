@@ -185,7 +185,6 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                 },
               })}
               sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
-
             >
               {selectable ? (
                 <TableCell padding="checkbox">

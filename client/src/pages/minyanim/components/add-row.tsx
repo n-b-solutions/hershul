@@ -1,9 +1,12 @@
 import * as React from 'react';
+import { eLocationClick } from '@/consts/setting-minyans';
 import { Grid } from '@mui/material';
 import { PlusCircle } from '@phosphor-icons/react/dist/ssr/PlusCircle';
-import { eLocationClick } from '@/consts/setting-minyans';
 
-export function AddRow(props: { index: number; onPlusClick: (index: number,location:number) => void }): React.JSX.Element {
+export function AddRow(props: {
+  index: number;
+  onPlusClick: (index: number, location: number) => void;
+}): React.JSX.Element {
   const [isHover, setIsHover] = React.useState<{ isHover: boolean; line: number }>({
     isHover: false,
     line: 0,
@@ -50,7 +53,7 @@ export function AddRow(props: { index: number; onPlusClick: (index: number,locat
           <Grid
             item
             onClick={() => {
-              props.onPlusClick(props.index,eLocationClick.top);
+              props.onPlusClick(props.index, eLocationClick.top);
             }}
             sx={{ ...plusStyle, bottom: '5px' }}
           >
@@ -68,11 +71,11 @@ export function AddRow(props: { index: number; onPlusClick: (index: number,locat
           sx={{ ...rowStyle }}
           xs={16}
         >
-          {isHover.isHover && isHover.line === eLocationClick.bottom? (
+          {isHover.isHover && isHover.line === eLocationClick.bottom ? (
             <Grid
               item
               onClick={() => {
-                props.onPlusClick(props.index,eLocationClick.bottom);
+                props.onPlusClick(props.index, eLocationClick.bottom);
               }}
               sx={{ ...plusStyle, top: '12px' }}
             >

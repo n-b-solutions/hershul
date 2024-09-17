@@ -127,20 +127,10 @@ const MinyanListController = {
 
   post: async (req: Request, res: Response): Promise<void> => {
     try {
-      const {
-        roomId,
-        announcement,
-        messages,
-        startDate,
-        endDate,
-        dateType,
-        blink,
-        steadyFlag,
-      } = req.body;
+      const { roomId, startDate, endDate, dateType, blink, steadyFlag } =
+        req.body;
       const newMinyan = new MinyanListModel({
         roomId,
-        announcement,
-        messages,
         startDate: { time: startDate, message: null },
         endDate: { time: endDate, message: null },
         blink: { secondsNum: blink, message: null },
