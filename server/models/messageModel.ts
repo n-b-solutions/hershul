@@ -1,10 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { IMessage } from '../types/message';
 
-interface IMessage extends Document {
-    name: string;
-    audioUrl: string;
-    selectedRoom:string;
-}
+
 
 const messageSchema: Schema = new Schema({
     name: { type: String, required: true },
