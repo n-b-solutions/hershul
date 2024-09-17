@@ -8,7 +8,7 @@ import {
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
-import { HDate } from '@hebcal/core';
+import { HDate, HebrewCalendar } from '@hebcal/core';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -20,7 +20,7 @@ import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { LineItemTable, NewMinyan } from '@/types/minyanim';
+import type { GetNewMinyan, LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
@@ -48,26 +48,70 @@ export function Calendar(): React.JSX.Element {
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
-  React.useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/calendar`)
-      .then((res) =>
-        dispatch(
-          setSettingTimes({
-            setting: res.data.map((minyan: any) => {
-              return {
-                ...minyan,
-                blink: minyan.blink?.secondsNum,
-                startDate: minyan.startDate?.time,
-                endDate: minyan.endDate?.time,
-              };
-            }),
-          })
-        )
-      )
-      .catch((err) => console.log('Error fetching data:', err));
-  }, ['calendar']);
+  const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
 
+  //   React.useEffect(() => {
+  //     axios
+  //       .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/calendar`)
+  //       .then((res) =>
+  //         dispatch(
+  //           setSettingTimes({
+  //             setting: res.data.map((minyan: any) => {
+  //               return {
+  //                 ...minyan,
+  //                 blink: minyan.blink?.secondsNum,
+  //                 startDate: minyan.startDate?.time,
+  //                 endDate: minyan.endDate?.time,
+  //               };
+  //             }),
+  //           })
+  //         )
+  //       )
+  //       .catch((err) => console.log('Error fetching data:', err));
+  //   }, []);
+  React.useEffect(() => {
+    const fetchMinyanim = async () => {
+      try {
+        // First fetch: get the default calendar minyanim
+        const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getMinyanimByDateType/calendar`);
+        const minyanim = calendarRes.data.map((minyan: any) => ({
+          ...minyan,
+          blink: minyan.blink?.secondsNum,
+          startDate: minyan.startDate?.time,
+          endDate: minyan.endDate?.time,
+        }));
+
+        // Check if today is Rosh Chodesh
+        const formattedDate = selectedDate.format('YYYY-MM-DD');
+        const hebcalRes = await axios.get(
+          `https://www.hebcal.com/converter?cfg=json&gy=${selectedDate.year()}&gm=${selectedDate.month() + 1}&gd=${selectedDate.date()}&g2h=1`
+        );
+        const data = hebcalRes.data;
+        let roshChodeshMinyanim = [];
+
+        if (data.events && data.events.some((event: string | string[]) => event.includes('Rosh Chodesh'))) {
+          // If today is Rosh Chodesh, fetch the Rosh Chodesh minyanim
+          const roshChodeshRes = await axios.get(`${API_BASE_URL}/minyan/getMinyanimByDateType/roshHodesh`);
+          roshChodeshMinyanim = roshChodeshRes.data.map((minyan: any) => ({
+            ...minyan,
+            blink: minyan.blink?.secondsNum,
+            startDate: minyan.startDate?.time,
+            endDate: minyan.endDate?.time,
+          }));
+        }
+
+        // Combine both calendar and Rosh Chodesh minyanim
+        const combinedMinyanim = [...minyanim, ...roshChodeshMinyanim];
+
+        // Dispatch to Redux store
+        dispatch(setSettingTimes({ setting: combinedMinyanim }));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchMinyanim();
+  }, [dispatch, selectedDate]);
   React.useEffect(() => {
     axios
       .get(`${API_BASE_URL}/roomStatus`)
@@ -83,18 +127,17 @@ export function Calendar(): React.JSX.Element {
   const handlePlusClick = async (index: number): Promise<any> => {
     console.log(index);
     const newRow: NewMinyan = getNewMinyan(index);
-    await axios.post<NewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
+    await axios.post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
       const currentRoom = rooms.find((m) => m.id === res.data.roomId);
       const { roomId: room, ...data } = res.data;
       dispatch(
         addSettingTimes({
           index,
           newRow: {
-            ...data,
-            endDate: dayjs(data.endDate).format('hh:mm'),
-            startDate: dayjs(data.startDate).format('hh:mm'),
+            endDate: data.endDate,
+            startDate: data.startDate,
             room: currentRoom!,
-            id: '',
+            id: data.id,
           },
         })
       );
@@ -142,49 +185,30 @@ export function Calendar(): React.JSX.Element {
 
   const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
     const updateId = settingTimesItem[index].id;
+    const fieldForEdit =
+      field === 'room'
+        ? 'roomId'
+        : field === 'endDate' || field === 'startDate'
+          ? `${field}.time`
+          : field === 'blink'
+            ? `${field}.secondsNum`
+            : field;
     axios
       .put(`${API_BASE_URL}/minyan/${updateId}`, {
         value: value,
-        fieldForEdit: field === 'room' ? 'roomId' : field,
+        fieldForEdit: fieldForEdit,
       })
       .then((res) => {
-        const value = rooms?.find((value: Room) => value.id === res.data);
-        if (value) dispatch(updateSettingTimesValue({ index, field, value }));
+        const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
+        if (editValue) dispatch(updateSettingTimesValue({ index, field, value: editValue }));
       })
       .catch((err) => console.log('Error fetching data:', err));
   };
-  const checkJewishDay = () => {
-    const today = new Date();
-    const hdate = new HDate(today); // ממיר את התאריך הנוכחי לתאריך עברי
-  
-    // לקבל את היום בשבוע
-    const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-    const dayOfWeek = daysOfWeek[today.getDay()];
-  
-    // בדיקת ראש חודש
-    let jewishDay = 'יום רגיל';
-    if (hdate.onRoshChodesh()) {
-      jewishDay = 'ראש חודש';
+  const handleDateChange = (newDate: Dayjs | null) => {
+    if (newDate) {
+      setSelectedDate(newDate);
     }
-  
-    // בדיקת חגים או אירועים
-    const eventsList = hdate.holidays();
-    if (eventsList.length > 0) {
-      eventsList.forEach((event) => {
-        if (event.desc().includes('Fast')) {
-          jewishDay = 'תענית';
-        } else if (event.desc().includes('Yom Tov')) {
-          jewishDay = 'יום טוב';
-        } else {
-          jewishDay = event.desc(); // מחזיר את שם האירוע
-        }
-      });
-    }
-  
-    console.log('היום היהודי הוא:', jewishDay);
   };
-  
-  checkJewishDay();
   const columns = [
     {
       formatter: (row): React.JSX.Element => getFormat(row.blink ? row.blink : ''),
@@ -197,7 +221,7 @@ export function Calendar(): React.JSX.Element {
       tooltip: 'Time to start Blink before lights on',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.startDate),
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.startDate).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'Start Date',
@@ -205,9 +229,10 @@ export function Calendar(): React.JSX.Element {
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
+      valueForEdit: (row) => dayjs(row.startDate).format('hh:mm'),
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.endDate),
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.endDate).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'End Date',
@@ -215,6 +240,7 @@ export function Calendar(): React.JSX.Element {
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
+      valueForEdit: (row) => dayjs(row.endDate).format('hh:mm'),
     },
     {
       formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
@@ -241,7 +267,13 @@ export function Calendar(): React.JSX.Element {
 
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
-      <DatePicker format="MMM D, YYYY" label="spesifcDate" value={dayjs()} minDate={dayjs()} />
+      <DatePicker
+        format="MMM D, YYYY"
+        label="Specific Date"
+        value={selectedDate}
+        minDate={dayjs()}
+        onChange={handleDateChange}
+      />{' '}
       <Card>
         <Divider />
         <Box sx={{ overflowX: 'auto', position: 'relative' }}>

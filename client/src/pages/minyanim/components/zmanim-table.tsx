@@ -52,7 +52,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
 
   React.useEffect(() => {
-    if (typeDate !== 'calendar') {
       axios
         .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${typeDate}`)
         .then((res) =>
@@ -70,7 +69,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           )
         )
         .catch((err) => console.log('Error fetching data:', err));
-    }
+    
   }, [typeDate]);
 
   React.useEffect(() => {
@@ -216,7 +215,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
       {typeDate === 'calendar' ? (
-        <Calendar typeDate={typeDate}/>
+        <Calendar />
       ) : (
         <Card>
           <Divider />

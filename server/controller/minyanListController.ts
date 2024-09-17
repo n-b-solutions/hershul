@@ -93,7 +93,6 @@ const MinyanListController = {
         .populate("blink.messageId");
 
       const filteredMinyanList = minyanList
-        .filter((minyan) => minyan.dateType === dateType)
         .map((minyan) => ({
           startDate: {
             time: minyan.startDate.time,
@@ -114,11 +113,8 @@ const MinyanListController = {
           id: minyan._id,
         }));
 
-      if (filteredMinyanList.length > 0) {
         res.status(200).json(filteredMinyanList);
-      } else {
-        res.status(400).send(`Minyan list for ${dateType} not found`);
-      }
+  
     } catch (error) {
       console.error(`Error fetching minyan for ${dateType}:`, error);
       res.status(500).send("Internal Server Error");
