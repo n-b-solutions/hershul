@@ -17,7 +17,6 @@ const settingTimesSlice = createSlice({
   reducers: {
     addSettingTimes: (state: Istate, action: PayloadAction<{ newRow: LineItemTable }>) => {
       state.settingTimesItem.push(action.payload.newRow);
-      state.settingTimesItem=sortByTime(state.settingTimesItem);
     },
     updateSettingTimesValue: (
       state,
@@ -28,14 +27,17 @@ const settingTimesSlice = createSlice({
       [...state.settingTimesItem, (state.settingTimesItem[action.payload.index] = newUpdate)];
     },
     setSettingTimes: (state: Istate, action: PayloadAction<{ setting: LineItemTable[] }>) => {
-      state.settingTimesItem = sortByTime(action.payload.setting);
+      state.settingTimesItem = action.payload.setting;
     },
     deleteMinyan: (state: Istate, action: PayloadAction<{ minyanId: string }>) => {
       state.settingTimesItem = state.settingTimesItem.filter((m) => m.id !== action.payload.minyanId);
     },
+    sortSettingTimesItem: (state: Istate) => {
+      state.settingTimesItem = sortByTime(state.settingTimesItem);
+    },
   },
 });
 
-export const { addSettingTimes, updateSettingTimesValue, setSettingTimes, deleteMinyan } = settingTimesSlice.actions;
+export const { addSettingTimes, updateSettingTimesValue, setSettingTimes, deleteMinyan,sortSettingTimesItem } = settingTimesSlice.actions;
 
 export default settingTimesSlice.reducer;

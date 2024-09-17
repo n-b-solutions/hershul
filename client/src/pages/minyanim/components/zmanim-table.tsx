@@ -1,11 +1,13 @@
 'use client';
 
 import * as React from 'react';
+import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
 import { getMiddleTime } from '@/helpers/functions-times';
 import {
   addSettingTimes,
   deleteMinyan,
   setSettingTimes,
+  sortSettingTimesItem,
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
@@ -21,7 +23,6 @@ import type { GetNewMinyan, LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
-import { eLocationClick } from '@/consts/setting-minyans';
 
 const styleTypography = {
   display: 'grid',
@@ -63,6 +64,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           })
         )
       )
+      .then(() => dispatch(sortSettingTimesItem()))
       .catch((err) => console.log('Error fetching data:', err));
   }, [props.typeDate]);
 
@@ -81,21 +83,25 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const handlePlusClick = async (index: number, location: number): Promise<any> => {
     console.log(index);
     const newRow: NewMinyan = getNewMinyan(index, location);
-    await axios.post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
-      const currentRoom = rooms.find((m) => m.id === res.data.roomId);
-      const { roomId: room, ...data } = res.data;
-      dispatch(
-        addSettingTimes({
-          newRow: {
-            blink: data.blink?.secondsNum,
-            endDate: data.endDate?.time,
-            startDate: data.startDate?.time,
-            room: currentRoom!,
-            id: data.id,
-          },
-        })
-      );
-    });
+    await axios
+      .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
+      .then((res) => {
+        const currentRoom = rooms.find((m) => m.id === res.data.roomId);
+        const { roomId: room, ...data } = res.data;
+        dispatch(
+          addSettingTimes({
+            newRow: {
+              blink: data.blink?.secondsNum,
+              endDate: data.endDate?.time,
+              startDate: data.startDate?.time,
+              room: currentRoom!,
+              id: data.id,
+            },
+          })
+        );
+      })
+      .then(() => dispatch(sortSettingTimesItem()))
+      .catch((err) => console.log('Error fetching data:', err));
   };
 
   const getNewMinyan = (index: number, location: number) => {
@@ -125,13 +131,15 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
     const updateId = settingTimesItem[index].id;
     const fieldForEdit =
-      field === 'room'
-        ? 'roomId'
-        : field === 'endDate' || field === 'startDate'
-          ? `${field}.time`
-          : field === 'blink'
-            ? `${field}.secondsNum`
-            : field;
+      field === eFieldName.room
+        ? eFieldName.roomId
+        : field === eFieldName.endDate
+          ? eFieldName.endDateTime
+          : field === eFieldName.startDate
+            ? eFieldName.startDateTime
+            : field === eFieldName.blink
+              ? eFieldName.blinkSecondsNum
+              : field;
     axios
       .put(`${API_BASE_URL}/minyan/${updateId}`, {
         value: value,
@@ -139,7 +147,10 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       })
       .then((res) => {
         const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
-        if (editValue) dispatch(updateSettingTimesValue({ index, field, value: editValue }));
+        if (editValue) {
+          dispatch(updateSettingTimesValue({ index, field, value: editValue }));
+          dispatch(sortSettingTimesItem());
+        }
       })
       .catch((err) => console.log('Error fetching data:', err));
   };
