@@ -46,7 +46,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   selectable?: boolean;
   selected?: Set<RowId>;
   uniqueRowId?: (row: TRowModel) => RowId;
-  onAddRowClick?: (index: number) => void;
+  onAddRowClick?: (index: number, location: number) => void;
   edited?: boolean;
   onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
@@ -248,7 +248,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   onClick={(e) => {
                     handleStatusClick(e);
                   }}
-                  sx={{ padding: '0px', width: '0px', pointerEvents: isShowPlus ? 'none' : 'auto' }}
+                  sx={{ padding: '0px', width: '0px' }}
                 >
                   <AddRow index={index} onPlusClick={onAddRowClick} />
                 </TableCell>
@@ -258,7 +258,6 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   sx={{
                     padding: '0px',
                     width: '0px',
-                    pointerEvents: isShowPlus ? 'none' : 'auto',
                     position: 'relative',
                   }}
                 >
@@ -274,7 +273,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
           );
         })}
         {onAddRowClick && (
-          <TableRow ><TableCell ></TableCell>
+          <TableRow>
+            <TableCell></TableCell>
           </TableRow>
         )}
       </TableBody>

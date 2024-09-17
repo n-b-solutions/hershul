@@ -1,10 +1,13 @@
 'use client';
 
 import * as React from 'react';
+import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
+import { getMiddleTime } from '@/helpers/functions-times';
 import {
   addSettingTimes,
   deleteMinyan,
   setSettingTimes,
+  sortSettingTimesItem,
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
@@ -13,11 +16,10 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import axios from 'axios';
-import dayjs, { Dayjs } from 'dayjs';
-import { response } from 'express';
+import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { LineItemTable, NewMinyan } from '@/types/minyanim';
+import type { GetNewMinyan, LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
@@ -62,6 +64,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           })
         )
       )
+      .then(() => dispatch(sortSettingTimesItem()))
       .catch((err) => console.log('Error fetching data:', err));
   }, [props.typeDate]);
 
@@ -77,52 +80,40 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   }, []);
 
-  const handlePlusClick = async (index: number): Promise<any> => {
+  const handlePlusClick = async (index: number, location: number): Promise<any> => {
     console.log(index);
-    const newRow: NewMinyan = getNewMinyan(index);
-    await axios.post<NewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
-      const currentRoom = rooms.find((m) => m.id === res.data.roomId);
-      const { roomId: room, ...data } = res.data;
-      dispatch(
-        addSettingTimes({
-          index,
-          newRow: {
-            ...data,
-            endDate: dayjs(data.endDate).format('hh:mm'),
-            startDate: dayjs(data.startDate).format('hh:mm'),
-            room: currentRoom!,
-            id: '',
-          },
-        })
-      );
-    });
+    const newRow: NewMinyan = getNewMinyan(index, location);
+    await axios
+      .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
+      .then((res) => {
+        const currentRoom = rooms.find((m) => m.id === res.data.roomId);
+        const { roomId: room, ...data } = res.data;
+        dispatch(
+          addSettingTimes({
+            newRow: {
+              blink: data.blink?.secondsNum,
+              endDate: data.endDate?.time,
+              startDate: data.startDate?.time,
+              room: currentRoom!,
+              id: data.id,
+            },
+          })
+        );
+      })
+      .then(() => dispatch(sortSettingTimesItem()))
+      .catch((err) => console.log('Error fetching data:', err));
   };
 
-  const getNewMinyan = (index: number) => {
+  const getNewMinyan = (index: number, location: number) => {
+    const indexBefore = location === eLocationClick.top ? index - 1 : index;
+    const indexAfter = location === eLocationClick.top ? index : index + 1;
     return {
-      startDate: getBetweenTime(
-        dayjs(settingTimesItem[index - 1].startDate, 'hh:mm'),
-        dayjs(settingTimesItem[index].startDate, 'hh:mm')
-      ),
-      endDate: getBetweenTime(
-        dayjs(settingTimesItem[index - 1].endDate, 'hh:mm'),
-        dayjs(settingTimesItem[index].endDate, 'hh:mm')
-      ),
+      startDate: getMiddleTime(settingTimesItem[indexBefore]?.startDate, settingTimesItem[indexAfter]?.startDate),
+      endDate: getMiddleTime(settingTimesItem[indexBefore]?.endDate, settingTimesItem[indexAfter]?.endDate),
       roomId: rooms[0].id,
       dateType: props.typeDate,
-      announcement: true,
-      messages: 'room',
       steadyFlag: false,
     };
-  };
-
-  const getBetweenTime = (beforeTime: Dayjs, aftertime: Dayjs): Date => {
-    const diff = dayjs(aftertime.diff(beforeTime));
-    let betweenH = diff.get('hour') / 2;
-    let betweenM = diff.get('minute') / 2;
-    beforeTime.add(betweenH, 'hour');
-    beforeTime.add(betweenM, 'minute');
-    return dayjs(betweenH).toDate();
   };
 
   const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
@@ -139,14 +130,27 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
     const updateId = settingTimesItem[index].id;
+    const fieldForEdit =
+      field === eFieldName.room
+        ? eFieldName.roomId
+        : field === eFieldName.endDate
+          ? eFieldName.endDateTime
+          : field === eFieldName.startDate
+            ? eFieldName.startDateTime
+            : field === eFieldName.blink
+              ? eFieldName.blinkSecondsNum
+              : field;
     axios
       .put(`${API_BASE_URL}/minyan/${updateId}`, {
         value: value,
-        fieldForEdit: field === 'room' ? 'roomId' : field,
+        fieldForEdit: fieldForEdit,
       })
       .then((res) => {
-        const value = rooms?.find((value: Room) => value.id === res.data);
-        if (value) dispatch(updateSettingTimesValue({ index, field, value }));
+        const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
+        if (editValue) {
+          dispatch(updateSettingTimesValue({ index, field, value: editValue }));
+          dispatch(sortSettingTimesItem());
+        }
       })
       .catch((err) => console.log('Error fetching data:', err));
   };
@@ -163,7 +167,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       tooltip: 'Time to start Blink before lights on',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.startDate),
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.startDate).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'Start Date',
@@ -171,9 +175,10 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
+      valueForEdit: (row) => dayjs(row.startDate).format('hh:mm'),
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.endDate),
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.endDate).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'End Date',
@@ -181,6 +186,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
+      valueForEdit: (row) => dayjs(row.endDate).format('hh:mm'),
     },
     {
       formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
