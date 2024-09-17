@@ -173,6 +173,9 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
               onMouseOver={() => {
                 setIsToShowDelete && setIsToShowDelete({ hover: true, index });
               }}
+              onMouseLeave={() => {
+                setIsToShowDelete && setIsToShowDelete({ hover: false, index });
+              }}
               hover={hover}
               key={rowId ?? index}
               selected={rowSelected}

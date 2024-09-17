@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import dayjs from "dayjs";
 import MinyanListModel from "../models/minyanListModel";
+import { io } from "../socketio";
 
 const MinyanListController = {
+  // Get all minyanim (לא צריך לשנות כאן)
   get: async (req: Request, res: Response): Promise<void> => {
     try {
-      // Populate both roomId and messageId for startDate, endDate, and blink
       const minyanList = await MinyanListModel.find()
         .populate("roomId")
         .populate("startDate.messageId")
@@ -15,16 +16,16 @@ const MinyanListController = {
       const fullMinyanList = minyanList.map((minyan) => ({
         startDate: {
           time: minyan.startDate.time,
-          message: minyan.startDate.messageId, // populated message details
+          message: minyan.startDate.messageId,
         },
         endDate: {
           time: minyan.endDate.time,
-          message: minyan.endDate.messageId, // populated message details
+          message: minyan.endDate.messageId,
         },
         blink: minyan.blink
           ? {
               secondsNum: minyan.blink.secondsNum,
-              message: minyan.blink.messageId, // populated message details
+              message: minyan.blink.messageId,
             }
           : null,
         dateType: minyan.dateType,
@@ -110,7 +111,7 @@ const MinyanListController = {
             : null,
           dateType: minyan.dateType,
           room: minyan.roomId,
-          id:minyan._id
+          id: minyan._id,
         }));
 
       if (filteredMinyanList.length > 0) {
@@ -141,12 +142,15 @@ const MinyanListController = {
         announcement,
         messages,
         startDate: { time: startDate, message: null },
-        endDate: { time:endDate, message: null },
+        endDate: { time: endDate, message: null },
         blink: { secondsNum: blink, message: null },
         dateType,
         steadyFlag,
       });
       await newMinyan.save();
+
+      io.emit("minyanUpdated", await MinyanListModel.find());
+
       res.status(201).json(newMinyan);
     } catch (error) {
       console.error("Error creating minyan:", error);
@@ -167,6 +171,9 @@ const MinyanListController = {
         res.status(404).send("Minyan not found");
         return;
       }
+
+      io.emit("minyanUpdated", await MinyanListModel.find());
+
       res.status(200).json(updatedMinyan[fieldForEdit]);
     } catch (error) {
       console.error(`Error updating minyan with ID ${id}:`, error);
@@ -182,6 +189,9 @@ const MinyanListController = {
         res.status(404).send("Minyan not found");
         return;
       }
+
+      io.emit("minyanUpdated", await MinyanListModel.find());
+
       res.status(200).json({ message: "Minyan deleted", deletedMinyan });
     } catch (error) {
       console.error(`Error deleting minyan with ID ${id}:`, error);

@@ -16,23 +16,19 @@ import {
   selectMessageRoomLoading,
   selectMessageRooms,
 } from '../../../state/message-room/message-room-slice';
-import type { AppDispatch } from '../../../state/store'; // ייבוא AppDispatch
-
+import type { AppDispatch } from '../../../state/store';
 import { CreateSystemMessages } from './createSystemMessages';
 
 export function SystemMessages(props: { open: boolean; handleClose: () => void; room: string }): React.JSX.Element {
   const { open, handleClose, room } = props;
-  const dispatch = useDispatch<AppDispatch>(); // שימוש ב-AppDispatch
+  const dispatch = useDispatch<AppDispatch>();
 
-  // שליפת הנתונים מ-Redux
   const messages = useSelector(selectMessageRooms);
   const loading = useSelector(selectMessageRoomLoading);
 
-  // ניהול המצב המקומי של השאילתא והדיאלוג
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState<boolean>(false);
 
-  // שליחת פעולה לקבלת ההודעות כאשר הקומפוננטה נטענת
   React.useEffect(() => {
     if (open) {
       dispatch(fetchMessageRooms());
@@ -55,12 +51,9 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void; 
 
   const filteredMessages = messages.filter(
     (contact) =>
-      contact.name &&
-      contact.selectedRoom === room && // סינון לפי החדר הנוכחי
-      contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+      contact.name && contact.selectedRoom === room && contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
- 
   return (
     <>
       <Dialog
@@ -143,7 +136,7 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void; 
         </Box>
       </Dialog>
 
-      <CreateSystemMessages open={isCreateDialogOpen} handleClose={handleCreateDialogClose} />
+      <CreateSystemMessages open={isCreateDialogOpen} handleClose={handleCreateDialogClose} room={room} />
     </>
   );
 }
