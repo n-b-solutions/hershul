@@ -43,15 +43,17 @@ const getFormat = (value: number | string): React.JSX.Element => {
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
 export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
+  const { typeDate} = props;
+
   const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
 
   React.useEffect(() => {
-    if (props.typeDate !== 'calendar') {
+    if (typeDate !== 'calendar') {
       axios
-        .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${props.typeDate}`)
+        .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${typeDate}`)
         .then((res) =>
           dispatch(
             setSettingTimes({
@@ -68,7 +70,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
         )
         .catch((err) => console.log('Error fetching data:', err));
     }
-  }, [props.typeDate]);
+  }, [typeDate]);
 
   React.useEffect(() => {
     axios
@@ -114,7 +116,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
         dayjs(settingTimesItem[index].endDate, 'hh:mm')
       ),
       roomId: rooms[0].id,
-      dateType: props.typeDate,
+      dateType: typeDate,
       announcement: true,
       messages: 'room',
       steadyFlag: false,
@@ -203,8 +205,8 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
-      {props.typeDate === 'calendar' ? (
-        <Calendar typeDate={props.typeDate}/>
+      {typeDate === 'calendar' ? (
+        <Calendar typeDate={typeDate}/>
       ) : (
         <Card>
           <Divider />

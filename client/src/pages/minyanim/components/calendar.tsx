@@ -8,20 +8,22 @@ import {
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
+import { HDate } from '@hebcal/core';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
+import Switch from '@mui/material/Switch';
 import { DatePicker } from '@mui/x-date-pickers';
+import { CheckCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
+
 import type { LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
-import Switch from '@mui/material/Switch';
-import { CheckCircle } from '@phosphor-icons/react';
 
 const styleTypography = {
   display: 'grid',
@@ -151,7 +153,38 @@ export function Calendar(): React.JSX.Element {
       })
       .catch((err) => console.log('Error fetching data:', err));
   };
-
+  const checkJewishDay = () => {
+    const today = new Date();
+    const hdate = new HDate(today); // ממיר את התאריך הנוכחי לתאריך עברי
+  
+    // לקבל את היום בשבוע
+    const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+    const dayOfWeek = daysOfWeek[today.getDay()];
+  
+    // בדיקת ראש חודש
+    let jewishDay = 'יום רגיל';
+    if (hdate.onRoshChodesh()) {
+      jewishDay = 'ראש חודש';
+    }
+  
+    // בדיקת חגים או אירועים
+    const eventsList = hdate.holidays();
+    if (eventsList.length > 0) {
+      eventsList.forEach((event) => {
+        if (event.desc().includes('Fast')) {
+          jewishDay = 'תענית';
+        } else if (event.desc().includes('Yom Tov')) {
+          jewishDay = 'יום טוב';
+        } else {
+          jewishDay = event.desc(); // מחזיר את שם האירוע
+        }
+      });
+    }
+  
+    console.log('היום היהודי הוא:', jewishDay);
+  };
+  
+  checkJewishDay();
   const columns = [
     {
       formatter: (row): React.JSX.Element => getFormat(row.blink ? row.blink : ''),
@@ -196,19 +229,14 @@ export function Calendar(): React.JSX.Element {
       align: 'center',
     },
     {
-        formatter: (row, isEditing): React.JSX.Element => (
-          isEditing ? (
-            <Switch />
-          ) : (
-            <CheckCircle size={24} weight="bold" />
-        )
-        ),
-        typeEditinput: 'button',
-        name: 'Is Routine',
-        width: '150px',
-        padding: 'none',
-        align: 'center',
-      },
+      formatter: (row, isEditing): React.JSX.Element =>
+        isEditing ? <Switch /> : <CheckCircle size={24} weight="bold" />,
+      typeEditinput: 'button',
+      name: 'Is Routine',
+      width: '150px',
+      padding: 'none',
+      align: 'center',
+    },
   ] satisfies ColumnDef<LineItemTable>[];
 
   return (
