@@ -131,8 +131,8 @@ const MinyanListController = {
         req.body;
       const newMinyan = new MinyanListModel({
         roomId,
-        startDate: { time: dayjs(startDate).toDate(), message: null },
-        endDate: { time: dayjs(endDate).toDate(), message: null },
+        startDate: { time: startDate, message: null },
+        endDate: { time: endDate, message: null },
         blink: { secondsNum: blink, message: null },
         dateType,
         steadyFlag,
