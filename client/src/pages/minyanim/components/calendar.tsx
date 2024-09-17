@@ -63,7 +63,6 @@ export function Calendar(): React.JSX.Element {
         }));
 
         // Check if today is Rosh Chodesh
-        const formattedDate = selectedDate.format('YYYY-MM-DD');
         const hebcalRes = await axios.get(
           `https://www.hebcal.com/converter?cfg=json&gy=${selectedDate.year()}&gm=${selectedDate.month() + 1}&gd=${selectedDate.date()}&g2h=1`
         );
