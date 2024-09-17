@@ -10,9 +10,21 @@ export interface TypeOfDate {
 export interface LineItemTable {
   id: string;
   blink?: number;
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
   room: Room;
+}
+
+export interface GetNewMinyan {
+  messages: string;
+  announcement: boolean;
+  startDate: Date;
+  endDate: Date;
+  roomId: string;
+  dateType: string;
+  steadyFlag: boolean;
+  blink?: number;
+  id:string;
 }
 
 export interface NewMinyan {
