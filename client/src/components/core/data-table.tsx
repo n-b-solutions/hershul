@@ -173,6 +173,9 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
               onMouseOver={() => {
                 setIsToShowDelete && setIsToShowDelete({ hover: true, index });
               }}
+              onMouseLeave={() => {
+                setIsToShowDelete && setIsToShowDelete({ hover: false, index });
+              }}
               hover={hover}
               key={rowId ?? index}
               selected={rowSelected}
@@ -235,7 +238,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                         ? column.formatter(row, index)
                         : column.field
                           ? row[column.field]
-                          : null ) as React.ReactNode)
+                          : null) as React.ReactNode)
                     )}
                   </TableCell>
                 )
@@ -245,9 +248,9 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   onClick={(e) => {
                     handleStatusClick(e);
                   }}
-                  sx={{ padding: '0px', width: '0px'}}
+                  sx={{ padding: '0px', width: '0px' }}
                 >
-                  <AddRow index={index} onPlusClick={onAddRowClick}/>
+                  <AddRow index={index} onPlusClick={onAddRowClick} />
                 </TableCell>
               ) : null}
               {onDeleteClick && isShowDelete.hover && isShowDelete.index === index ? (
@@ -270,7 +273,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
           );
         })}
         {onAddRowClick && (
-          <TableRow ><TableCell ></TableCell>
+          <TableRow>
+            <TableCell></TableCell>
           </TableRow>
         )}
       </TableBody>
