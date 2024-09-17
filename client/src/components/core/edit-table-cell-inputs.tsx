@@ -55,13 +55,13 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
         <OutlinedInput
           value={props.value}
           onChange={(e) => {
-            handle(e.target.value as TRowModel[keyof TRowModel]);
+            handle(dayjs(e.target.value,"hh:mm").toISOString() as TRowModel[keyof TRowModel]);
           }}
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
           type="time"
           onBlur={(e) => {
-            props.handleBlur(e, dayjs(e.target.value).toDate() as TRowModel[keyof TRowModel], props.index, props.fieldName);
+            props.handleBlur(e, dayjs(e.target.value,"hh:mm").toISOString() as TRowModel[keyof TRowModel], props.index, props.fieldName);
           }}
         />
       );
