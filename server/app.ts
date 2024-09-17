@@ -1,56 +1,31 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import cors from "cors";
-import MinyanListRouter from "./router/minyanListRouter";
-import RoomStatusRouter from "./router/roomStatusRouter";
-import MessageRoomRouter from "./router/messageRoomRouter";
-import connectDB from "./DB/mongoConnect";
-import { CronJob } from "cron";
-import ScheduleController from "./controller/scheduleController";
-import { createServer } from "node:http";
-import { Server } from "socket.io";
 import helmet from "helmet";
+import { createServer } from "http";
 
-connectDB();
+import connectDB from "./DB/mongoConnect";
+import { initSocketio } from "./socketio";
+import { router } from "./router";
+
 const app = express();
+
+//connect to DB
+connectDB();
+//create server
 const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST"],
-  },
-});
+//connect to socket io
+initSocketio(server);
+
+// set security HTTP headers
 app.use(helmet());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cors());
 
-io.on("connection", (socket) => {
-  console.log("A user connected " + socket.id);
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
-  });
-});
-
-const job = new CronJob("* * * * *", async () => {
-  console.log("Running cron job to update rooms...");
-  const updatedStatuses = await ScheduleController.updateRoomStatuses();
-
-  await ScheduleController.logBeforeShkiah();
-  io.emit("roomStatusUpdated", updatedStatuses);
-});
-
-job.start();
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!");
-});
-
-app.use("/minyan", MinyanListRouter);
-app.use("/roomStatus", RoomStatusRouter);
-app.use("/message", MessageRoomRouter);
+app.use("/", router);
 
 server.listen(4000, () => {
-  console.log("Server is running on port 4000");
-});
+    console.log("Server is running on port 4000");
+  });
+
 export const viteNodeApp = app;
-export { io }; 

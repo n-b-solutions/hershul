@@ -1,8 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import dayjs, { Dayjs } from 'dayjs';
 
-import type { LineItemTable } from '@/types/minyanim';
+import type {  LineItemTable } from '@/types/minyanim';
 import { Room } from '@/types/room';
 
 export interface Istate {
@@ -20,7 +19,7 @@ const settingTimesSlice = createSlice({
       state.settingTimesItem.push(action.payload.newRow);
       state.settingTimesItem.sort((a) => (a.startDate ? 1 : -1));
     },
-    updateSettingTimesValue: (state, action: PayloadAction<{ index: number; value: string | Room |number; field: string }>) => {
+    updateSettingTimesValue: (state, action: PayloadAction<{ index: number; value: string | Date |Room |number; field: string }>) => {
       const update = state.settingTimesItem[action.payload.index] as LineItemTable;
       const newUpdate: LineItemTable = { ...update, [action.payload.field]: action.payload.value };
       [...state.settingTimesItem, (state.settingTimesItem[action.payload.index] = newUpdate)];

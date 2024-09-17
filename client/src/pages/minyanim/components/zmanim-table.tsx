@@ -17,17 +17,18 @@ import dayjs, { Dayjs } from 'dayjs';
 import { response } from 'express';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { LineItemTable, NewMinyan } from '@/types/minyanim';
+import type { GetNewMinyan, LineItemTable, NewMinyan } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
+import zIndex from '@mui/material/styles/zIndex';
 
 const styleTypography = {
   display: 'grid',
   justifyItems: 'center',
   alignItems: 'center',
   whiteSpace: 'nowrap',
-  height: '54px',
+  height: '54px'
 };
 
 const getFormat = (value: number | string): React.JSX.Element => {
@@ -80,18 +81,17 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const handlePlusClick = async (index: number): Promise<any> => {
     console.log(index);
     const newRow: NewMinyan = getNewMinyan(index);
-    await axios.post<NewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
+    await axios.post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
       const currentRoom = rooms.find((m) => m.id === res.data.roomId);
       const { roomId: room, ...data } = res.data;
       dispatch(
         addSettingTimes({
           index,
           newRow: {
-            ...data,
-            endDate: dayjs(data.endDate).format('hh:mm'),
-            startDate: dayjs(data.startDate).format('hh:mm'),
+            endDate: data.endDate,
+            startDate: data.startDate,
             room: currentRoom!,
-            id: '',
+            id:data.id
           },
         })
       );
@@ -139,14 +139,22 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
     const updateId = settingTimesItem[index].id;
+    const fieldForEdit =
+      field === 'room'
+        ? 'roomId'
+        : field === 'endDate' || field === 'startDate'
+          ? `${field}.time`
+          : field === 'blink'
+            ? `${field}.secondsNum`
+            : field;
     axios
       .put(`${API_BASE_URL}/minyan/${updateId}`, {
         value: value,
-        fieldForEdit: field === 'room' ? 'roomId' : field,
+        fieldForEdit: fieldForEdit,
       })
       .then((res) => {
-        const value = rooms?.find((value: Room) => value.id === res.data);
-        if (value) dispatch(updateSettingTimesValue({ index, field, value }));
+        const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
+        if (editValue) dispatch(updateSettingTimesValue({ index, field, value: editValue }));
       })
       .catch((err) => console.log('Error fetching data:', err));
   };
@@ -163,7 +171,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       tooltip: 'Time to start Blink before lights on',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.startDate),
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.startDate).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'Start Date',
@@ -171,9 +179,10 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
+      valueForEdit: (row) => dayjs(row.startDate).format('hh:mm'),
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.endDate),
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.endDate).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'End Date',
@@ -181,6 +190,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
+      valueForEdit: (row) => dayjs(row.endDate).format('hh:mm'),
     },
     {
       formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
