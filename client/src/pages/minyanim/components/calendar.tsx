@@ -50,26 +50,7 @@ export function Calendar(): React.JSX.Element {
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
   const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
 
-  //   React.useEffect(() => {
-  //     axios
-  //       .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/calendar`)
-  //       .then((res) =>
-  //         dispatch(
-  //           setSettingTimes({
-  //             setting: res.data.map((minyan: any) => {
-  //               return {
-  //                 ...minyan,
-  //                 blink: minyan.blink?.secondsNum,
-  //                 startDate: minyan.startDate?.time,
-  //                 endDate: minyan.endDate?.time,
-  //               };
-  //             }),
-  //           })
-  //         )
-  //       )
-  //       .catch((err) => console.log('Error fetching data:', err));
-  //   }, []);
-  React.useEffect(() => {
+ React.useEffect(() => {
     const fetchMinyanim = async () => {
       try {
         // First fetch: get the default calendar minyanim
