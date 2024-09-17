@@ -5,12 +5,15 @@ const MinyanListRouter = express.Router();
 MinyanListRouter.get("/", (req: Request, res: Response) => {
     MinyanListController.get(req, res);
   });
+  
+  MinyanListRouter.get('/getMinyanimByDateType', (req: Request, res: Response) => {
+    console.log("getMinyanimByDateType");
+    
+    MinyanListController.getByTypeDate(req, res);
+  });
   MinyanListRouter.get('/:id', (req: Request, res: Response) => {
     MinyanListController.getById(req, res);
   });
-  MinyanListRouter.get('/getMinyanimByDateType/:dateType',(req:Request,res:Response)=>{
-    MinyanListController.getByTypeDate(req,res);
-  })
   MinyanListRouter.post('/', (req: Request, res: Response) => {
     MinyanListController.post(req, res);
   });
