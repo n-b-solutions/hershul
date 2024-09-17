@@ -13,7 +13,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   index: number;
   fieldName: keyof TRowModel;
   handleBlur: (
-    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+    event: React.FocusEvent | React.KeyboardEvent,
     value?: TRowModel[keyof TRowModel],
     index?: number,
     fieldName?: keyof TRowModel
@@ -22,7 +22,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   selectOptions?: SelectOption[];
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
-  const [select, setSelect] = useState(props.value?.value && props.value.value);
+  const [select, setSelect] = useState(props.value);
 
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
@@ -32,6 +32,10 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
 
   const handle = (value: TRowModel[keyof TRowModel]) => {
     props.handleChangeInput && props.handleChangeInput(value, props.index, props.fieldName);
+  };
+
+  const handleBlurInput = (value: TRowModel[keyof TRowModel], event: React.FocusEvent | React.KeyboardEvent) => {
+    props.handleBlur(event, value, props.index, props.fieldName);
   };
 
   switch (props.editType) {
@@ -46,8 +50,11 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
           name={props.fieldName.toString() + props.index}
           type="number"
           onBlur={(e) => {
-            props.handleBlur(e, parseInt(e.target.value) as TRowModel[keyof TRowModel], props.index, props.fieldName);
+            handleBlurInput(parseInt(props.value) as TRowModel[keyof TRowModel], e);
           }}
+          onKeyDown={(e) =>
+            e.key === 'Enter' && handleBlurInput(parseInt(props.value) as TRowModel[keyof TRowModel], e)
+          }
         />
       );
     case 'time':
@@ -60,13 +67,12 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
           onBlur={(e) => {
-            props.handleBlur(
-              e,
-              dayjs(e.target.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel],
-              props.index,
-              props.fieldName
-            );
+            handleBlurInput(dayjs(e.target.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel], e);
           }}
+          onKeyDown={(e) =>
+            e.key === 'Enter' &&
+            handleBlurInput(dayjs(props.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel], e)
+          }
         />
       );
     case 'select':
@@ -76,7 +82,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
           onChange={handleChange}
           inputRef={props.cellRef}
           onBlur={(e) => {
-            props.handleBlur(e, e.target.value as TRowModel[keyof TRowModel], props.index, props.fieldName);
+            handleBlurInput(e.target.value as TRowModel[keyof TRowModel], e);
           }}
         >
           {props.selectOptions.map((option: SelectOption) => (
