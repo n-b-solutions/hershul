@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Event, HDate, HebrewCalendar } from '@hebcal/core';
 import { Grid, IconButton, Typography } from '@mui/material';
-import { ArrowLeft as BackIcon, Gear as SettingsIcon } from '@phosphor-icons/react/dist/ssr';
+import { ArrowLeft as BackIcon, ArrowRight as ForwardIcon, Gear as SettingsIcon } from '@phosphor-icons/react/dist/ssr';
 import { format } from 'date-fns';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import type { Metadata } from '@/types/metadata';
 import { config } from '@/config';
@@ -16,6 +16,7 @@ function Header() {
   const [specialDay, setSpecialDay] = useState<string>('');
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const updateDate = () => {
@@ -36,6 +37,14 @@ function Header() {
 
   const isHomePage = location.pathname === '/';
 
+  const handleNavigation = () => {
+    if (isHomePage) {
+      navigate('/setting');
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
     <Grid container direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{
       borderBottom: '2px solid #000', 
@@ -43,10 +52,7 @@ function Header() {
       paddingLeft: '16px', 
     }}>
       <Grid item xs={6}>
-        <Typography
-          variant="h6"
-         
-        >
+        <Typography variant="h6">
           {metadata.description}
         </Typography>
       </Grid>
@@ -70,8 +76,8 @@ function Header() {
           </Grid>
 
           <Grid item>
-            <IconButton color="secondary" size="small" href={isHomePage ? '/setting' : '/'}>
-              {isHomePage ? <SettingsIcon /> : <BackIcon />}
+            <IconButton color="secondary" size="small" onClick={handleNavigation}>
+              {isHomePage ? <SettingsIcon /> : <ForwardIcon />}
             </IconButton>
           </Grid>
         </Grid>
