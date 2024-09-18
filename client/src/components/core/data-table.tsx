@@ -98,13 +98,13 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   };
 
   const handleBlurInput = (
-    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+    event: React.FocusEvent | React.KeyboardEvent,
     value?: TRowModel[keyof TRowModel],
     index: number = 0,
     fieldName?: keyof TRowModel
   ): void => {
     onBlurInput && value && fieldName && onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
-    const id = (event.currentTarget as HTMLInputElement).id;
+    const id = (event.target as HTMLInputElement).id;
     setIsCellClick({ isclick: false, id });
     setIsShowPlus(false);
   };
