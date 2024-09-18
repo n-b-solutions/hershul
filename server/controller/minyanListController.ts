@@ -126,11 +126,11 @@ const MinyanListController = {
           switch (dayOfWeek) {
             case 0: // Sunday
             case 2: // Tuesday
-            case 4: // Thursday
+            case 3: // Thursday
               queryDateType = eDateType.SUNDAY;
               break;
             case 1: // Monday
-            case 3: // Wednesday
+            case 4: // Wednesday
               queryDateType = eDateType.MONDAY;
               break;
             case 5: // Friday
@@ -143,7 +143,6 @@ const MinyanListController = {
           }
         }
       }
-
       const minyanList = await MinyanListModel.find({
         dateType: queryDateType,
       })
@@ -152,27 +151,25 @@ const MinyanListController = {
         .populate("endDate.messageId")
         .populate("blink.messageId");
 
-      const filteredMinyanList = minyanList
-        .filter((minyan) => minyan.dateType === queryDateType)
-        .map((minyan) => ({
-          startDate: {
-            time: minyan.startDate.time,
-            message: minyan.startDate.messageId, // populated message details
-          },
-          endDate: {
-            time: minyan.endDate.time,
-            message: minyan.endDate.messageId, // populated message details
-          },
-          blink: minyan.blink
-            ? {
-                secondsNum: minyan.blink.secondsNum,
-                message: minyan.blink.messageId, // populated message details
-              }
-            : null,
-          dateType: minyan.dateType,
-          room: minyan.roomId,
-          id: minyan.id,
-        }));
+      const filteredMinyanList = minyanList.map((minyan) => ({
+        startDate: {
+          time: minyan.startDate.time,
+          message: minyan.startDate.messageId, // populated message details
+        },
+        endDate: {
+          time: minyan.endDate.time,
+          message: minyan.endDate.messageId, // populated message details
+        },
+        blink: minyan.blink
+          ? {
+              secondsNum: minyan.blink.secondsNum,
+              message: minyan.blink.messageId, // populated message details
+            }
+          : null,
+        dateType: minyan.dateType,
+        room: minyan.roomId,
+        id: minyan.id,
+      }));
 
       res.status(200).json(filteredMinyanList);
     } catch (error) {
