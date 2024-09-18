@@ -9,7 +9,6 @@ MinyanListRouter.get("/", (req: Request, res: Response) => {
 MinyanListRouter.get(
   "/getMinyanimByDateType",
   (req: Request, res: Response) => {
-
     MinyanListController.getByDateType(req, res);
   }
 );

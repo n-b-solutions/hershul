@@ -62,5 +62,3 @@ export interface MinyanApi {
   endDate: AlertType;
   blink?: BlinkAlertType;
 }
-
-
