@@ -11,11 +11,14 @@ export interface LineItemTable {
   startDate: Date;
   endDate: Date;
   room: Room;
+  isRoutine?:boolean;
 }
-
+interface SpesificDate{
+  date: Date;
+  isRoutine: boolean;
+}
 export interface GetNewMinyan {
   messages: string;
-  announcement: boolean;
   startDate: AlertType;
   endDate: AlertType;
   roomId: string;
@@ -23,6 +26,8 @@ export interface GetNewMinyan {
   steadyFlag: boolean;
   blink?: BlinkAlertType;
   id: string;
+  spesificDate?:SpesificDate;
+  inactiveDates?:SpesificDate[];
 }
 
 export interface NewMinyan {

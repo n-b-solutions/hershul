@@ -21,6 +21,10 @@ import mongoose, {
     secondsNum: number;
     messageId?: ObjectId;
   }
+  interface SpesificDate{
+    date: Date;
+    isRoutine: boolean;
+  }
   export interface MinyanDocument extends Document {
     roomId: ObjectId;
     startDate: AlertType;
@@ -28,4 +32,6 @@ import mongoose, {
     dateType: DateTypes;
     blink?: BlinkAlertType;
     steadyFlag: Boolean;
+    spesificDate?:SpesificDate;
+    inactiveDates?:SpesificDate[];
   }

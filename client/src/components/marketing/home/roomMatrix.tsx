@@ -10,7 +10,6 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
-
 import { socket } from '../../../socket';
 import { SystemMessages } from './systemMessages';
 import { Room } from '@/types/room';

@@ -15,7 +15,7 @@ import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import Switch from '@mui/material/Switch';
 import { DatePicker } from '@mui/x-date-pickers';
-import { CheckCircle } from '@phosphor-icons/react';
+import { CheckCircle,XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -55,12 +55,16 @@ export function Calendar(): React.JSX.Element {
       try {
         // First fetch: get the default calendar minyanim
         const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getMinyanimByDateType/calendar`);
+        console.log("calendarRes: ",calendarRes.data);
+        
         const minyanim = calendarRes.data.map((minyan: any) => ({
           ...minyan,
           blink: minyan.blink?.secondsNum,
           startDate: minyan.startDate?.time,
           endDate: minyan.endDate?.time,
+          isRoutine:minyan.spesificDate?.isRoutine
         }));
+console.log(minyanim);
 
         // Check if today is Rosh Chodesh
         const hebcalRes = await axios.get(
@@ -235,13 +239,16 @@ export function Calendar(): React.JSX.Element {
       align: 'center',
     },
     {
-      formatter: (row, isEditing): React.JSX.Element =>
-        isEditing ? <Switch /> : <CheckCircle size={24} weight="bold" />,
-      typeEditinput: 'button',
+      formatter: (row): React.JSX.Element =>
+      row.isRoutine?<CheckCircle size={24} />:<XCircle size={24}/>,
+      typeEditinput: 'switch',
+      valueForEdit:(row)=>row.isRoutine,
       name: 'Is Routine',
       width: '150px',
       padding: 'none',
       align: 'center',
+      field: 'isRoutine',
+
     },
   ] satisfies ColumnDef<LineItemTable>[];
 

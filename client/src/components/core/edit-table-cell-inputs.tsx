@@ -1,5 +1,5 @@
 import React, { Ref, useState } from 'react';
-import { OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
+import { OutlinedInput, Select, SelectChangeEvent, Switch, TextField } from '@mui/material';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';
 
@@ -94,6 +94,8 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
       ) : (
         <></>
       );
+      case 'switch':
+        return (<Switch value={props.value}></Switch>);
     default:
       return <></>;
   }

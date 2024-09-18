@@ -4,7 +4,6 @@ import mongoose, {
 } from "mongoose";
 import { MinyanDocument } from "../types/minyan";
 
-
 const MinyanSchema: Schema<MinyanDocument> = new Schema({
   roomId: { type: SchemaTypes.ObjectId, required: true, ref: "rooms" },
   startDate: {
@@ -17,10 +16,18 @@ const MinyanSchema: Schema<MinyanDocument> = new Schema({
   },
   blink: {
     secondsNum: { type: Number },
-    messageId: { type: SchemaTypes.ObjectId, ref: "messages" }, 
+    messageId: { type: SchemaTypes.ObjectId, ref: "messages" },
   },
   steadyFlag: { type: Boolean, required: true },
   dateType: { type: String, required: true },
+  spesificDate: {
+    date: { type: Date, required: false },
+    isRoutine: { type: Boolean, required: false },
+  },
+  inactiveDates: [{
+    date: { type: Date, required: false },
+    isRoutine: { type: Boolean, required: false },
+  }],
 });
 
 const MinyanListModel = mongoose.model<MinyanDocument>("minyans", MinyanSchema);
