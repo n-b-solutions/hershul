@@ -10,8 +10,6 @@ import mongoose, {
     | "friday"
     | "saturday"
     | "roshHodesh"
-    | "taanit"
-    | "yomTov"
     | "calendar";
   interface AlertType {
     time: Date;
