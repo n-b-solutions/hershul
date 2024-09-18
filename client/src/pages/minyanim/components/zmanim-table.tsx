@@ -47,14 +47,12 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
-  const dateType=props.typeDate
+  const dateType = props.typeDate;
   React.useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/`, {
-        params: {
-            dateType: dateType
-        }
-    })
+      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType`, {
+        params: { dateType },
+      })
       .then((res) =>
         dispatch(
           setSettingTimes({
