@@ -6,8 +6,6 @@ import axios from "axios";
 import mongoose from "mongoose";
 import { eDateType } from "../types/minyan";
 
-
-
 // Function to determine if today is Rosh Chodesh
 const isRoshChodesh = async (): Promise<boolean> => {
   const now = new Date();
@@ -138,8 +136,8 @@ const MinyanListController = {
             case 5: // Friday
               queryDateType = eDateType.FRIDAY;
               break;
-             case 6://shabat
-             queryDateType=eDateType.SATURDAY;
+            case 6: //shabat
+              queryDateType = eDateType.SATURDAY;
             default:
               queryDateType = eDateType.DEFAULT; // Fallback default value
           }
