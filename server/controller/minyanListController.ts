@@ -4,6 +4,9 @@ import MinyanListModel from "../models/minyanListModel";
 import { io } from "../socketio";
 import axios from "axios";
 import mongoose from "mongoose";
+import { eDateType } from "../types/minyan";
+
+
 
 // Function to determine if today is Rosh Chodesh
 const isRoshChodesh = async (): Promise<boolean> => {
@@ -107,9 +110,7 @@ const MinyanListController = {
     }
   },
 
-  getByTypeDate: async (req: Request, res: Response): Promise<void> => {
-    console.log("getByTypeDate");
-
+  getByDateType: async (req: Request, res: Response): Promise<void> => {
     let queryDateType: string;
 
     const today = new Date();
@@ -121,29 +122,30 @@ const MinyanListController = {
         const roshChodesh = await isRoshChodesh();
 
         if (roshChodesh) {
-          queryDateType = "roshHodesh";
+          queryDateType = eDateType.ROSH_HODESH;
         } else {
           // Determine default dateType based on the day of the week
           switch (dayOfWeek) {
             case 0: // Sunday
             case 2: // Tuesday
             case 4: // Thursday
-              queryDateType = "sunday";
+              queryDateType = eDateType.SUNDAY;
               break;
             case 1: // Monday
             case 3: // Wednesday
-              queryDateType = "monday";
+              queryDateType = eDateType.MONDAY;
               break;
             case 5: // Friday
-              queryDateType = "friday";
+              queryDateType = eDateType.FRIDAY;
               break;
+             case 6://shabat
+             queryDateType=eDateType.SATURDAY;
             default:
-              queryDateType = "default"; // Fallback default value
+              queryDateType = eDateType.DEFAULT; // Fallback default value
           }
         }
-
-        // Use the provided dateType if available, otherwise use the default value
       }
+
       const minyanList = await MinyanListModel.find({
         dateType: queryDateType,
       })
@@ -180,6 +182,7 @@ const MinyanListController = {
       res.status(500).send("Internal Server Error");
     }
   },
+
   post: async (req: Request, res: Response): Promise<void> => {
     try {
       const { roomId, startDate, endDate, dateType, blink, steadyFlag } =
