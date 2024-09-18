@@ -190,7 +190,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     {
       formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
       typeEditinput: 'select',
-      valueForEdit: (row) => ({ label: row.room.nameRoom, value: row.room.id }),
+      valueForEdit: (row) => row.room.id,
       selectOptions: roomsOption,
       valueOption: rooms,
       padding: 'none',
