@@ -1,6 +1,6 @@
 import React, { Ref, useState } from 'react';
-import { OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
-import { TimeField } from '@mui/x-date-pickers/TimeField';
+import { OutlinedInput, Select, SelectChangeEvent } from '@mui/material';
+import { TimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 
 import { SelectOption } from '@/types/room';
@@ -23,6 +23,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
   const [select, setSelect] = useState(props.value);
+  const [isOpenTimePicker, setIsOpenTimePicker] = useState<boolean>(false);
 
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
@@ -59,20 +60,26 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
       );
     case 'time':
       return (
-        <TimeField
+        <TimePicker
           value={props.value}
           onChange={(e) => {
             handle(e.toISOString() as TRowModel[keyof TRowModel]);
           }}
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
-          onBlur={(e) => {
-            handleBlurInput(dayjs(e.target.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel], e);
+          onOpen={() => setIsOpenTimePicker(false)}
+          onAccept={() => setIsOpenTimePicker(true)}
+          slotProps={{
+            textField: {
+              onBlur: (e) => {
+                isOpenTimePicker &&
+                  handleBlurInput(dayjs(e.target.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel], e);
+              },
+              onKeyDown: (e: React.KeyboardEvent) =>
+                e.key === 'Enter' &&
+                handleBlurInput(dayjs(props.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel], e),
+            },
           }}
-          onKeyDown={(e) =>
-            e.key === 'Enter' &&
-            handleBlurInput(dayjs(props.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel], e)
-          }
         />
       );
     case 'select':
