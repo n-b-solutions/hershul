@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState,useEffect } from 'react'
+import { useEffect, useState } from 'react';
 import { socket } from '@/socket';
 import { Divider, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -10,7 +10,6 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
-
 import { Minyan, MinyanApi } from '@/types/minyanim';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
@@ -121,16 +120,16 @@ export function ListMinyan(): React.JSX.Element {
       return data.sort((a, b) => {
         const timeA = dayjs(a.startDate).hour() * 60 + dayjs(a.startDate).minute();
         const timeB = dayjs(b.startDate).hour() * 60 + dayjs(b.startDate).minute();
-    
+
         if (timeA === timeB) {
           if (a.action === 'blink' && b.action === 'on') {
-            return -1; 
+            return -1;
           }
           if (a.action === 'on' && b.action === 'blink') {
-            return 1; 
+            return 1;
           }
         }
-    
+
         return timeA - timeB;
       });
     };

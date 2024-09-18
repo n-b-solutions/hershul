@@ -63,7 +63,7 @@ const ScheduleController = {
   },
   logBeforeShkiah: async () => {
     const now = new Date();
-    const today = now.getDay(); 
+    const today = now.getDay();
 
     const latitude = process.env.LATITUDE
       ? parseFloat(process.env.LATITUDE)
@@ -76,10 +76,13 @@ const ScheduleController = {
     const location = new Location(latitude, longitude, false, tzid);
 
     if (today === 5) {
+      // Friday
+      // Calculate shkiah (sunset) time for Friday
       const gloc = new GeoLocation(null, latitude, longitude, 0, tzid);
       const zmanim = new Zmanim(gloc, now, false);
       const shkiah = zmanim.shkiah();
-      const shkiahMinus30 = new Date(shkiah.getTime() - 30 * 60000); 
+      // Calculate 30 minutes before shkiah
+      const shkiahMinus30 = new Date(shkiah.getTime() - 30 * 60000);
 
       if (now >= shkiahMinus30 && now <= shkiah) {
         const rooms = await RoomStatusModel.find();
@@ -97,7 +100,9 @@ const ScheduleController = {
       const mask = 0;
       const eventTime = new Date();
 
-      const havdalahMins = process.env.HAVDALAMINS?parseInt(process.env.HAVDALAMINS):50
+      const havdalahMins = process.env.HAVDALAMINS
+        ? parseInt(process.env.HAVDALAMINS)
+        : 50;
       const linkedEvent = undefined;
       const options = undefined;
 
@@ -111,9 +116,13 @@ const ScheduleController = {
         options
       );
 
-      const havdalahTimeLocal = havdalahEvent.getDate(); 
+      // Convert HDate to Date object if HDate has a method to get Date object
+      const havdalahTimeLocal = havdalahEvent.getDate();
+      // Add conversion method or utility function here
 
       function convertHDateToDate(hDate) {
+        // Example conversion logic (adjust according to actual HDate properties)
+
         return new Date(
           hDate.getYear(),
           hDate.getMonth() - 1,
