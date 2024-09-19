@@ -14,10 +14,8 @@ const typesOfDates = [
   { value: 'sunday', label: 'Sunday & Tuesday & Wednesday' },
   { value: 'monday', label: 'Monday & Thursday' },
   { value: 'friday', label: 'Friday' },
-  { value: 'saturday', label: 'Saturday' },
+  { value: 'saturday', label: 'Saturday Night' },
   { value: 'roshHodesh', label: 'Rosh Hodesh' },
-  { value: 'taanit', label: 'Taanit' },
-  { value: 'yomTov', label: 'Yom Tov' },
   { value: 'calendar', label: 'Calendar' },
 ] satisfies TypeOfDate[];
 
