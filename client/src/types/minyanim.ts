@@ -30,14 +30,19 @@ export interface GetNewMinyan {
   inactiveDates?:SpesificDate[];
 }
 
-export interface NewMinyan {
+// הגדרה חדשה ל-NewMinyan כולל spesificDate
+export type NewMinyan = {
   startDate: Date;
   endDate: Date;
   roomId: string;
   dateType: string;
   steadyFlag: boolean;
   blink?: number;
-}
+  spesificDate?: {
+    date: Date;
+    isRoutine: boolean;
+  };
+};
 
 export interface NewMinyan1 {
   startDate: Date;

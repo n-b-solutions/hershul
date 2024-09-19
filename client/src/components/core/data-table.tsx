@@ -51,6 +51,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onDeleteClick?: (index: number) => void;
+  // rowSx?:()
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null }>({
@@ -103,7 +104,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     index: number = 0,
     fieldName?: keyof TRowModel
   ): void => {
-    onBlurInput && value && fieldName && onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
+    onBlurInput && value!=undefined && fieldName && onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
     const id = (event.target as HTMLInputElement).id;
     setIsCellClick({ isclick: false, id });
     setIsShowPlus(false);

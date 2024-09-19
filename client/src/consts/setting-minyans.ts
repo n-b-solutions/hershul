@@ -11,7 +11,9 @@ export const enum eFieldName {
   startDate = 'startDate',
   blink = 'blink',
   roomId = 'roomId',
+  spesificDate='isRoutine',
   endDateTime = 'endDate.time',
   startDateTime = 'startDate.time',
   blinkSecondsNum = 'blink.secondsNum',
+  isRoutine='spesificDate.isRoutine'
 }

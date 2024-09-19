@@ -23,6 +23,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
   const [select, setSelect] = useState(props.value);
+console.log(props.fieldName);
 
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
@@ -31,6 +32,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   };
 
   const handle = (value: TRowModel[keyof TRowModel]) => {
+    console.log(value);
     props.handleChangeInput && props.handleChangeInput(value, props.index, props.fieldName);
   };
 
@@ -94,8 +96,27 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
       ) : (
         <></>
       );
-      case 'switch':
-        return (<Switch value={props.value}></Switch>);
+    case 'switch':
+      const [isChecked, setIsChecked] = useState(!!props.value);
+
+      React.useEffect(() => {
+        setIsChecked(!!props.value);
+      }, [props.value]);
+
+      return (
+        <Switch
+          checked={isChecked}
+          onChange={(e) => {
+            console.log('Switch clicked:', e.target.checked);
+            setIsChecked(e.target.checked);
+            handle(e.target.checked as TRowModel[keyof TRowModel]);
+          }}
+          onBlur={(e) => {
+            handleBlurInput(props.value as TRowModel[keyof TRowModel], e);
+          }}
+        />
+      );
+
     default:
       return <></>;
   }

@@ -5,26 +5,8 @@ import { io } from "../socketio";
 import axios from "axios";
 import mongoose from "mongoose";
 import { eDateType } from "../types/minyan";
-
-// Function to determine if today is Rosh Chodesh
-const isRoshChodesh = async (): Promise<boolean> => {
-  const now = new Date();
-  const hebcalRes = await axios.get(
-    `https://www.hebcal.com/converter?cfg=json&gy=${now.getFullYear()}&gm=${
-      now.getMonth() + 1
-    }&gd=${now.getDate()}&g2h=1`
-  );
-  const data = hebcalRes.data;
-
-  if (
-    data.events &&
-    data.events.some((event: string | string[]) =>
-      event.includes("Rosh Chodesh")
-    )
-  )
-    return true;
-  return false;
-};
+import { log } from "util";
+import { getQueryDateType, isRoshChodesh } from "../helper/function-minyans";
 
 const MinyanListController = {
   // Get all minyanim
@@ -107,42 +89,69 @@ const MinyanListController = {
       res.status(500).send("Internal Server Error");
     }
   },
+  getCalendar: async (req: Request, res: Response): Promise<void> => {
+    const { date } = req.body;
 
+    try {
+      const queryDateType = await getQueryDateType();
+
+      const minyanListByDate = await MinyanListModel.find({
+        dateType: "calendar",
+        "specificDate.date": date,
+      })
+        .populate("roomId")
+        .populate("startDate.messageId")
+        .populate("endDate.messageId")
+        .populate("blink.messageId");
+      const minyanListByQueryDateType = await MinyanListModel.find({
+        dateType: queryDateType,
+      })
+        .populate("roomId")
+        .populate("startDate.messageId")
+        .populate("endDate.messageId")
+        .populate("blink.messageId");
+      const combinedMinyanList = [
+        ...minyanListByDate,
+        ...minyanListByQueryDateType,
+      ];
+
+      const fullMinyanList = combinedMinyanList.map((minyan) => ({
+        startDate: {
+          time: minyan.startDate.time,
+          message: minyan.startDate.messageId, // populated message details
+        },
+        endDate: {
+          time: minyan.endDate.time,
+          message: minyan.endDate.messageId, // populated message details
+        },
+        blink: minyan.blink
+          ? {
+              secondsNum: minyan.blink.secondsNum,
+              message: minyan.blink.messageId, // populated message details
+            }
+          : null,
+        dateType: minyan.dateType,
+        room: minyan.roomId,
+        id: minyan.id,
+        spesificDate: minyan.spesificDate
+          ? {
+              date: minyan.spesificDate.date,
+              isRoutine: minyan.spesificDate.isRoutine,
+            }
+          : null,
+      }));
+
+      res.status(200).json(fullMinyanList);
+    } catch (error) {
+      res.status(500).json({ message: "Error retrieving data", error });
+    }
+  },
   getByDateType: async (req: Request, res: Response): Promise<void> => {
     let queryDateType: string;
-
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
     try {
       if (req.query.dateType) queryDateType = req.query.dateType.toString();
-      else {
-        // Check if today is Rosh Chodesh
-        const roshChodesh = await isRoshChodesh();
+      else queryDateType = await getQueryDateType();
 
-        if (roshChodesh) {
-          queryDateType = eDateType.ROSH_HODESH;
-        } else {
-          // Determine default dateType based on the day of the week
-          switch (dayOfWeek) {
-            case 0: // Sunday
-            case 2: // Tuesday
-            case 3: // Thursday
-              queryDateType = eDateType.SUNDAY;
-              break;
-            case 1: // Monday
-            case 4: // Wednesday
-              queryDateType = eDateType.MONDAY;
-              break;
-            case 5: // Friday
-              queryDateType = eDateType.FRIDAY;
-              break;
-            case 6: //shabat
-              queryDateType = eDateType.SATURDAY;
-            default:
-              queryDateType = eDateType.DEFAULT; // Fallback default value
-          }
-        }
-      }
       const minyanList = await MinyanListModel.find({
         dateType: queryDateType,
       })
@@ -150,7 +159,6 @@ const MinyanListController = {
         .populate("startDate.messageId")
         .populate("endDate.messageId")
         .populate("blink.messageId");
-
       const filteredMinyanList = minyanList.map((minyan) => ({
         startDate: {
           time: minyan.startDate.time,
@@ -169,6 +177,12 @@ const MinyanListController = {
         dateType: minyan.dateType,
         room: minyan.roomId,
         id: minyan.id,
+        spesificDate: minyan.spesificDate
+          ? {
+              date: minyan.spesificDate.date,
+              isRoutine: minyan.spesificDate.isRoutine,
+            }
+          : null,
       }));
 
       res.status(200).json(filteredMinyanList);
@@ -204,12 +218,17 @@ const MinyanListController = {
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { fieldForEdit, value } = req.body;
+    console.log(fieldForEdit);
+    console.log(value);
+
     try {
       const updatedMinyan = await MinyanListModel.findByIdAndUpdate(
         id,
         { [fieldForEdit]: value },
         { new: true, runValidators: true }
       );
+      console.log(updatedMinyan);
+
       if (!updatedMinyan) {
         res.status(404).send("Minyan not found");
         return;

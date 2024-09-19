@@ -2,8 +2,6 @@
 
 import * as React from 'react';
 import {
-  addSettingTimes,
-  deleteMinyan,
   setSettingTimes,
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
@@ -13,14 +11,12 @@ import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
-import Switch from '@mui/material/Switch';
 import { DatePicker } from '@mui/x-date-pickers';
-import { CheckCircle,XCircle } from '@phosphor-icons/react';
+import { CheckCircle, XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
-
-import type { GetNewMinyan, LineItemTable, NewMinyan } from '@/types/minyanim';
+import type {LineItemTable } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
@@ -43,52 +39,35 @@ const getFormat = (value: number | string): React.JSX.Element => {
 
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
-export function Calendar(): React.JSX.Element {
+export function Calendar(props: {
+  handlePlusClick: (index: number, location: number) => void; // Updated signature
+  handleDelete: (index: number) => void;
+  handleBlurInput: (value: LineItemTable[keyof LineItemTable], index: number, field: string) => void;
+  selectedDate: Dayjs;
+  setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs>>;
+  rooms: Room[];
+  roomsOption: SelectOption[];
+}): React.JSX.Element {
+  const { handlePlusClick, handleDelete, handleBlurInput, selectedDate, setSelectedDate, rooms, roomsOption } = props;
+
   const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
   const dispatch = useDispatch();
-  const [rooms, setRooms] = React.useState<Room[]>([]);
-  const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
-  const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
 
- React.useEffect(() => {
+  React.useEffect(() => {
     const fetchMinyanim = async () => {
       try {
         // First fetch: get the default calendar minyanim
-        const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getMinyanimByDateType/calendar`);
-        console.log("calendarRes: ",calendarRes.data);
-        
+        const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getCalendar/${selectedDate}`);
         const minyanim = calendarRes.data.map((minyan: any) => ({
           ...minyan,
           blink: minyan.blink?.secondsNum,
           startDate: minyan.startDate?.time,
           endDate: minyan.endDate?.time,
-          isRoutine:minyan.spesificDate?.isRoutine
+          isRoutine: minyan.spesificDate?.isRoutine,
         }));
-console.log(minyanim);
-
-        // Check if today is Rosh Chodesh
-        const hebcalRes = await axios.get(
-          `https://www.hebcal.com/converter?cfg=json&gy=${selectedDate.year()}&gm=${selectedDate.month() + 1}&gd=${selectedDate.date()}&g2h=1`
-        );
-        const data = hebcalRes.data;
-        let roshChodeshMinyanim = [];
-
-        if (data.events && data.events.some((event: string | string[]) => event.includes('Rosh Chodesh'))) {
-          // If today is Rosh Chodesh, fetch the Rosh Chodesh minyanim
-          const roshChodeshRes = await axios.get(`${API_BASE_URL}/minyan/getMinyanimByDateType/roshHodesh`);
-          roshChodeshMinyanim = roshChodeshRes.data.map((minyan: any) => ({
-            ...minyan,
-            blink: minyan.blink?.secondsNum,
-            startDate: minyan.startDate?.time,
-            endDate: minyan.endDate?.time,
-          }));
-        }
-
-        // Combine both calendar and Rosh Chodesh minyanim
-        const combinedMinyanim = [...minyanim, ...roshChodeshMinyanim];
 
         // Dispatch to Redux store
-        dispatch(setSettingTimes({ setting: combinedMinyanim }));
+        dispatch(setSettingTimes({ setting: minyanim }));
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -96,103 +75,16 @@ console.log(minyanim);
 
     fetchMinyanim();
   }, [dispatch, selectedDate]);
-  React.useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/roomStatus`)
-      .then((res) => {
-        setRoomsOption(
-          res.data.map((option: { nameRoom: string; id: string }) => ({ label: option.nameRoom, value: option.id }))
-        );
-        setRooms(res.data);
-      })
-      .catch((err) => console.log('Error fetching data:', err));
-  }, []);
-
-  const handlePlusClick = async (index: number): Promise<any> => {
-    console.log(index);
-    const newRow: NewMinyan = getNewMinyan(index);
-    await axios.post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow }).then((res) => {
-      const currentRoom = rooms.find((m) => m.id === res.data.roomId);
-      const { roomId: room, ...data } = res.data;
-      dispatch(
-        addSettingTimes({
-          index,
-          newRow: {
-            endDate: data.endDate,
-            startDate: data.startDate,
-            room: currentRoom!,
-            id: data.id,
-          },
-        })
-      );
-    });
-  };
-
-  const getNewMinyan = (index: number) => {
-    return {
-      startDate: getBetweenTime(
-        dayjs(settingTimesItem[index - 1].startDate, 'hh:mm'),
-        dayjs(settingTimesItem[index].startDate, 'hh:mm')
-      ),
-      endDate: getBetweenTime(
-        dayjs(settingTimesItem[index - 1].endDate, 'hh:mm'),
-        dayjs(settingTimesItem[index].endDate, 'hh:mm')
-      ),
-      roomId: rooms[0].id,
-      dateType: 'calendar',
-      announcement: true,
-      messages: 'room',
-      steadyFlag: false,
-    };
-  };
-
-  const getBetweenTime = (beforeTime: Dayjs, aftertime: Dayjs): Date => {
-    const diff = dayjs(aftertime.diff(beforeTime));
-    let betweenH = diff.get('hour') / 2;
-    let betweenM = diff.get('minute') / 2;
-    beforeTime.add(betweenH, 'hour');
-    beforeTime.add(betweenM, 'minute');
-    return dayjs(betweenH).toDate();
-  };
 
   const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
-    value && dispatch(updateSettingTimesValue({ index, field, value }));
-  };
-
-  const handleDelete = (index: number) => {
-    const minyanId = settingTimesItem[index].id;
-    axios
-      .delete<{ deletedMinyan: LineItemTable }>(`${API_BASE_URL}/minyan/${minyanId}`)
-      .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
-      .catch((err) => console.log('Error fetching data:', err));
-  };
-
-  const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
-    const updateId = settingTimesItem[index].id;
-    const fieldForEdit =
-      field === 'room'
-        ? 'roomId'
-        : field === 'endDate' || field === 'startDate'
-          ? `${field}.time`
-          : field === 'blink'
-            ? `${field}.secondsNum`
-            : field;
-    axios
-      .put(`${API_BASE_URL}/minyan/${updateId}`, {
-        value: value,
-        fieldForEdit: fieldForEdit,
-      })
-      .then((res) => {
-        const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
-        if (editValue) dispatch(updateSettingTimesValue({ index, field, value: editValue }));
-      })
-      .catch((err) => console.log('Error fetching data:', err));
+    value != undefined && dispatch(updateSettingTimesValue({ index, field, value }));
   };
   const handleDateChange = (newDate: Dayjs | null) => {
     if (newDate) {
       setSelectedDate(newDate);
     }
   };
+
   const columns = [
     {
       formatter: (row): React.JSX.Element => getFormat(row.blink ? row.blink : ''),
@@ -239,16 +131,19 @@ console.log(minyanim);
       align: 'center',
     },
     {
-      formatter: (row): React.JSX.Element =>
-      row.isRoutine?<CheckCircle size={24} />:<XCircle size={24}/>,
+      formatter: (row): React.JSX.Element => {
+        if (row.isRoutine === undefined) {
+          return <></>; // displays nothing if isRoutine is undefined
+        }
+        return row.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
+      },
       typeEditinput: 'switch',
-      valueForEdit:(row)=>row.isRoutine,
+      valueForEdit: (row) => row.isRoutine,
       name: 'Is Routine',
       width: '150px',
       padding: 'none',
       align: 'center',
       field: 'isRoutine',
-
     },
   ] satisfies ColumnDef<LineItemTable>[];
 

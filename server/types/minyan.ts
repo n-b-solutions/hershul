@@ -35,3 +35,12 @@ import mongoose, {
     spesificDate?:SpesificDate;
     inactiveDates?:SpesificDate[];
   }
+  export enum eDateType {
+    SUNDAY = "sunday",
+    MONDAY = "monday",
+    FRIDAY = "friday",
+    ROSH_HODESH = "roshHodesh",
+    SATURDAY="satueday",
+    DEFAULT = "default"
+
+  }

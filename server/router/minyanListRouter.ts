@@ -5,7 +5,9 @@ const MinyanListRouter = express.Router();
 MinyanListRouter.get("/", (req: Request, res: Response) => {
   MinyanListController.get(req, res);
 });
-
+MinyanListRouter.get("/getCalendar/:date", (req: Request, res: Response) => {
+  MinyanListController.getCalendar(req, res);
+})
 MinyanListRouter.get(
   "/getMinyanimByDateType",
   (req: Request, res: Response) => {
