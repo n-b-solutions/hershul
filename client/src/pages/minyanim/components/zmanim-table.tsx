@@ -47,9 +47,12 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
+  const dateType = props.typeDate;
   React.useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${props.typeDate}`)
+      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType`, {
+        params: { dateType },
+      })
       .then((res) =>
         dispatch(
           setSettingTimes({
@@ -66,7 +69,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       )
       .then(() => dispatch(sortSettingTimesItem()))
       .catch((err) => console.log('Error fetching data:', err));
-  }, [props.typeDate]);
+  }, [dateType]);
 
   React.useEffect(() => {
     axios
@@ -110,7 +113,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       startDate: getMiddleTime(settingTimesItem[indexBefore]?.startDate, settingTimesItem[indexAfter]?.startDate),
       endDate: getMiddleTime(settingTimesItem[indexBefore]?.endDate, settingTimesItem[indexAfter]?.endDate),
       roomId: rooms[0].id,
-      dateType: props.typeDate,
+      dateType: dateType,
       steadyFlag: false,
     };
   };
@@ -190,7 +193,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     {
       formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
       typeEditinput: 'select',
-      valueForEdit: (row) => ({ label: row.room.nameRoom, value: row.room.id }),
+      valueForEdit: (row) => row.room.id,
       selectOptions: roomsOption,
       valueOption: rooms,
       padding: 'none',

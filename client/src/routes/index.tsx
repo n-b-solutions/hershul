@@ -23,7 +23,7 @@ export const routes: RouteObject[] = [
     ),
     children: [
       { index: true, element: <HomePage /> },
-      { path: '/setting', element: <Minyanim /> }, // הגדר את /setting כאן כך שגם ה-Header יוצג
+      { path: '/setting', element: <Minyanim /> }, 
     ],
   },
   authRoute,

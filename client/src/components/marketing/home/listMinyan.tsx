@@ -139,7 +139,7 @@ export function ListMinyan(): React.JSX.Element {
 
   useEffect(() => {
     axios
-      .get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
+      .get<MinyanApi[]>(`${API_BASE_URL}/minyan/getMinyanimByDateType`)
       .then((res) => {
         const processedMinyans = processMinyanData(res.data);
         setAllMinyans(processedMinyans);
