@@ -8,8 +8,8 @@ import MessageModel from "../models/messageModel";
 // Get __filename and __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 // Extend Express Request type to include Multer file properties
+
 declare global {
   namespace Express {
     interface Request {
@@ -20,12 +20,12 @@ declare global {
     }
   }
 }
-
+// Create the uploads directory for storing audio files if it doesn't exist
 const uploadDir = path.join(__dirname, "..", "uploads", "audio");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
-
+// Define Multer storage configuration for saving files to disk
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -41,6 +41,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 const MessageRoomController = {
+    // Get all messages
   get: async (req: Request, res: Response): Promise<void> => {
     try {
       const messages = await MessageModel.find();
@@ -49,6 +50,7 @@ const MessageRoomController = {
       res.status(500).send("Internal Server Error");
     }
   },
+  // Get a specific message by its ID
 
   getById: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
@@ -63,7 +65,7 @@ const MessageRoomController = {
       res.status(500).send("Internal Server Error");
     }
   },
-
+  // Upload an audio file and create a new message
   post: async (req: Request, res: Response): Promise<void> => {
     upload.single("audioBlob")(req, res, async (err: any) => {
       if (err) {
@@ -84,6 +86,7 @@ const MessageRoomController = {
       const newMessage = new MessageModel({
         selectedRoom,
         name,
+        //Save the path to the uploaded file
         audioUrl: filePath,
       });
 
@@ -91,7 +94,7 @@ const MessageRoomController = {
       res.status(201).json({ filePath });
     });
   },
-
+ // Update an existing message
   put: async (req: Request, res: Response): Promise<void> => {
     try {
       res.send("Resource updated");
