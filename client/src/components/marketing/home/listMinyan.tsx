@@ -6,7 +6,6 @@ import { Divider, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
@@ -20,11 +19,11 @@ const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
 export function ListMinyan(): React.JSX.Element {
   const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]);
-  const [minyans, setMinyans] = React.useState<Minyan[]>([]); 
+  const [minyans, setMinyans] = React.useState<Minyan[]>([]);
 
   React.useEffect(() => {
     axios
-      .get<MinyanApi[]>(`${API_BASE_URL}/minyan`)
+      .get<MinyanApi[]>(`${API_BASE_URL}/minyan/getMinyanimByDateType`)
       .then((res) => {
         const processedMinyans = processMinyanData(res.data);
         setAllMinyans(processedMinyans);
@@ -41,7 +40,8 @@ export function ListMinyan(): React.JSX.Element {
     });
 
     return () => {
-      socket.off('minyanUpdated');     };
+      socket.off('minyanUpdated');
+    };
   }, []);
 
   const processMinyanData = (data: MinyanApi[]) => {
@@ -80,12 +80,12 @@ export function ListMinyan(): React.JSX.Element {
 
   const filterMinyans = React.useCallback((data: Minyan[]) => {
     const now = dayjs();
-    const currentMinutesOfDay = now.hour() * 60 + now.minute(); 
-    const minutesInTwoHours = currentMinutesOfDay + 2 * 60; 
+    const currentMinutesOfDay = now.hour() * 60 + now.minute();
+    const minutesInTwoHours = currentMinutesOfDay + 2 * 60;
 
     const filteredMinyans = data.filter((minyan) => {
       const minyanTime = dayjs(minyan.startDate);
-      const minyanMinutesOfDay = minyanTime.hour() * 60 + minyanTime.minute(); 
+      const minyanMinutesOfDay = minyanTime.hour() * 60 + minyanTime.minute();
 
       return minyanMinutesOfDay > currentMinutesOfDay && minyanMinutesOfDay <= minutesInTwoHours;
     });
@@ -97,9 +97,9 @@ export function ListMinyan(): React.JSX.Element {
       return timeA - timeB;
     });
 
-    setMinyans(sortMinyans); 
+    setMinyans(sortMinyans);
 
-    console.log(filteredMinyans); 
+    console.log(filteredMinyans);
   }, []);
 
   React.useEffect(() => {
@@ -149,7 +149,7 @@ export function ListMinyan(): React.JSX.Element {
           <>
             {row.messages ? (
               <Tooltip title={row.messages}>
-                  <SpeakerIcon size={24}/>
+                <SpeakerIcon size={24} />
               </Tooltip>
             ) : null}
           </>

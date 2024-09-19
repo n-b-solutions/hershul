@@ -52,27 +52,29 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
-
+  const dateType = props.typeDate;
   React.useEffect(() => {
-      axios
-        .get(`${API_BASE_URL}/minyan/getMinyanimByDateType/${typeDate}`)
-        .then((res) =>
-          dispatch(
-            setSettingTimes({
-              setting: res.data.map((minyan: any) => {
-                return {
-                  ...minyan,
-                  blink: minyan.blink?.secondsNum,
-                  startDate: minyan.startDate?.time,
-                  endDate: minyan.endDate?.time,
-                };
-              }),
-            })
-          )
+    axios
+      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType`, {
+        params: { dateType },
+      })
+      .then((res) =>
+        dispatch(
+          setSettingTimes({
+            setting: res.data.map((minyan: any) => {
+              return {
+                ...minyan,
+                blink: minyan.blink?.secondsNum,
+                startDate: minyan.startDate?.time,
+                endDate: minyan.endDate?.time,
+              };
+            }),
+          })
         )
-        .catch((err) => console.log('Error fetching data:', err));
-    
-  }, [typeDate]);
+      )
+      .then(() => dispatch(sortSettingTimesItem()))
+      .catch((err) => console.log('Error fetching data:', err));
+  }, [dateType]);
 
   React.useEffect(() => {
     axios
@@ -116,9 +118,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       startDate: getMiddleTime(settingTimesItem[indexBefore]?.startDate, settingTimesItem[indexAfter]?.startDate),
       endDate: getMiddleTime(settingTimesItem[indexBefore]?.endDate, settingTimesItem[indexAfter]?.endDate),
       roomId: rooms[0].id,
-      dateType: typeDate,
-      announcement: true,
-      messages: 'room',
+      dateType: dateType,
       steadyFlag: false,
     };
   };
