@@ -15,25 +15,11 @@ export const initSocketio = (
       origin: process.env.CLIENT_URL,
       methods: ["GET", "POST"],
     },
+    allowEIO3: true
   });
 
   io.on("connection", (socket) => {
     console.log("A user connected " + socket.id);
-
-    socket.on("changeRoomStatus", async ({ nameRoom, newStatus }) => {
-      console.log(" socket.on");
-      try {
-        const updatedStatuses1 =
-          await ScheduleController.setRoomSteadyFlagAndStatus(
-            nameRoom,
-            newStatus
-          );
-        io.emit("roomStatusUpdated", updatedStatuses1);
-      } catch (error) {
-        console.error("Error handling changeRoomStatus event:", error);
-      }
-    });
-
     socket.on("disconnect", () => {
       console.log("User disconnected");
     });
