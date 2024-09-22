@@ -2,10 +2,7 @@ import { Request, Response } from "express";
 import dayjs from "dayjs";
 import MinyanListModel from "../models/minyanListModel";
 import { io } from "../socketio";
-import axios from "axios";
 import mongoose from "mongoose";
-import { eDateType } from "../types/minyan";
-import { log } from "util";
 import { getQueryDateType, isRoshChodesh } from "../helper/function-minyans";
 
 const MinyanListController = {
@@ -183,6 +180,7 @@ const MinyanListController = {
               isRoutine: minyan.spesificDate.isRoutine,
             }
           : null,
+          
       }));
 
       res.status(200).json(filteredMinyanList);
@@ -194,8 +192,17 @@ const MinyanListController = {
 
   post: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { roomId, startDate, endDate, dateType, blink, steadyFlag } =
-        req.body;
+      const {
+        roomId,
+        startDate,
+        endDate,
+        dateType,
+        blink,
+        steadyFlag,
+        spesificDate,
+        inactiveDates
+      } = req.body;
+      
       const newMinyan = new MinyanListModel({
         roomId,
         startDate: { time: startDate, message: null },
@@ -203,6 +210,8 @@ const MinyanListController = {
         blink: { secondsNum: blink, message: null },
         dateType,
         steadyFlag,
+        spesificDate,
+        inactiveDates
       });
       await newMinyan.save();
 
@@ -218,8 +227,7 @@ const MinyanListController = {
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { fieldForEdit, value } = req.body;
-    console.log(fieldForEdit);
-    console.log(value);
+
 
     try {
       const updatedMinyan = await MinyanListModel.findByIdAndUpdate(
@@ -227,7 +235,6 @@ const MinyanListController = {
         { [fieldForEdit]: value },
         { new: true, runValidators: true }
       );
-      console.log(updatedMinyan);
 
       if (!updatedMinyan) {
         res.status(404).send("Minyan not found");

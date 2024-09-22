@@ -12,6 +12,8 @@ export interface LineItemTable {
   endDate: Date;
   room: Room;
   isRoutine?:boolean;
+  dateType: string;
+  spesificDate?: { date: string; isRoutine: boolean }; // ודא שזה מוגדר
 }
 interface SpesificDate{
   date: Date;

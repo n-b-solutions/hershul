@@ -34,6 +34,7 @@ export interface ColumnDef<TRowModel> {
 type Padding = 'normal' | 'checkbox' | 'none';
 type RowId = number | string;
 export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
+  type?:string;
   columns: ColumnDef<TRowModel>[];
   hideHead?: boolean;
   hover?: boolean;
@@ -51,10 +52,13 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onDeleteClick?: (index: number) => void;
+  rowProps?: (row: TRowModel) => { sx: React.CSSProperties }; // Add this line
+
   // rowSx?:()
 }
 
-export function DataTable<TRowModel extends object & { id?: RowId | null }>({
+export function DataTable<TRowModel extends object & { id?: RowId | null; dateType?: string }>({
+  type,
   columns,
   hideHead,
   hover,
@@ -72,6 +76,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   onChangeInput,
   onBlurInput,
   onDeleteClick,
+  rowProps,
   ...props
 }: DataTableProps<TRowModel>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
@@ -93,9 +98,13 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     (event.target as HTMLTextAreaElement).localName === 'div' && setIsShowPlus(true);
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
+  const handleClick = (event: React.MouseEvent<HTMLSpanElement>, row: TRowModel): void => {
     const id = (event.currentTarget as HTMLTextAreaElement).id;
-    setIsCellClick({ isclick: true, id });
+    
+    // Only allow clicks if dateType is not 'calendar'
+    if (type=='calendar'&&row.dateType == 'calendar') {
+            setIsCellClick({ isclick: true, id });
+    }
   };
 
   const handleBlurInput = (
@@ -104,7 +113,10 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     index: number = 0,
     fieldName?: keyof TRowModel
   ): void => {
-    onBlurInput && value!=undefined && fieldName && onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
+    onBlurInput &&
+      value != undefined &&
+      fieldName &&
+      onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
     const id = (event.target as HTMLInputElement).id;
     setIsCellClick({ isclick: false, id });
     setIsShowPlus(false);
@@ -185,7 +197,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   onClick(event, row);
                 },
               })}
-              sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
+              sx={{
+                ...(onClick && { cursor: 'pointer' }),
+                ...(onAddRowClick && { positions: 'relative' }),
+                ...(rowProps ? rowProps(row).sx : {}),
+              }}
             >
               {selectable ? (
                 <TableCell padding="checkbox">
@@ -213,7 +229,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                     id={column.field && column.field?.toString() + index}
                     key={column.name}
                     onClick={(e) => {
-                      edited && handleClick(e);
+                      // Prevent editing if dateType is 'calendar'
+                      edited && handleClick(e, row);
                     }}
                     padding={column?.padding}
                     sx={{ ...(column.align && { textAlign: column.align }) }}

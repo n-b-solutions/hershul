@@ -15,8 +15,6 @@ import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
-import zIndex from '@mui/material/styles/zIndex';
-import { DatePicker } from '@mui/x-date-pickers';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -69,7 +67,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
                 blink: minyan.blink?.secondsNum,
                 startDate: minyan.startDate?.time,
                 endDate: minyan.endDate?.time,
-                isRoutine:minyan.spesificDate?.isRoutine
+                isRoutine: minyan.spesificDate?.isRoutine,
               };
             }),
           })
@@ -92,15 +90,14 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   }, []);
 
   const handlePlusClick = async (index: number, location: number, isCalendar = false): Promise<any> => {
-    console.log(isCalendar);
-    
+
     const newRow: NewMinyan = getNewMinyan(index, location, isCalendar);
-  
+
     try {
       const res = await axios.post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow });
       const currentRoom = rooms.find((m) => m.id === res.data.roomId);
       const { roomId: room, ...data } = res.data;
-  
+
       // Prepare the newRow object with or without spesificDate based on isCalendar
       const dispatchData: any = {
         blink: data.blink?.secondsNum,
@@ -109,11 +106,13 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
         room: currentRoom!,
         id: data.id,
       };
-  
+
       if (isCalendar) {
-        dispatchData.spesificDate = data.spesificDate; // Add spesificDate only if isCalendar is true
+        dispatchData.spesificDate = {
+          date: selectedDate.toISOString(), // Convert to ISO string
+          isRoutine: false,
+        };
       }
-  
       dispatch(
         addSettingTimes({
           newRow: dispatchData,
@@ -124,33 +123,29 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       console.log('Error fetching data:', err);
     }
   };
-  
-  
 
   const getNewMinyan = (index: number, location: number, isCalendar: boolean) => {
     const indexBefore = location === eLocationClick.top ? index - 1 : index;
     const indexAfter = location === eLocationClick.top ? index : index + 1;
- 
-   const newMinyan = {
+
+    const newMinyan = {
       startDate: getMiddleTime(settingTimesItem[indexBefore]?.startDate, settingTimesItem[indexAfter]?.startDate),
       endDate: getMiddleTime(settingTimesItem[indexBefore]?.endDate, settingTimesItem[indexAfter]?.endDate),
-      roomId: rooms[0].id, 
-      dateType: dateType,   
-      steadyFlag: false,    
+      roomId: rooms[0].id,
+      dateType: dateType,
+      steadyFlag: false,
     };
-  
+
     // Add spesificDate if isCalendar is true
     if (isCalendar) {
       newMinyan.spesificDate = {
-        date: selectedDate.toDate(),
+        date: selectedDate.toISOString(), // Convert to ISO string
         isRoutine: false,
       };
     }
-  console.log(newMinyan);
-  
+
     return newMinyan;
   };
-
 
   const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
     value && dispatch(updateSettingTimesValue({ index, field, value }));
@@ -243,15 +238,15 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
       {typeDate === 'calendar' ? (
-       <Calendar
-       handlePlusClick={(index: number, location: number) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
-       handleDelete={handleDelete}
-       handleBlurInput={handleBlurInput}
-       selectedDate={selectedDate}
-       setSelectedDate={setSelectedDate}
-       rooms={rooms}             
-       roomsOption={roomsOption}  
-     />
+        <Calendar
+          handlePlusClick={(index: number, location: number) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
+          handleDelete={handleDelete}
+          handleBlurInput={handleBlurInput}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          rooms={rooms}
+          roomsOption={roomsOption}
+        />
       ) : (
         <Card>
           <Divider />
