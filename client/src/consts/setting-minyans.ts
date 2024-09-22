@@ -15,3 +15,7 @@ export const enum eFieldName {
   startDateTime = 'startDate.time',
   blinkSecondsNum = 'blink.secondsNum',
 }
+
+export const SECONDS_NUM = 'secondsNum';
+export const TIME = 'time';
+export const MESSAGE_ID = 'messageId';

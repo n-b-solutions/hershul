@@ -88,7 +88,8 @@ const MessageRoomController = {
       });
 
       await newMessage.save();
-      res.status(201).json({ filePath });
+      res.status(201).json(newMessage);
+      // res.status(201).json({ filePath });
     });
   },
 

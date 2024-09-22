@@ -12,6 +12,7 @@ import TableRow from '@mui/material/TableRow';
 import { Trash } from '@phosphor-icons/react';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
+import { typeForEdit } from '@/types/minyanim';
 import { SelectOption } from '@/types/room';
 import { AddRow } from '@/pages/minyanim/components/add-row';
 
@@ -48,8 +49,8 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   uniqueRowId?: (row: TRowModel) => RowId;
   onAddRowClick?: (index: number, location: number) => void;
   edited?: boolean;
-  onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
-  onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
+  onChangeInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
+  onBlurInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onDeleteClick?: (index: number) => void;
 }
 
@@ -93,17 +94,20 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   };
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
-    const id = (event.currentTarget as HTMLTextAreaElement).id;
-    setIsCellClick({ isclick: true, id });
+    if ((event.target as HTMLTextAreaElement).localName === 'span') {
+      const id = (event.currentTarget as HTMLTextAreaElement).id;
+      setIsCellClick({ isclick: true, id });
+    }
   };
 
   const handleBlurInput = (
     event: React.FocusEvent | React.KeyboardEvent,
-    value?: TRowModel[keyof TRowModel],
+    value?: typeForEdit,
     index: number = 0,
-    fieldName?: keyof TRowModel
+    fieldName?: keyof TRowModel,
+    internalField?: string
   ): void => {
-    onBlurInput && value && fieldName && onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
+    onBlurInput && value && fieldName && onBlurInput(value as typeForEdit, index, fieldName, internalField);
     const id = (event.target as HTMLInputElement).id;
     setIsCellClick({ isclick: false, id });
     setIsShowPlus(false);
