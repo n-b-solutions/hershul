@@ -30,11 +30,12 @@ export interface ColumnDef<TRowModel> {
   padding?: Padding;
   tooltip?: string;
   selectOptions?: SelectOption[];
+  editable?: boolean;
 }
 type Padding = 'normal' | 'checkbox' | 'none';
 type RowId = number | string;
 export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
-  type?:string;
+  type?: string;
   columns: ColumnDef<TRowModel>[];
   hideHead?: boolean;
   hover?: boolean;
@@ -82,7 +83,10 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
-  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({ isclick: false, id: '' });
+  const [isCellClick, setIsCellClick] = React.useState<{ isclick: 'true' | 'false' | 'partial'; id: string }>({
+    isclick: 'true',
+    id: '',
+  });
   const [isShowPlus, setIsShowPlus] = React.useState<boolean>(false);
   const [isShowDelete, setIsToShowDelete] = React.useState<{ hover: boolean; index: number }>({
     hover: false,
@@ -100,11 +104,13 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>, row: TRowModel): void => {
     const id = (event.currentTarget as HTMLTextAreaElement).id;
-    
+    const rowType = rowProps(row).type;
+    console.log(rowType);
+
     // Only allow clicks if dateType is not 'calendar'
-    if (type=='calendar'&&row.dateType == 'calendar') {
-            setIsCellClick({ isclick: true, id });
-    }
+    if (rowType === 'disable') setIsCellClick({ isclick: 'false', id });
+    else if (rowType === 'other') setIsCellClick({ isclick: 'partial', id });
+    else setIsCellClick({ isclick: "true", id });
   };
 
   const handleBlurInput = (
@@ -229,7 +235,6 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                     id={column.field && column.field?.toString() + index}
                     key={column.name}
                     onClick={(e) => {
-                      // Prevent editing if dateType is 'calendar'
                       edited && handleClick(e, row);
                     }}
                     padding={column?.padding}
@@ -237,7 +242,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                   >
                     {edited &&
                     column.field &&
-                    isCellClick.isclick &&
+                    (isCellClick.isclick=="true" || (isCellClick.isclick == 'partial' && column.editable != false)) &&
                     onChangeInput &&
                     isCellClick.id === column.field.toString() + index ? (
                       <EditTableCellInputs

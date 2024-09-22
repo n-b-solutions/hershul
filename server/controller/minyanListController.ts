@@ -33,6 +33,7 @@ const MinyanListController = {
         dateType: minyan.dateType,
         room: minyan.roomId,
         steadyFlag: minyan.steadyFlag,
+        inactiveDates: minyan.inactiveDates, // Include inactiveDates here
       }));
 
       res.status(200).json(fullMinyanList);
@@ -78,6 +79,7 @@ const MinyanListController = {
         dateType: minyan.dateType,
         room: minyan.roomId,
         steadyFlag: minyan.steadyFlag,
+        inactiveDates: minyan.inactiveDates, // Include inactiveDates here
       };
 
       res.status(200).json(fullMinyan);
@@ -136,6 +138,7 @@ const MinyanListController = {
               isRoutine: minyan.spesificDate.isRoutine,
             }
           : null,
+        inactiveDates: minyan.inactiveDates, // Include inactiveDates here
       }));
 
       res.status(200).json(fullMinyanList);
@@ -180,7 +183,7 @@ const MinyanListController = {
               isRoutine: minyan.spesificDate.isRoutine,
             }
           : null,
-          
+        inactiveDates: minyan.inactiveDates, // Include inactiveDates here
       }));
 
       res.status(200).json(filteredMinyanList);
@@ -200,9 +203,9 @@ const MinyanListController = {
         blink,
         steadyFlag,
         spesificDate,
-        inactiveDates
+        inactiveDates,
       } = req.body;
-      
+
       const newMinyan = new MinyanListModel({
         roomId,
         startDate: { time: startDate, message: null },
@@ -211,7 +214,7 @@ const MinyanListController = {
         dateType,
         steadyFlag,
         spesificDate,
-        inactiveDates
+        inactiveDates,
       });
       await newMinyan.save();
 
@@ -226,8 +229,11 @@ const MinyanListController = {
 
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    const { fieldForEdit, value } = req.body;
+    console.log("Request Body:", req.body); // This should show the entire body
 
+    const { fieldForEdit, value } = req.body;
+    console.log(fieldForEdit);
+    console.log(value);
 
     try {
       const updatedMinyan = await MinyanListModel.findByIdAndUpdate(
@@ -235,6 +241,7 @@ const MinyanListController = {
         { [fieldForEdit]: value },
         { new: true, runValidators: true }
       );
+      console.log(updatedMinyan);
 
       if (!updatedMinyan) {
         res.status(404).send("Minyan not found");

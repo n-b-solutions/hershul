@@ -1,9 +1,7 @@
 'use client';
-
 import * as React from 'react';
-import { setSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
+import { deleteMinyan, setSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
-import { HDate, HebrewCalendar } from '@hebcal/core';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -13,7 +11,6 @@ import { CheckCircle, XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
-
 import type { LineItemTable } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
@@ -73,34 +70,43 @@ export function Calendar(props: {
     fetchMinyanim();
   }, [dispatch, selectedDate]);
   const handleDelete = async (index: number) => {
-    const minyanId = settingTimesItem[index].id;
-  console.log("handleDelete");
+    if(settingTimesItem[index].dateType=="calendar"){
+      axios
+      .delete<{ deletedMinyan: LineItemTable }>(`${API_BASE_URL}/minyan/${settingTimesItem[index].id}`)
+      .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
+      .catch((err) => console.log('Error fetching data:', err));
   
+    }
+    else{
+    const minyanId = settingTimesItem[index].id;
+    console.log('handleDelete');
+
     try {
       // Fetch the current minyan data
       const currentMinyanRes = await axios.get(`${API_BASE_URL}/minyan/${minyanId}`);
+      console.log(currentMinyanRes);
       const currentInactiveDates = currentMinyanRes.data.inactiveDates || [];
-  
       // Add the selected date to inactiveDates
-      const updatedInactiveDates = [...currentInactiveDates, selectedDate.format('YYYY-MM-DD')];
-  
+      const updatedInactiveDates = [...currentInactiveDates, { date: selectedDate.toISOString(), isRoutine: true }];
+      console.log(updatedInactiveDates);
       // Update the minyan in the database with the new inactiveDates
       await axios.put(`${API_BASE_URL}/minyan/${minyanId}`, {
-        inactiveDates: updatedInactiveDates,
-      });
-  
-      // Update the Redux store using the existing updateSettingTimesValue action
-      dispatch(updateSettingTimesValue({
-        index,
-        field: 'inactiveDates',
+        fieldForEdit: 'inactiveDates',
         value: updatedInactiveDates,
-      }));
+      });
+
+      // Update the Redux store using the existing updateSettingTimesValue action
+      dispatch(
+        updateSettingTimesValue({
+          index,
+          field: 'inactiveDates',
+          value: updatedInactiveDates,
+        })
+      );
     } catch (err) {
       console.log('Error updating inactive dates:', err);
-    }
+    }}
   };
-  
-  
 
   const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
     value != undefined && dispatch(updateSettingTimesValue({ index, field, value }));
@@ -110,20 +116,8 @@ export function Calendar(props: {
       setSelectedDate(newDate);
     }
   };
-  const handleInputChangeConditionally = (row: LineItemTable, columnId: string, value: any) => {
-    // בדוק אם dateType הוא לא 'calendar' לפני קריאה לפונקציה
-    if (row.dateType !== 'calendar') {
-      handleChange(row.id, columnId, value);
-    }
-  };
-  
-  const handleBlurInputConditionally = (row: LineItemTable, columnId: string, value: any) => {
-    // בדוק אם dateType הוא לא 'calendar' לפני קריאה לפונקציה
-    if (row.dateType !== 'calendar') {
-      handleBlurInput(row.id, columnId, value);
-    }
-  };
-  const columns  = [
+
+  const columns = [
     {
       formatter: (row) => getFormat(row.blink ? row.blink : ''),
       typeEditinput: 'number',
@@ -160,8 +154,8 @@ export function Calendar(props: {
       formatter: (row) => getFormat(row.room?.nameRoom),
       typeEditinput: 'select',
       valueForEdit: (row) => ({ label: row.room?.nameRoom, value: row.room?.id }),
-      selectOptions: roomsOption,  // Assuming roomsOption is populated correctly
-      valueOption: rooms,  // Assuming rooms is the list of room objects
+      selectOptions: roomsOption, // Assuming roomsOption is populated correctly
+      valueOption: rooms, // Assuming rooms is the list of room objects
       padding: 'none',
       name: 'Room',
       width: '250px',
@@ -180,11 +174,29 @@ export function Calendar(props: {
       padding: 'none',
       align: 'center',
       field: 'isRoutine',
+      editable:true
     },
   ] satisfies ColumnDef<LineItemTable>[];
-  const getRowStyle = (row: LineItemTable): React.CSSProperties => {
+  const getRowProps = (row: LineItemTable): { sx: React.CSSProperties; type: string } => {
+    let isInactiveDate = false;
+    const selectedDateISO = selectedDate.toISOString().split('T')[0];
+  
+    row.inactiveDates.forEach((element: any) => {
+      const elementDate = new Date(element.date).toISOString().split('T')[0];
+      if (elementDate === selectedDateISO) isInactiveDate = true;
+    });
+  
+    const rowType = isInactiveDate
+      ? 'disable'
+      : row.dateType === 'calendar'
+        ? 'calendar'
+        : 'other';
+  
     return {
-      backgroundColor: row.dateType=="calendar" ? 'lightgreen' : 'lightcoral', // צבע רקע לפי פרמטר
+      sx: {
+        backgroundColor: isInactiveDate ? 'lightgray' : row.dateType !== 'calendar' ? 'lightgreen' : '',
+      },
+      type: rowType,
     };
   };
   
@@ -201,7 +213,7 @@ export function Calendar(props: {
         <Divider />
         <Box sx={{ overflowX: 'auto', position: 'relative' }}>
           <DataTable<LineItemTable>
-            type="calendar"
+            type="calendar" // כאן אנחנו משתמשים במשתנה type
             columns={columns}
             edited
             onAddRowClick={handlePlusClick}
@@ -209,11 +221,9 @@ export function Calendar(props: {
             onBlurInput={handleBlurInput}
             onDeleteClick={handleDelete}
             rows={settingTimesItem}
-            rowProps={(row) => {
-              return { sx: getRowStyle(row) };
-            }}
+            rowProps={(row) => getRowProps(row)} // Call getRowProps for each row
+
           />
-          
         </Box>
       </Card>
     </Box>

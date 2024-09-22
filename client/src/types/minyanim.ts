@@ -6,6 +6,7 @@ export interface TypeOfDate {
 }
 
 export interface LineItemTable {
+  inactiveDates: any;
   id: string;
   blink?: number;
   startDate: Date;
