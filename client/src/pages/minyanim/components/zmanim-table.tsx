@@ -90,7 +90,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   }, []);
 
   const handlePlusClick = async (index: number, location: number, isCalendar = false): Promise<any> => {
-
     const newRow: NewMinyan = getNewMinyan(index, location, isCalendar);
 
     try {
@@ -159,8 +158,35 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   };
 
-  const handleBlurInput = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
+  const handleBlurInput = async (
+    value: LineItemTable[keyof LineItemTable],
+    index: number,
+    field: string,
+    row?:LineItemTable
+  ): Promise<void> => {
+    console.log(field);
+
     const updateId = settingTimesItem[index].id;
+    if (field == 'inactiveDates') {
+      console.log("hi!!!!");
+      
+      await axios
+        .put(`${API_BASE_URL}/minyan/updateInactiveDate/${updateId}`, {
+          data: {
+            date: selectedDate.toISOString(),
+            isRoutine: value,
+          },
+        })
+        .then((res) => {
+          const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
+          if (editValue) {
+            dispatch(updateSettingTimesValue({ index, field, value: editValue }));
+            dispatch(sortSettingTimesItem());
+          }
+        })
+        .catch((err) => console.log('Error fetching data:', err));
+      return;
+    }
     const fieldForEdit =
       field === eFieldName.room
         ? eFieldName.roomId

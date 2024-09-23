@@ -20,7 +20,15 @@ MinyanListRouter.get("/:id", (req: Request, res: Response) => {
 MinyanListRouter.post("/", (req: Request, res: Response) => {
   MinyanListController.post(req, res);
 });
-
+MinyanListRouter.put("/addInactiveDates/:id", (req: Request, res: Response) => {
+  MinyanListController.addInactiveDates(req, res);
+});
+MinyanListRouter.put("/removeInactiveDates/:id", (req: Request, res: Response) => {
+  MinyanListController.removeInactiveDates(req, res);
+});
+MinyanListRouter.put("/updateInactiveDate/:id", (req: Request, res: Response) => {
+  MinyanListController.updateInactiveDate(req, res);
+});
 MinyanListRouter.put("/:id", (req: Request, res: Response) => {
   MinyanListController.put(req, res);
 });

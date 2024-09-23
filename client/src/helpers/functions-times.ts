@@ -1,6 +1,17 @@
 import { ONE_MINUTE } from '@/consts/setting-minyans';
 import dayjs from 'dayjs';
 
+export const isDateInactive = (selectedDate: Date, inactiveDates: any[] = []): boolean => {
+  if (!inactiveDates || !Array.isArray(inactiveDates)) return false;
+
+  return inactiveDates.some((inactiveDate) => {
+    if (!inactiveDate || !inactiveDate.date) return false; // Check for null or undefined
+    const elementDate = new Date(inactiveDate.date).toISOString().split('T')[0];
+    return elementDate === selectedDate.toISOString().split('T')[0];
+  });
+};
+
+
 export const sortByTime = (array: any): any => {
   const sortArray = array.sort((a: any, b: any) => {
     const timeStartA = dayjs().hour(dayjs(a.startDate).get('hour')).minute(dayjs(a.startDate).get('minute'));

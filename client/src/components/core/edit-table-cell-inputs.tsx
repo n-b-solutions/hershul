@@ -23,7 +23,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
   const [select, setSelect] = useState(props.value);
-console.log(props.fieldName);
+  console.log(props.fieldName);
 
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
@@ -32,7 +32,6 @@ console.log(props.fieldName);
   };
 
   const handle = (value: TRowModel[keyof TRowModel]) => {
-    console.log(value);
     props.handleChangeInput && props.handleChangeInput(value, props.index, props.fieldName);
   };
 

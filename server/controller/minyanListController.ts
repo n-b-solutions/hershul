@@ -226,14 +226,109 @@ const MinyanListController = {
       res.status(500).send("Internal Server Error");
     }
   },
+  addInactiveDates: async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const { data } = req.body;
+    try {
+      // שליפת המניין לפי ID
+      const minyan = await MinyanListModel.findById(id);
+      if (!minyan) {
+        res.status(404).send("Minyan not found");
+        return;
+      }
+
+      // וידוא שהמערך קיים, ואם לא, יצירה שלו
+      if (!minyan.inactiveDates) {
+        minyan.inactiveDates = [];
+      }
+
+      // הוספת האובייקט החדש למערך inactiveDates
+      minyan.inactiveDates.push(data);
+
+      // שמירת הדוקומנט המעודכן
+      await minyan.save();
+
+      res.status(200).json(minyan.inactiveDates);
+    } catch (error) {
+      console.error("Error adding inactive date:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  },
+
+  removeInactiveDates: async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const { data } = req.body;
+
+    try {
+      const minyan = await MinyanListModel.findById(id);
+      if (!minyan) {
+        res.status(404).send("Minyan not found");
+        return;
+      }
+
+      if (!minyan.inactiveDates) {
+        res.status(400).send("No inactive dates found");
+        return;
+      }
+
+      minyan.inactiveDates = minyan.inactiveDates.filter(
+        (inactiveDate) =>
+          !(
+            inactiveDate.date.getTime() === new Date(data.date).getTime() &&
+            inactiveDate.isRoutine === data.isRoutine
+          )
+      );
+
+      await minyan.save();
+
+      res.status(200).json(minyan.inactiveDates);
+    } catch (error) {
+      console.error("Error removing inactive date:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  },
+
+  updateInactiveDate: async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const { data } = req.body;
+
+    try {
+      const minyan = await MinyanListModel.findById(id);
+      if (!minyan) {
+        res.status(404).send("Minyan not found");
+        return;
+      }
+
+      if (!minyan.inactiveDates) {
+        res.status(400).send("No inactive dates found");
+        return;
+      }
+
+      const targetDate = new Date(data.date).getTime();
+      const inactiveDate = minyan.inactiveDates.find(
+        (item) => new Date(item.date).getTime() === targetDate
+      );
+
+      if (!inactiveDate) {
+        res.status(404).send("Inactive date not found");
+        return;
+      }
+
+      inactiveDate.isRoutine = data.isRoutine;
+
+      await minyan.save();
+
+      res.status(200).json(minyan.inactiveDates);
+    } catch (error) {
+      console.error("Error updating inactive date:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  },
 
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    console.log("Request Body:", req.body); // This should show the entire body
 
     const { fieldForEdit, value } = req.body;
-    console.log(fieldForEdit);
-    console.log(value);
 
     try {
       const updatedMinyan = await MinyanListModel.findByIdAndUpdate(

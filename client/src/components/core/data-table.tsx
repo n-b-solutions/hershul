@@ -9,7 +9,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Trash } from '@phosphor-icons/react';
+import { ArrowArcLeft, Trash } from '@phosphor-icons/react';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
 import { SelectOption } from '@/types/room';
@@ -19,9 +19,10 @@ import { EditTableCellInputs } from './edit-table-cell-inputs';
 
 export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
-  field?: keyof TRowModel;
+  field: string; // Updated to allow function
   formatter?: (row: TRowModel, index: number) => React.ReactNode;
   valueForEdit?: (row: TRowModel) => any;
+  valueForField?: (row: TRowModel) => any;
   valueOption?: any & { id: string }[];
   typeEditinput?: string;
   hideName?: boolean;
@@ -54,8 +55,6 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onDeleteClick?: (index: number) => void;
   rowProps?: (row: TRowModel) => { sx: React.CSSProperties }; // Add this line
-
-  // rowSx?:()
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null; dateType?: string }>({
@@ -82,7 +81,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
 }: DataTableProps<TRowModel>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
-
+  const [currentRowType, setCurrentRowType] = React.useState<string>('');
   const [isCellClick, setIsCellClick] = React.useState<{ isclick: 'true' | 'false' | 'partial'; id: string }>({
     isclick: 'true',
     id: '',
@@ -105,12 +104,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>, row: TRowModel): void => {
     const id = (event.currentTarget as HTMLTextAreaElement).id;
     const rowType = rowProps(row).type;
-    console.log(rowType);
-
+    setCurrentRowType(rowType);
     // Only allow clicks if dateType is not 'calendar'
-    if (rowType === 'disable') setIsCellClick({ isclick: 'false', id });
-    else if (rowType === 'other') setIsCellClick({ isclick: 'partial', id });
-    else setIsCellClick({ isclick: "true", id });
+    if (rowType === 'other') setIsCellClick({ isclick: 'false', id });
+    else if (rowType === 'disable') setIsCellClick({ isclick: 'partial', id });
+    else setIsCellClick({ isclick: 'true', id });
   };
 
   const handleBlurInput = (
@@ -186,6 +184,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
         {rows.map((row, index): React.JSX.Element => {
           const rowId = row.id ? row.id : uniqueRowId?.(row);
           const rowSelected = rowId ? selected?.has(rowId) : false;
+          const rowType = rowProps ? rowProps(row).type : ''; // Check if rowProps is defined
 
           return (
             <TableRow
@@ -242,12 +241,12 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                   >
                     {edited &&
                     column.field &&
-                    (isCellClick.isclick=="true" || (isCellClick.isclick == 'partial' && column.editable != false)) &&
+                    (isCellClick.isclick == 'true' || (isCellClick.isclick == 'partial' && column.editable == true)) &&
                     onChangeInput &&
                     isCellClick.id === column.field.toString() + index ? (
                       <EditTableCellInputs
-                        fieldName={column.field}
-                        cellRef={cellRef}
+                      fieldName={column.valueForField ? column.valueForField(row) : column.field}
+                      cellRef={cellRef}
                         index={index}
                         handleBlur={handleBlurInput}
                         value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
@@ -288,7 +287,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                     onClick={() => onDeleteClick(index)}
                     sx={{ position: 'absolute', right: '20px', top: '9px' }}
                   >
-                    <Trash size={24} />
+                    {rowType === 'disable' ? <ArrowArcLeft size={24} /> : <Trash size={24} />}{' '}
                   </IconButton>
                 </TableCell>
               ) : null}

@@ -1,5 +1,7 @@
 'use client';
+
 import * as React from 'react';
+import { isDateInactive } from '@/helpers/functions-times';
 import { deleteMinyan, setSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
 import { Typography } from '@mui/material';
@@ -11,6 +13,7 @@ import { CheckCircle, XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
+
 import type { LineItemTable } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
@@ -33,7 +36,6 @@ const getFormat = (value: number | string): React.JSX.Element => {
 };
 
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
-
 export function Calendar(props: {
   handlePlusClick: (index: number, location: number) => void; // Updated signature
   handleBlurInput: (value: LineItemTable[keyof LineItemTable], index: number, field: string) => void;
@@ -52,13 +54,25 @@ export function Calendar(props: {
       try {
         // First fetch: get the default calendar minyanim
         const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getCalendar/${selectedDate}`);
-        const minyanim = calendarRes.data.map((minyan: any) => ({
-          ...minyan,
-          blink: minyan.blink?.secondsNum,
-          startDate: minyan.startDate?.time,
-          endDate: minyan.endDate?.time,
-          isRoutine: minyan.spesificDate?.isRoutine,
-        }));
+        const minyanim = calendarRes.data.map((minyan: any) => {
+          let isRoutine = minyan.spesificDate?.isRoutine;
+          if (!isRoutine && isDateInactive(selectedDate.toDate(), minyan.inactiveDates)) {
+            const inactiveDate = minyan.inactiveDates.find(
+              (item: any) =>
+                new Date(item.date).toISOString().split('T')[0] === selectedDate.toISOString().split('T')[0]
+            );
+            isRoutine = inactiveDate?.isRoutine ?? false;
+          }
+
+          // החזרת האובייקט המעודכן
+          return {
+            ...minyan,
+            blink: minyan.blink?.secondsNum,
+            startDate: minyan.startDate?.time,
+            endDate: minyan.endDate?.time,
+            isRoutine, // משתמשים ב-isRoutine בתוך האובייקט
+          };
+        });
 
         // Dispatch to Redux store
         dispatch(setSettingTimes({ setting: minyanim }));
@@ -70,42 +84,68 @@ export function Calendar(props: {
     fetchMinyanim();
   }, [dispatch, selectedDate]);
   const handleDelete = async (index: number) => {
-    if(settingTimesItem[index].dateType=="calendar"){
+    if (settingTimesItem[index].dateType === 'calendar') {
+      // Deleting Minyan
       axios
-      .delete<{ deletedMinyan: LineItemTable }>(`${API_BASE_URL}/minyan/${settingTimesItem[index].id}`)
-      .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
-      .catch((err) => console.log('Error fetching data:', err));
-  
+        .delete<{ deletedMinyan: LineItemTable }>(`${API_BASE_URL}/minyan/${settingTimesItem[index].id}`)
+        .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
+        .catch((err) => console.log('Error fetching data:', err));
+    } else {
+      const minyanId = settingTimesItem[index].id;
+
+      try {
+        const currentMinyanRes = settingTimesItem[index];
+        const currentInactiveDates = currentMinyanRes.inactiveDates || [];
+        const isRoutine = currentMinyanRes.isRoutine;
+
+        const isDateInInactive = currentInactiveDates.some((inactiveDate: any) => {
+          const elementDate = new Date(inactiveDate.date).toISOString().split('T')[0];
+          return elementDate === selectedDate.toISOString().split('T')[0];
+        });
+
+        if (isDateInInactive) {
+          // If the date exists, remove it
+          await axios.put(`${API_BASE_URL}/minyan/updateInactiveDate/${minyanId}`, {
+            data: {
+              date: selectedDate.toISOString(),
+              isRoutine: isRoutine,
+            },
+          });
+
+          const updatedInactiveDates = currentInactiveDates.filter((inactiveDate: any) => {
+            const elementDate = new Date(inactiveDate.date).toISOString().split('T')[0];
+            return elementDate !== selectedDate.toISOString().split('T')[0];
+          });
+
+          // Update Redux
+          dispatch(
+            updateSettingTimesValue({
+              index,
+              field: 'inactiveDates',
+              value: updatedInactiveDates,
+            })
+          );
+        } else {
+          // If the date does not exist, add it
+          await axios.put(`${API_BASE_URL}/minyan/addInactiveDates/${minyanId}`, {
+            date: selectedDate.toISOString(),
+            isRoutine: isRoutine,
+          });
+
+          // Update inactiveDates in Redux
+          const updatedInactiveDates = [...currentInactiveDates, { date: selectedDate.toISOString(), isRoutine }];
+          dispatch(
+            updateSettingTimesValue({
+              index,
+              field: 'inactiveDates',
+              value: updatedInactiveDates,
+            })
+          );
+        }
+      } catch (err) {
+        console.log('Error updating inactive dates:', err);
+      }
     }
-    else{
-    const minyanId = settingTimesItem[index].id;
-    console.log('handleDelete');
-
-    try {
-      // Fetch the current minyan data
-      const currentMinyanRes = await axios.get(`${API_BASE_URL}/minyan/${minyanId}`);
-      console.log(currentMinyanRes);
-      const currentInactiveDates = currentMinyanRes.data.inactiveDates || [];
-      // Add the selected date to inactiveDates
-      const updatedInactiveDates = [...currentInactiveDates, { date: selectedDate.toISOString(), isRoutine: true }];
-      console.log(updatedInactiveDates);
-      // Update the minyan in the database with the new inactiveDates
-      await axios.put(`${API_BASE_URL}/minyan/${minyanId}`, {
-        fieldForEdit: 'inactiveDates',
-        value: updatedInactiveDates,
-      });
-
-      // Update the Redux store using the existing updateSettingTimesValue action
-      dispatch(
-        updateSettingTimesValue({
-          index,
-          field: 'inactiveDates',
-          value: updatedInactiveDates,
-        })
-      );
-    } catch (err) {
-      console.log('Error updating inactive dates:', err);
-    }}
   };
 
   const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
@@ -115,6 +155,18 @@ export function Calendar(props: {
     if (newDate) {
       setSelectedDate(newDate);
     }
+  };
+  const getRowProps = (row: LineItemTable): { sx: React.CSSProperties; type: string } => {
+    const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
+
+    const rowType = isInactiveDate ? 'disable' : row.dateType === 'calendar' ? 'calendar' : 'other';
+
+    return {
+      sx: {
+        backgroundColor: isInactiveDate ? 'lightgray' : row.dateType !== 'calendar' ? 'lightgreen' : '',
+      },
+      type: rowType,
+    };
   };
 
   const columns = [
@@ -169,37 +221,19 @@ export function Calendar(props: {
       },
       typeEditinput: 'switch',
       valueForEdit: (row) => row.isRoutine,
+      valueForField:(row: any) => {
+        const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
+        return isInactiveDate ? 'inactiveDates' : 'isRoutine';
+      },
       name: 'Is Routine',
       width: '150px',
       padding: 'none',
       align: 'center',
       field: 'isRoutine',
-      editable:true
+      editable: true,
     },
   ] satisfies ColumnDef<LineItemTable>[];
-  const getRowProps = (row: LineItemTable): { sx: React.CSSProperties; type: string } => {
-    let isInactiveDate = false;
-    const selectedDateISO = selectedDate.toISOString().split('T')[0];
-  
-    row.inactiveDates.forEach((element: any) => {
-      const elementDate = new Date(element.date).toISOString().split('T')[0];
-      if (elementDate === selectedDateISO) isInactiveDate = true;
-    });
-  
-    const rowType = isInactiveDate
-      ? 'disable'
-      : row.dateType === 'calendar'
-        ? 'calendar'
-        : 'other';
-  
-    return {
-      sx: {
-        backgroundColor: isInactiveDate ? 'lightgray' : row.dateType !== 'calendar' ? 'lightgreen' : '',
-      },
-      type: rowType,
-    };
-  };
-  
+
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
       <DatePicker
@@ -222,7 +256,6 @@ export function Calendar(props: {
             onDeleteClick={handleDelete}
             rows={settingTimesItem}
             rowProps={(row) => getRowProps(row)} // Call getRowProps for each row
-
           />
         </Box>
       </Card>
