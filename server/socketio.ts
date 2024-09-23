@@ -7,19 +7,19 @@ import ScheduleController from "./controller/scheduleController";
 
 let io;
 
-export const initSocketio = (
-  server: HttpServer<typeof IncomingMessage, typeof ServerResponse>
-) => {
-  io = new SocketioServer(server, {
-    cors: {
-      origin: process.env.CLIENT_URL,
-      methods: ["GET", "POST"],
-    },
-    allowEIO3: true
-  });
+export const initSocketio = () => {
+  io = new SocketioServer(
+    process.env.VITE_SOCKET_PORT ? +process.env.VITE_SOCKET_PORT : 4001,
+    {
+      cors: {
+        origin: process.env.VITE_SITE_URL,
+        methods: ["GET", "POST"],
+      },
+    }
+  );
 
   io.on("connection", (socket) => {
-    console.log("A user connected " + socket.id);
+    console.log("A user connected" + socket.id);
     socket.on("disconnect", () => {
       console.log("User disconnected");
     });
@@ -34,6 +34,7 @@ export const initSocketio = (
   });
 
   job.start();
+
   return io;
 };
 

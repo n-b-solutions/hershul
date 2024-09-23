@@ -6,7 +6,7 @@ config();
 
 export default defineConfig({
   server: {
-    port: process.env.PORT ? +process.env.PORT : 4000,
+    port: process.env.VITE_PORT ? +process.env.VITE_PORT : 4000,
   },
   plugins: [
     ...VitePluginNode({
