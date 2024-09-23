@@ -109,7 +109,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   }, []);
 
-  const handlePlusClick = async (index: number, location: number): Promise<any> => {
+  const handlePlusClick = async (index: number, location: eLocationClick): Promise<any> => {
     const newRow: NewMinyan = getNewMinyan(index, location);
     await axios
       .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
@@ -132,7 +132,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   };
 
-  const getNewMinyan = (index: number, location: number) => {
+  const getNewMinyan = (index: number, location: eLocationClick) => {
     const indexBefore = location === eLocationClick.top ? index - 1 : index;
     const indexAfter = location === eLocationClick.top ? index : index + 1;
     return {

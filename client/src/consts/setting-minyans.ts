@@ -1,6 +1,6 @@
 export const enum eLocationClick {
-  top,
-  bottom,
+  top = 'top',
+  bottom = 'bottom',
 }
 
 export const ONE_MINUTE = 1;

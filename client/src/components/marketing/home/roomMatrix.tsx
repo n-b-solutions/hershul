@@ -21,7 +21,6 @@ const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 
 export function RoomMatrix(): React.JSX.Element {
   const [assetsState, setAssetsState] = React.useState<Room[]>([]);
-  // const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({}); // ניהול state לפי חדר
 
   React.useEffect(() => {
     axios

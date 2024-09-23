@@ -10,8 +10,6 @@ const typesOfDates: TypeOfDate[] = [
   { value: 'friday', label: 'Friday' },
   { value: 'saturday', label: 'Saturday' },
   { value: 'roshHodesh', label: 'Rosh Hodesh' },
-  { value: 'taanit', label: 'Taanit' },
-  { value: 'yomTov', label: 'Yom Tov' },
   { value: 'calendar', label: 'Calendar' },
 ];
 

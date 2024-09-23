@@ -6,8 +6,6 @@ type DateTypes =
   | "friday"
   | "saturday"
   | "roshHodesh"
-  | "taanit"
-  | "yomTov"
   | "calendar";
 interface AlertType {
   time: Date;

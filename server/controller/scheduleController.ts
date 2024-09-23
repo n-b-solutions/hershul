@@ -61,36 +61,9 @@ const ScheduleController = {
 
     return updates;
   },
-
-  setRoomSteadyFlagAndStatus: async (
-    roomName: string,
-    newStatus: "on" | "off" | "blink"
-  ): Promise<Room[]> => {
-    const now = new Date();
-    const minyans = await MinyanListModel.find({ room: roomName });
-
-    let activeMinyan = minyans.find(
-      (minyan) => now >= minyan.startDate && now <= minyan.endDate
-    );
-    console.log(activeMinyan);
-
-    if (activeMinyan) {
-      activeMinyan.steadyFlag = true;
-      await activeMinyan.save();
-    }
-    const room = await RoomStatusModel.findOne({ nameRoom: roomName });
-
-    if (room) {
-      room.status = newStatus;
-      await room.save();
-      if (activeMinyan) console.log(room);
-    }
-    return await RoomStatusModel.find();
-  },
-
   logBeforeShkiah: async () => {
     const now = new Date();
-    const today = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
+    const today = now.getDay();
 
     const latitude = process.env.LATITUDE
       ? parseFloat(process.env.LATITUDE)
@@ -109,7 +82,7 @@ const ScheduleController = {
       const zmanim = new Zmanim(gloc, now, false);
       const shkiah = zmanim.shkiah();
       // Calculate 30 minutes before shkiah
-      const shkiahMinus30 = new Date(shkiah.getTime() - 30 * 60000); // 30 minutes before shkiah
+      const shkiahMinus30 = new Date(shkiah.getTime() - 30 * 60000);
 
       if (now >= shkiahMinus30 && now <= shkiah) {
         const rooms = await RoomStatusModel.find();
@@ -127,7 +100,9 @@ const ScheduleController = {
       const mask = 0;
       const eventTime = new Date();
 
-      const havdalahMins = process.env.HAVDALAMINS?parseInt(process.env.HAVDALAMINS):50
+      const havdalahMins = process.env.HAVDALAMINS
+        ? parseInt(process.env.HAVDALAMINS)
+        : 50;
       const linkedEvent = undefined;
       const options = undefined;
 
@@ -142,11 +117,12 @@ const ScheduleController = {
       );
 
       // Convert HDate to Date object if HDate has a method to get Date object
-      const havdalahTimeLocal = havdalahEvent.getDate(); // assuming this returns an HDate object
-
+      const havdalahTimeLocal = havdalahEvent.getDate();
       // Add conversion method or utility function here
+
       function convertHDateToDate(hDate) {
         // Example conversion logic (adjust according to actual HDate properties)
+
         return new Date(
           hDate.getYear(),
           hDate.getMonth() - 1,
