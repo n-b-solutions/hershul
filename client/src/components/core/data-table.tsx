@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { eLocationClick } from '@/consts/setting-minyans';
+import { eLocationClick, NO_DATA } from '@/consts/setting-minyans';
 import { Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Table from '@mui/material/Table';
@@ -47,7 +47,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   selectable?: boolean;
   selected?: Set<RowId>;
   uniqueRowId?: (row: TRowModel) => RowId;
-  onAddRowClick?: (index: number, location: eLocationClick) => void;
+  onAddRowClick?: (index: number, location?: eLocationClick) => void;
   edited?: boolean;
   onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
@@ -295,11 +295,33 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
             </TableRow>
           );
         })}
-        {onAddRowClick && (
+        {onAddRowClick && !rows.length && (
+          <TableRow
+            onMouseOver={() => setPlusMode({ mode: null, index: -1 })}
+            onMouseLeave={() => setPlusMode({ mode: null })}
+          >
+            <TableCell sx={{ padding: '15px' }} colSpan={columns.length}>
+              <Grid
+                onClick={() => onAddRowClick(-1)}
+                sx={{
+                  position: 'absolute',
+                  width: '25px',
+                  color: '#635bff',
+                  right: '50%',
+                  top: '38px',
+                }}
+              >
+                {plusMode.index === -1 && <PlusCircle size={32} />}
+              </Grid>
+              <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
+            </TableCell>
+          </TableRow>
+        )}
+        {onAddRowClick && rows.length ? (
           <TableRow>
             <TableCell></TableCell>
           </TableRow>
-        )}
+        ) : null}
       </TableBody>
     </Table>
   );

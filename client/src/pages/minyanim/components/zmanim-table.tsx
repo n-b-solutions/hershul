@@ -83,7 +83,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   }, []);
 
-  const handlePlusClick = async (index: number, location: eLocationClick): Promise<any> => {
+  const handlePlusClick = async (index: number, location?: eLocationClick): Promise<any> => {
     const newRow: NewMinyan = getNewMinyan(index, location);
     await axios
       .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
@@ -106,12 +106,18 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   };
 
-  const getNewMinyan = (index: number, location: eLocationClick) => {
+  const getNewMinyan = (index: number, location?: eLocationClick) => {
     const indexBefore = location === eLocationClick.top ? index - 1 : index;
     const indexAfter = location === eLocationClick.top ? index : index + 1;
     return {
-      startDate: getMiddleTime(settingTimesItem[indexBefore]?.startDate, settingTimesItem[indexAfter]?.startDate),
-      endDate: getMiddleTime(settingTimesItem[indexBefore]?.endDate, settingTimesItem[indexAfter]?.endDate),
+      startDate:
+        index === -1
+          ? new Date()
+          : getMiddleTime(settingTimesItem[indexBefore]?.startDate, settingTimesItem[indexAfter]?.startDate),
+      endDate:
+        index === -1
+          ? new Date()
+          : getMiddleTime(settingTimesItem[indexBefore]?.endDate, settingTimesItem[indexAfter]?.endDate),
       roomId: rooms[0].id,
       dateType: dateType,
       steadyFlag: false,

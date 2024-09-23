@@ -15,3 +15,5 @@ export const enum eFieldName {
   startDateTime = 'startDate.time',
   blinkSecondsNum = 'blink.secondsNum',
 }
+
+export const NO_DATA = 'No minyans have been determined for this category';
