@@ -40,7 +40,7 @@ const getFormat = (value: number | string): React.JSX.Element => {
   );
 };
 
-const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
+const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
 
 export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
