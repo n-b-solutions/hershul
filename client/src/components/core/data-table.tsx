@@ -86,8 +86,9 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     hover: false,
     index: 0,
   });
-
+  const rowRef = React.useRef<HTMLTableRowElement>(null);
   const cellRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     cellRef.current?.focus();
   });
@@ -121,9 +122,9 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
 
   const handleMouseHover = (event: any, index: number) => {
     setIsToShowDelete({ hover: true, index });
-    const { y: rectY, height: rectHight, width: rectWidth } = event.target?.getBoundingClientRect();
+    const { y: rectY, height: rectHight } = event.target?.getBoundingClientRect();
     const { clientY } = event;
-    const rowWidth = event?.target?.offsetParent?.clientWidth;
+    const rowWidth = rowRef.current?.clientWidth;
     const middleY = rectY + rectHight / 2;
     if (clientY < middleY) {
       rowWidth && setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2 });
@@ -190,6 +191,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
           const rowSelected = rowId ? selected?.has(rowId) : false;
           return (
             <TableRow
+              ref={rowRef}
               onMouseOver={(event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
                 handleMouseHover(event, index);
               }}
