@@ -65,13 +65,13 @@ const ScheduleController = {
     const now = new Date();
     const today = now.getDay();
 
-    const latitude = process.env.LATITUDE
-      ? parseFloat(process.env.LATITUDE)
+    const latitude = process.env.VITE_LATITUDE
+      ? parseFloat(process.env.VITE_LATITUDE)
       : 40.7128; // Default to New York City latitude
-    const longitude = process.env.LONGITUDE
-      ? parseFloat(process.env.LONGITUDE)
+    const longitude = process.env.VITE_LONGITUDE
+      ? parseFloat(process.env.VITE_LONGITUDE)
       : -74.006; // Default to New York City longitude
-    const tzid = process.env.TZID || "America/New_York";
+    const tzid = process.env.VITE_TZID || "America/New_York";
 
     const location = new Location(latitude, longitude, false, tzid);
 
@@ -100,8 +100,8 @@ const ScheduleController = {
       const mask = 0;
       const eventTime = new Date();
 
-      const havdalahMins = process.env.HAVDALAMINS
-        ? parseInt(process.env.HAVDALAMINS)
+      const havdalahMins = process.env.VITE_HAVDALAMINS
+        ? parseInt(process.env.VITE_HAVDALAMINS)
         : 50;
       const linkedEvent = undefined;
       const options = undefined;

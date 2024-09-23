@@ -10,12 +10,13 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
+
 import { Minyan, MinyanApi } from '@/types/minyanim';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
-const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
+const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
 
 const columns: ColumnDef<Minyan>[] = [
   {

@@ -69,6 +69,12 @@ export default defineConfig({
     ],
   },
   server: {
-    port: process.env.PORT ? +process.env.PORT : 3000,
+    port: process.env.VITE_SITE_PORT ? +process.env.VITE_SITE_PORT : 3000,
+    proxy: {
+      '/socket.io': {
+        target: 'ws://localhost:4000',
+        ws: true,
+      },
+    }
   },
 });
