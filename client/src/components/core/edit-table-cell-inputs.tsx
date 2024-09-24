@@ -1,22 +1,25 @@
 import React, { Ref, useState } from 'react';
+import { SECONDS_NUM, TIME } from '@/consts/setting-minyans';
 import { OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';
 
+import { typeForEdit } from '@/types/minyanim';
 import { SelectOption } from '@/types/room';
 import { Option } from '@/components/core/option';
 
 export function EditTableCellInputs<TRowModel extends object>(props: {
   value: any;
-  handleChangeInput: (value: TRowModel[keyof TRowModel], index: number, field: keyof TRowModel) => void;
+  handleChangeInput: (value: typeForEdit, index: number, field: keyof TRowModel, internalField?: string) => void;
   cellRef: Ref<any>;
   index: number;
   fieldName: keyof TRowModel;
   handleBlur: (
     event: React.FocusEvent | React.KeyboardEvent,
-    value?: TRowModel[keyof TRowModel],
+    value?: typeForEdit,
     index?: number,
-    fieldName?: keyof TRowModel
+    fieldName?: keyof TRowModel,
+    internalField?: string
   ) => void;
   editType?: string;
   selectOptions?: SelectOption[];
@@ -30,12 +33,16 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
     props.handleChangeInput && props.handleChangeInput(editValue, props.index, props.fieldName);
   };
 
-  const handle = (value: TRowModel[keyof TRowModel]) => {
-    props.handleChangeInput && props.handleChangeInput(value, props.index, props.fieldName);
+  const handle = (value: typeForEdit, internalField?: string) => {
+    props.handleChangeInput && props.handleChangeInput(value, props.index, props.fieldName, internalField);
   };
 
-  const handleBlurInput = (value: TRowModel[keyof TRowModel], event: React.FocusEvent | React.KeyboardEvent) => {
-    props.handleBlur(event, value, props.index, props.fieldName);
+  const handleBlurInput = (
+    value: typeForEdit,
+    event: React.FocusEvent | React.KeyboardEvent,
+    internalField?: string
+  ) => {
+    props.handleBlur(event, value, props.index, props.fieldName, internalField);
   };
 
   switch (props.editType) {
@@ -44,17 +51,15 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
         <OutlinedInput
           value={props.value || ''}
           onChange={(e) => {
-            handle(parseInt(e.target.value) as TRowModel[keyof TRowModel]);
+            handle(parseInt(e.target.value) as typeForEdit, SECONDS_NUM);
           }}
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
           type="number"
           onBlur={(e) => {
-            handleBlurInput(parseInt(props.value) as TRowModel[keyof TRowModel], e);
+            handleBlurInput(parseInt(props.value) as typeForEdit, e, SECONDS_NUM);
           }}
-          onKeyDown={(e) =>
-            e.key === 'Enter' && handleBlurInput(parseInt(props.value) as TRowModel[keyof TRowModel], e)
-          }
+          onKeyDown={(e) => e.key === 'Enter' && handleBlurInput(parseInt(props.value) as typeForEdit, e, SECONDS_NUM)}
         />
       );
     case 'time':
@@ -62,16 +67,15 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
         <TimeField
           value={props.value}
           onChange={(e) => {
-            handle(e.toISOString() as TRowModel[keyof TRowModel]);
+            handle(e.toISOString() as typeForEdit, TIME);
           }}
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
           onBlur={(e) => {
-            handleBlurInput(dayjs(e.target.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel], e);
+            handleBlurInput(dayjs(e.target.value, 'hh:mm A').toISOString() as typeForEdit, e, TIME);
           }}
           onKeyDown={(e) =>
-            e.key === 'Enter' &&
-            handleBlurInput(dayjs(props.value, 'hh:mm A').toISOString() as TRowModel[keyof TRowModel], e)
+            e.key === 'Enter' && handleBlurInput(dayjs(props.value, 'hh:mm A').toISOString() as typeForEdit, e, TIME)
           }
         />
       );
@@ -82,7 +86,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
           onChange={handleChange}
           inputRef={props.cellRef}
           onBlur={(e) => {
-            handleBlurInput(e.target.value as TRowModel[keyof TRowModel], e);
+            handleBlurInput(e.target.value as typeForEdit, e);
           }}
         >
           {props.selectOptions.map((option: SelectOption) => (

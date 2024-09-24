@@ -14,6 +14,7 @@ import { Trash } from '@phosphor-icons/react';
 import { PlusCircle } from '@phosphor-icons/react/dist/ssr';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
+import { typeForEdit } from '@/types/minyanim';
 import { SelectOption } from '@/types/room';
 
 import { EditTableCellInputs } from './edit-table-cell-inputs';
@@ -49,8 +50,8 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   uniqueRowId?: (row: TRowModel) => RowId;
   onAddRowClick?: (index: number, location?: eLocationClick) => void;
   edited?: boolean;
-  onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
-  onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
+  onChangeInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
+  onBlurInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onDeleteClick?: (index: number) => void;
 }
 
@@ -85,25 +86,29 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     hover: false,
     index: 0,
   });
-
+  const rowRef = React.useRef<HTMLTableRowElement>(null);
   const cellRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     cellRef.current?.focus();
   });
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
-    const id = (event.currentTarget as HTMLTextAreaElement).id;
-    setIsCellClick({ isclick: true, id });
+    if ((event.target as HTMLTextAreaElement).localName === 'div') {
+      const id = (event.currentTarget as HTMLTextAreaElement).id;
+      setIsCellClick({ isclick: true, id });
+    }
     setPlusMode({ mode: null });
   };
 
   const handleBlurInput = (
     event: React.FocusEvent | React.KeyboardEvent,
-    value?: TRowModel[keyof TRowModel],
+    value?: typeForEdit,
     index: number = 0,
-    fieldName?: keyof TRowModel
+    fieldName?: keyof TRowModel,
+    internalField?: string
   ): void => {
-    onBlurInput && value && fieldName && onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
+    onBlurInput && value && fieldName && onBlurInput(value as typeForEdit, index, fieldName, internalField);
     const id = (event.target as HTMLInputElement).id;
     setIsCellClick({ isclick: false, id });
     setPlusMode({ mode: null });
@@ -117,9 +122,9 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
 
   const handleMouseHover = (event: any, index: number) => {
     setIsToShowDelete({ hover: true, index });
-    const { y: rectY, height: rectHight, width: rectWidth } = event.target?.getBoundingClientRect();
+    const { y: rectY, height: rectHight } = event.target?.getBoundingClientRect();
     const { clientY } = event;
-    const rowWidth = event?.target?.offsetParent?.clientWidth;
+    const rowWidth = rowRef.current?.clientWidth;
     const middleY = rectY + rectHight / 2;
     if (clientY < middleY) {
       rowWidth && setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2 });
@@ -186,6 +191,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
           const rowSelected = rowId ? selected?.has(rowId) : false;
           return (
             <TableRow
+              ref={rowRef}
               onMouseOver={(event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
                 handleMouseHover(event, index);
               }}
