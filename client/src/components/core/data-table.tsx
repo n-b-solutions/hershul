@@ -94,10 +94,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   });
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
-    if ((event.target as HTMLTextAreaElement).localName === 'div') {
-      const id = (event.currentTarget as HTMLTextAreaElement).id;
-      setIsCellClick({ isclick: true, id });
-    }
+    const id = (event.currentTarget as HTMLTextAreaElement).id;
+    setIsCellClick({ isclick: true, id });
     setPlusMode({ mode: null });
   };
 
