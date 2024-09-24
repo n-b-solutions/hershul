@@ -205,25 +205,32 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   ] satisfies ColumnDef<LineItemTable>[];
 
   return (
-    <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
-    <Card>
-      <Divider />
-      <Box sx={{ overflowX: 'auto', position: 'relative', maxWidth: '100%' }}>
-        <Box sx={{ minWidth: '1000px' }}> {/* Ensures table takes up minimum space and enables internal scrolling */}
-          <DataTable<LineItemTable>
-
-            columns={columns}
-            edited
-            onAddRowClick={handlePlusClick}
-            onChangeInput={handleChange}
-            onBlurInput={handleBlurInput}
-            onDeleteClick={handleDelete}
-            rows={settingTimesItem}
-          />
-        </Box>
-      
-        </Box>
-      </Card>
-    </Box>
+    <Box
+    sx={{
+      width: '100%', // This ensures the container takes up the full available width
+      overflowX: 'auto', // Enables scrolling within the box
+      maxWidth: '100vw', // Prevents the box from expanding beyond the viewport width
+      display: 'block', // Ensures that the box remains a block-level element
+    }}
+  >
+    <DataTable<LineItemTable>
+      columns={columns}
+      edited
+      onAddRowClick={handlePlusClick}
+      onChangeInput={handleChange}
+      onBlurInput={handleBlurInput}
+      onDeleteClick={handleDelete}
+      rows={settingTimesItem}
+      sx={{
+        minWidth: '100%',
+        display: 'table',
+        tableLayout: 'fixed', // Ensures columns maintain a consistent width
+        '& th, & td': {
+          whiteSpace: 'nowrap', // Prevents text wrapping
+        },
+      }}
+    />
+  </Box>
+  
   );
 }
