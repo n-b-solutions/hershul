@@ -133,7 +133,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   };
 
   return (
-    <Table {...props}>
+    <Table {...props} stickyHeader>
       <TableHead sx={{ ...(hideHead && { visibility: 'collapse', '--TableCell-borderWidth': 0 }) }}>
         <TableRow>
           {selectable ? (

@@ -208,7 +208,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
       <Card>
         <Divider />
-        <Box sx={{ overflowX: 'auto', position: 'relative' }}>
+        <Box sx={{ maxHeight: '70vh', overflow: 'auto', position: 'relative' }}>
           <DataTable<LineItemTable>
             columns={columns}
             edited
