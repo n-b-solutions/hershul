@@ -17,7 +17,7 @@ import { socket } from '../../../socket';
 import { AddMessage } from './add-message';
 import { SystemMessages } from './systemMessages';
 
-const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
+const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
 
 export function RoomMatrix(): React.JSX.Element {
   const [assetsState, setAssetsState] = React.useState<Room[]>([]);

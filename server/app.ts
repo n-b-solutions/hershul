@@ -14,7 +14,7 @@ connectDB();
 //create server
 const server = createServer(app);
 //connect to socket io
-initSocketio(server);
+initSocketio();
 
 // set security HTTP headers
 app.use(helmet());
@@ -26,8 +26,8 @@ app.use(cors());
 
 app.use("/", router);
 
-server.listen(4000, () => {
-    console.log("Server is running on port 4000");
-  });
+server.listen(process.env.VITE_PORT ? +process.env.VITE_PORT : 4000, () => {
+  console.log("Server is running on port 4000");
+});
 
 export const viteNodeApp = app;
