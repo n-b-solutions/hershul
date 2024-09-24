@@ -258,7 +258,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
         const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
         if (editValue) {
           dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
-          dispatch(sortSettingTimesItem());
+          if (field === eFieldName.endDate || field === eFieldName.startDate) dispatch(sortSettingTimesItem());
         }
       })
       .catch((err) => console.log('Error fetching data:', err));
