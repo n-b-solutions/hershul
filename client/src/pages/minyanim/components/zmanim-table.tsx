@@ -265,10 +265,10 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   };
 
   return (
-    <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
-      <Card>
+    <Box sx={{ height: '100%', bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
+      <Card sx={{ height: '100%' }}>
         <Divider />
-        <Box sx={{ maxHeight: '70vh', overflowX: 'auto', position: 'relative' }}>
+        <Box sx={{ maxHeight: '100%', overflowX: 'auto', position: 'relative' }}>
           <DataTable<LineItemTable>
             columns={columns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
             edited
