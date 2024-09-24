@@ -8,8 +8,8 @@ import MessageModel from "../models/messageModel";
 // Get __filename and __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-// Extend Express Request type to include Multer file properties
 
+// Extend Express Request type to include Multer file properties
 declare global {
   namespace Express {
     interface Request {
@@ -41,7 +41,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 const MessageRoomController = {
-    // Get all messages
+  // Get all messages
   get: async (req: Request, res: Response): Promise<void> => {
     try {
       const messages = await MessageModel.find();
@@ -50,8 +50,8 @@ const MessageRoomController = {
       res.status(500).send("Internal Server Error");
     }
   },
-  // Get a specific message by its ID
 
+  // Get a specific message by its ID
   getById: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     try {
@@ -81,7 +81,6 @@ const MessageRoomController = {
 
       const filePath = path.join("uploads", "audio", file.filename);
       const { name, selectedRoom } = req.body;
-      console.log(selectedRoom);
 
       const newMessage = new MessageModel({
         selectedRoom,
@@ -91,10 +90,10 @@ const MessageRoomController = {
       });
 
       await newMessage.save();
-      res.status(201).json({ filePath });
+      res.status(201).json(newMessage);
     });
   },
- // Update an existing message
+  // Update an existing message
   put: async (req: Request, res: Response): Promise<void> => {
     try {
       res.send("Resource updated");

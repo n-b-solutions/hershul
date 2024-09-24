@@ -1,21 +1,22 @@
 import * as React from 'react';
+import { Dialog } from '@mui/material';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Grid from '@mui/material/Unstable_Grid2';
-import Button from '@mui/material/Button';
-import { Dialog } from '@mui/material';
-import AudioRecorder from './audioRecorder';
-import { Option } from '@/components/core/option';
-import { useDispatch, useSelector } from 'react-redux';
-import type { AppDispatch } from '../../../state/store';
-import { createMessageRoom, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
-import { Room } from '@/types/room';
 import Tooltip from '@mui/material/Tooltip';
+import Grid from '@mui/material/Unstable_Grid2';
+import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { Room } from '@/types/room';
+import { Option } from '@/components/core/option';
+
+import { createMessageRoom, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
+import type { AppDispatch } from '../../../state/store';
+import AudioRecorder from './audioRecorder';
 
 const rooms = [
   { id: '1', nameRoom: 'room1' },
@@ -23,10 +24,14 @@ const rooms = [
   { id: '3', nameRoom: 'room3' },
   { id: '4', nameRoom: 'room4' },
   { id: '5', nameRoom: 'room5' },
-  { id: '6', nameRoom: 'room6' }
+  { id: '6', nameRoom: 'room6' },
 ] satisfies Room[];
 
-export function CreateSystemMessages(props: { open: boolean; handleClose: () => void; room?: string }): React.JSX.Element {
+export function CreateSystemMessages(props: {
+  open: boolean;
+  handleClose: (id?: string) => void;
+  room?: string;
+}): React.JSX.Element {
   const [selectedRoom, setSelectedRoom] = React.useState<string>(props.room || '');
   const [name, setName] = React.useState<string>('');
   const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
@@ -57,38 +62,29 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
         name,
         audioBlob,
       };
-
-      dispatch(createMessageRoom(newRoom));
-      handleClose();
+      const newMessage = await dispatch(createMessageRoom(newRoom)).unwrap();
+      handleClose(newMessage?.id);
     }
   };
 
   const isSaveDisabled = !name || !audioBlob;
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={() => handleClose()}>
       <Box sx={{ p: 3 }}>
         <Box maxWidth="sm">
           <Grid container spacing={3}>
             <Grid sm={6} xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Name</InputLabel>
-                <OutlinedInput
-                  name="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
+                <OutlinedInput name="name" value={name} onChange={(e) => setName(e.target.value)} />
               </FormControl>
             </Grid>
 
             <Grid sm={6} xs={12}>
               <FormControl fullWidth disabled={!!room}>
                 <InputLabel>Room</InputLabel>
-                <Select
-                  value={selectedRoom}
-                  onChange={handleRoomChange}
-                  input={<OutlinedInput label="Room" />}
-                >
+                <Select value={selectedRoom} onChange={handleRoomChange} input={<OutlinedInput label="Room" />}>
                   {rooms.map((room) => (
                     <Option key={room.id} value={room.nameRoom}>
                       {room.nameRoom}
@@ -102,7 +98,7 @@ export function CreateSystemMessages(props: { open: boolean; handleClose: () => 
             <AudioRecorder onSave={(blob) => setAudioBlob(blob)} />
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-            <Button onClick={handleClose} variant="outlined" sx={{ mr: 1 }}>
+            <Button onClick={() => handleClose()} variant="outlined" sx={{ mr: 1 }}>
               Cancel
             </Button>
             {isSaveDisabled || loading ? (
