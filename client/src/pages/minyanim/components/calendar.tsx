@@ -97,12 +97,14 @@ export function Calendar(props: {
         const currentMinyanRes = settingTimesItem[index];
         const currentInactiveDates = currentMinyanRes.inactiveDates || [];
         const isRoutine = currentMinyanRes.isRoutine;
-
         const isDateInInactive = currentInactiveDates.some((inactiveDate: any) => {
+          if (!inactiveDate || !inactiveDate.date) {
+            return false; // אם inactiveDate או date אינם מוגדרים, דלג על האיטרציה הזו
+          }
           const elementDate = new Date(inactiveDate.date).toISOString().split('T')[0];
           return elementDate === selectedDate.toISOString().split('T')[0];
         });
-
+        
         if (isDateInInactive) {
           // If the date exists, remove it
           await axios.put(`${API_BASE_URL}/minyan/updateInactiveDate/${minyanId}`, {
