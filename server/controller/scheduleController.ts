@@ -17,15 +17,14 @@ const ScheduleController = {
   updateRoomStatuses: async (): Promise<Room[]> => {
     const now = new Date();
     const updates: Room[] = [];
-    console.log("updateRoomStatuses");
 
     const minyans = await MinyanListModel.find();
     const roomStatusMap = new Map<string, "on" | "off" | "blink">();
 
     for (const minyan of minyans) {
-      const roomName = minyan.room;
-      const startDate = new Date(minyan.startDate);
-      const endDate = new Date(minyan.endDate);
+      const roomId = minyan.roomId.toString();
+      const startDate = new Date(minyan.startDate.time);
+      const endDate = new Date(minyan.endDate.time);
       const blinkMinutes = Number(minyan.blink);
       const blurStartTime = new Date(
         startDate.getTime() - blinkMinutes * 60000
@@ -33,16 +32,16 @@ const ScheduleController = {
 
       if (now >= blurStartTime && now < startDate) {
         if (!minyan.steadyFlag) {
-          roomStatusMap.set(roomName, "blink");
+          roomStatusMap.set(roomId, "blink");
         }
       } else if (now >= startDate && now <= endDate) {
         if (!minyan.steadyFlag) {
-          roomStatusMap.set(roomName, "on");
+          roomStatusMap.set(roomId, "on");
         }
       } else {
         if (minyan.steadyFlag) {
           minyan.steadyFlag = false;
-          roomStatusMap.set(roomName, "off");
+          roomStatusMap.set(roomId, "off");
           await minyan.save();
         }
       }
@@ -51,7 +50,7 @@ const ScheduleController = {
     const rooms = await RoomStatusModel.find();
 
     for (const room of rooms) {
-      const currentStatus = roomStatusMap.get(room.nameRoom);
+      const currentStatus = roomStatusMap.get(room.id.toString());
       if (currentStatus && room.status !== currentStatus) {
         room.status = currentStatus;
         await room.save();
