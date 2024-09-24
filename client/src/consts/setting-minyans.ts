@@ -1,6 +1,6 @@
 export const enum eLocationClick {
-  top,
-  bottom,
+  top = 'top',
+  bottom = 'bottom',
 }
 
 export const ONE_MINUTE = 1;
@@ -17,3 +17,5 @@ export const enum eFieldName {
   blinkSecondsNum = 'blink.secondsNum',
   isRoutine='spesificDate.isRoutine'
 }
+
+export const NO_DATA = 'No minyans have been determined for this category';

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { socket } from '@/socket';
 import { Divider, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -15,34 +16,60 @@ import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
-const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
+const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
+
+const columns: ColumnDef<Minyan>[] = [
+  {
+    formatter: (row): React.JSX.Element => (
+      <div>
+        <Typography color="text.secondary" suppressHydrationWarning sx={{ whiteSpace: 'nowrap' }} variant="body2">
+          {dayjs(row.startDate).format('hh:mm A')}
+        </Typography>
+      </div>
+    ),
+    name: 'Time',
+    width: '70px',
+  },
+  {
+    formatter: (row): React.JSX.Element => (
+      <div>
+        <Typography sx={{ whiteSpace: 'nowrap' }} variant="subtitle2">
+          {row.action}
+        </Typography>
+      </div>
+    ),
+    name: 'Action',
+    width: '70px',
+  },
+  {
+    formatter: (row): React.JSX.Element => (
+      <div>
+        <Typography sx={{ whiteSpace: 'nowrap' }} variant="subtitle2">
+          {row.roomName}
+        </Typography>
+      </div>
+    ),
+    name: 'Room',
+    width: '70px',
+  },
+  {
+    formatter: (row): React.JSX.Element => (
+      <>
+        {row.messages ? (
+          <Tooltip title={row.messages}>
+            <SpeakerIcon size={24} />
+          </Tooltip>
+        ) : null}
+      </>
+    ),
+    name: 'Message',
+    width: '70px',
+  },
+];
 
 export function ListMinyan(): React.JSX.Element {
-  const [allMinyans, setAllMinyans] = React.useState<Minyan[]>([]);
-  const [minyans, setMinyans] = React.useState<Minyan[]>([]);
-
-  React.useEffect(() => {
-    axios
-      .get<MinyanApi[]>(`${API_BASE_URL}/minyan/getMinyanimByDateType`)
-      .then((res) => {
-        const processedMinyans = processMinyanData(res.data);
-        setAllMinyans(processedMinyans);
-        filterMinyans(processedMinyans);
-      })
-      .catch((err) => {
-        console.error('Error fetching data:', err);
-      });
-
-    socket.on('minyanUpdated', (updatedMinyans) => {
-      const processedMinyans = processMinyanData(updatedMinyans);
-      setAllMinyans(processedMinyans);
-      filterMinyans(processedMinyans);
-    });
-
-    return () => {
-      socket.off('minyanUpdated');
-    };
-  }, []);
+  const [allMinyans, setAllMinyans] = useState<Minyan[]>([]);
+  const [minyans, setMinyans] = useState<Minyan[]>([]);
 
   const processMinyanData = (data: MinyanApi[]) => {
     return data.reduce<Minyan[]>((acc, minyan) => {
@@ -90,75 +117,56 @@ export function ListMinyan(): React.JSX.Element {
       return minyanMinutesOfDay > currentMinutesOfDay && minyanMinutesOfDay <= minutesInTwoHours;
     });
 
-    const sortMinyans = filteredMinyans.sort((a, b) => {
-      const timeA = dayjs(a.startDate).hour() * 60 + dayjs(a.startDate).minute();
-      const timeB = dayjs(b.startDate).hour() * 60 + dayjs(b.startDate).minute();
+    const sortMinyans = (data: Minyan[]) => {
+      return data.sort((a, b) => {
+        const timeA = dayjs(a.startDate).hour() * 60 + dayjs(a.startDate).minute();
+        const timeB = dayjs(b.startDate).hour() * 60 + dayjs(b.startDate).minute();
 
-      return timeA - timeB;
-    });
+        if (timeA === timeB) {
+          if (a.action === 'blink' && b.action === 'on') {
+            return -1;
+          }
+          if (a.action === 'on' && b.action === 'blink') {
+            return 1;
+          }
+        }
 
-    setMinyans(sortMinyans);
+        return timeA - timeB;
+      });
+    };
 
-    console.log(filteredMinyans);
+    setMinyans(sortMinyans(filteredMinyans));
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    axios
+      .get<MinyanApi[]>(`${API_BASE_URL}/minyan/getMinyanimByDateType`)
+      .then((res) => {
+        const processedMinyans = processMinyanData(res.data);
+        setAllMinyans(processedMinyans);
+        filterMinyans(processedMinyans);
+      })
+      .catch((err) => {
+        console.error('Error fetching data:', err);
+      });
+
+    socket.on('minyanUpdated', (updatedMinyans) => {
+      const processedMinyans = processMinyanData(updatedMinyans);
+      setAllMinyans(processedMinyans);
+      filterMinyans(processedMinyans);
+    });
+
+    return () => {
+      socket.off('minyanUpdated');
+    };
+  }, [filterMinyans]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       filterMinyans(allMinyans);
     }, 60000);
     return () => clearInterval(interval);
   }, [allMinyans, filterMinyans]);
-
-  const columns = [
-    {
-      formatter: (row): React.JSX.Element => (
-        <div>
-          <Typography color="text.secondary" suppressHydrationWarning sx={{ whiteSpace: 'nowrap' }} variant="body2">
-            {dayjs(row.startDate).format('hh:mm A')}
-          </Typography>
-        </div>
-      ),
-      name: 'Time',
-      width: '70px',
-    },
-    {
-      formatter: (row): React.JSX.Element => (
-        <div>
-          <Typography sx={{ whiteSpace: 'nowrap' }} variant="subtitle2">
-            {row.action}
-          </Typography>
-        </div>
-      ),
-      name: 'Action',
-      width: '70px',
-    },
-    {
-      formatter: (row): React.JSX.Element => (
-        <div>
-          <Typography sx={{ whiteSpace: 'nowrap' }} variant="subtitle2">
-            {row.roomName}
-          </Typography>
-        </div>
-      ),
-      name: 'Room',
-      width: '70px',
-    },
-    {
-      formatter: (row): React.JSX.Element => {
-        return (
-          <>
-            {row.messages ? (
-              <Tooltip title={row.messages}>
-                <SpeakerIcon size={24} />
-              </Tooltip>
-            ) : null}
-          </>
-        );
-      },
-      name: 'Message',
-      width: '70px',
-    },
-  ] satisfies ColumnDef<Minyan>[];
 
   return (
     <Box sx={{ height: '90vh', display: 'flex', flexDirection: 'column', p: 3 }}>

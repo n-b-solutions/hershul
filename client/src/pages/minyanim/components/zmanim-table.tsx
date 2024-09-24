@@ -34,6 +34,54 @@ const styleTypography = {
   height: '54px',
 };
 
+const columns = (props: { roomArray: Room[]; roomsOptionsArray: SelectOption[] }) =>
+  [
+    {
+      formatter: (row): React.JSX.Element => getFormat(row.blink ? row.blink : ''),
+      typeEditinput: 'number',
+      name: 'Blink',
+      width: '250px',
+      field: 'blink',
+      padding: 'none',
+      align: 'center',
+      tooltip: 'Time to start Blink before lights on',
+    },
+    {
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.startDate).format('hh:mm A')),
+      typeEditinput: 'time',
+      padding: 'none',
+      name: 'Start Time',
+      width: '250px',
+      field: 'startDate',
+      align: 'center',
+      tooltip: 'Lights On',
+      valueForEdit: (row) => dayjs(row.startDate),
+    },
+    {
+      formatter: (row): React.JSX.Element => getFormat(dayjs(row.endDate).format('hh:mm A')),
+      typeEditinput: 'time',
+      padding: 'none',
+      name: 'End Time',
+      width: '250px',
+      field: 'endDate',
+      align: 'center',
+      tooltip: 'Lights Off',
+      valueForEdit: (row) => dayjs(row.endDate),
+    },
+    {
+      formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
+      typeEditinput: 'select',
+      valueForEdit: (row) => row.room.id,
+      selectOptions: props.roomsOptionsArray,
+      valueOption: props.roomArray,
+      padding: 'none',
+      name: 'Room',
+      width: '250px',
+      field: 'room',
+      align: 'center',
+    },
+  ] satisfies ColumnDef<LineItemTable>[];
+
 const getFormat = (value: number | string): React.JSX.Element => {
   return (
     <Typography component="span" position="relative" sx={{ ...styleTypography }} variant="inherit">
@@ -42,7 +90,7 @@ const getFormat = (value: number | string): React.JSX.Element => {
   );
 };
 
-const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
+const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
 
 export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const { typeDate } = props;
@@ -126,7 +174,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const getNewMinyan = (index: number, location: number, isCalendar: boolean) => {
     const indexBefore = location === eLocationClick.top ? index - 1 : index;
     const indexAfter = location === eLocationClick.top ? index : index + 1;
-
     const newMinyan = {
       startDate: getMiddleTime(settingTimesItem[indexBefore]?.startDate, settingTimesItem[indexAfter]?.startDate),
       endDate: getMiddleTime(settingTimesItem[indexBefore]?.endDate, settingTimesItem[indexAfter]?.endDate),
@@ -164,11 +211,9 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     field: string,
     row?:LineItemTable
   ): Promise<void> => {
-    console.log(field);
 
     const updateId = settingTimesItem[index].id;
     if (field == 'inactiveDates') {
-      console.log("hi!!!!");
       
       await axios
         .put(`${API_BASE_URL}/minyan/updateInactiveDate/${updateId}`, {
@@ -213,53 +258,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       })
       .catch((err) => console.log('Error fetching data:', err));
   };
-
-  const columns = [
-    {
-      formatter: (row): React.JSX.Element => getFormat(row.blink ? row.blink : ''),
-      typeEditinput: 'number',
-      name: 'Blink',
-      width: '250px',
-      field: 'blink',
-      padding: 'none',
-      align: 'center',
-      tooltip: 'Time to start Blink before lights on',
-    },
-    {
-      formatter: (row): React.JSX.Element => getFormat(dayjs(row.startDate).format('hh:mm A')),
-      typeEditinput: 'time',
-      padding: 'none',
-      name: 'Start Date',
-      width: '250px',
-      field: 'startDate',
-      align: 'center',
-      tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate),
-    },
-    {
-      formatter: (row): React.JSX.Element => getFormat(dayjs(row.endDate).format('hh:mm A')),
-      typeEditinput: 'time',
-      padding: 'none',
-      name: 'End Date',
-      width: '250px',
-      field: 'endDate',
-      align: 'center',
-      tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate),
-    },
-    {
-      formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
-      typeEditinput: 'select',
-      valueForEdit: (row) => row.room.id,
-      selectOptions: roomsOption,
-      valueOption: rooms,
-      padding: 'none',
-      name: 'Room',
-      width: '250px',
-      field: 'room',
-      align: 'center',
-    },
-  ] satisfies ColumnDef<LineItemTable>[];
 
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>

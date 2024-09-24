@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { Grid, IconButton, OutlinedInput, SelectChangeEvent, TextField, Tooltip, Typography } from '@mui/material';
+import { eLocationClick, NO_DATA } from '@/consts/setting-minyans';
+import { Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Table from '@mui/material/Table';
 import type { TableProps } from '@mui/material/Table';
@@ -9,11 +10,10 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { ArrowArcLeft, Trash } from '@phosphor-icons/react';
+import { ArrowArcLeft, PlusCircle, Trash } from '@phosphor-icons/react';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
 import { SelectOption } from '@/types/room';
-import { AddRow } from '@/pages/minyanim/components/add-row';
 
 import { EditTableCellInputs } from './edit-table-cell-inputs';
 
@@ -49,7 +49,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   selectable?: boolean;
   selected?: Set<RowId>;
   uniqueRowId?: (row: TRowModel) => RowId;
-  onAddRowClick?: (index: number, location: number) => void;
+  onAddRowClick?: (index: number, location?: eLocationClick) => void;
   edited?: boolean;
   onChangeInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
   onBlurInput?: (value: TRowModel[keyof TRowModel], index: number, fieldName: keyof TRowModel) => void;
@@ -91,12 +91,13 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
     hover: false,
     index: 0,
   });
-
+  const [plusMode, setPlusMode] = React.useState<{ mode: eLocationClick | null; index?: number; right?: number }>({
+    mode: null,
+  });
   const cellRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     cellRef.current?.focus();
   });
-
   const handleStatusClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
     (event.target as HTMLTextAreaElement).localName === 'div' && setIsShowPlus(true);
   };
@@ -109,6 +110,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
     if (rowType === 'other') setIsCellClick({ isclick: 'false', id });
     else if (rowType === 'disable') setIsCellClick({ isclick: 'partial', id });
     else setIsCellClick({ isclick: 'true', id });
+    setPlusMode({ mode: null });
+
   };
 
   const handleBlurInput = (
@@ -122,14 +125,31 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
       fieldName &&
       onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
     const id = (event.target as HTMLInputElement).id;
-    setIsCellClick({ isclick: false, id });
-    setIsShowPlus(false);
+    setIsCellClick({ isclick: "false", id });
+    setPlusMode({ mode: null });
   };
 
   const getValue = (index: number, field: keyof TRowModel): TRowModel[keyof TRowModel] => {
     const currentRow = rows[index];
     const value = currentRow[field];
     return value;
+  };
+
+  const handleMouseHover = (event: any, index: number) => {
+    setIsToShowDelete({ hover: true, index });
+    const { y: rectY, height: rectHight, width: rectWidth } = event.target?.getBoundingClientRect();
+    const { clientY } = event;
+    const rowWidth = event?.target?.offsetParent?.clientWidth;
+    const middleY = rectY + rectHight / 2;
+    if (clientY < middleY) {
+      rowWidth && setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2 });
+    } else {
+      rowWidth && setPlusMode({ mode: eLocationClick.bottom, index, right: rowWidth / 2 });
+    }
+  };
+
+  const getPlusYPosition = () => {
+    return plusMode.mode === eLocationClick.bottom ? { top: '39px' } : { bottom: '33px' };
   };
 
   return (
@@ -188,11 +208,12 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
 
           return (
             <TableRow
-              onMouseOver={() => {
-                setIsToShowDelete && setIsToShowDelete({ hover: true, index });
+              onMouseOver={(event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+                handleMouseHover(event, index);
               }}
               onMouseLeave={() => {
                 setIsToShowDelete && setIsToShowDelete({ hover: false, index });
+                setPlusMode({ mode: null });
               }}
               hover={hover}
               key={rowId ?? index}
@@ -265,14 +286,20 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                   </TableCell>
                 )
               )}
-              {onAddRowClick && !isShowPlus ? (
-                <TableCell
-                  onClick={(e) => {
-                    handleStatusClick(e);
-                  }}
-                  sx={{ padding: '0px', width: '0px' }}
-                >
-                  <AddRow index={index} onPlusClick={onAddRowClick} />
+              {onAddRowClick && !isCellClick.isclick && plusMode.mode && plusMode.index === index ? (
+                <TableCell sx={{ padding: '0px', width: '0px', position: 'relative' }}>
+                  <Grid
+                    onClick={() => onAddRowClick(index, plusMode.mode!)}
+                    sx={{
+                      position: 'absolute',
+                      width: '25px',
+                      color: '#635bff',
+                      right: `${plusMode.right || 0}px`,
+                      ...getPlusYPosition(),
+                    }}
+                  >
+                    <PlusCircle size={32} />
+                  </Grid>
                 </TableCell>
               ) : null}
               {onDeleteClick && isShowDelete.hover && isShowDelete.index === index ? (
@@ -294,11 +321,33 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
             </TableRow>
           );
         })}
-        {onAddRowClick && (
+        {onAddRowClick && !rows.length && (
+          <TableRow
+            onMouseOver={() => setPlusMode({ mode: null, index: -1 })}
+            onMouseLeave={() => setPlusMode({ mode: null })}
+          >
+            <TableCell sx={{ padding: '15px' }} colSpan={columns.length}>
+              <Grid
+                onClick={() => onAddRowClick(-1)}
+                sx={{
+                  position: 'absolute',
+                  width: '25px',
+                  color: '#635bff',
+                  right: '50%',
+                  top: '38px',
+                }}
+              >
+                {plusMode.index === -1 && <PlusCircle size={32} />}
+              </Grid>
+              <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
+            </TableCell>
+          </TableRow>
+        )}
+        {onAddRowClick && rows.length ? (
           <TableRow>
             <TableCell></TableCell>
           </TableRow>
-        )}
+        ) : null}
       </TableBody>
     </Table>
   );

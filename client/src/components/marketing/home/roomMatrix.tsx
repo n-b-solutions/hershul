@@ -10,11 +10,12 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
-import { socket } from '../../../socket';
-import { SystemMessages } from './systemMessages';
 import { Room } from '@/types/room';
 
-const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
+import { socket } from '../../../socket';
+import { SystemMessages } from './systemMessages';
+
+const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
 
 export function RoomMatrix(): React.JSX.Element {
   const [assetsState, setAssetsState] = React.useState<Room[]>([]);
