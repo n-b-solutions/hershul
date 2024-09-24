@@ -224,6 +224,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
             onBlurInput={handleBlurInput}
             onDeleteClick={handleDelete}
             rows={settingTimesItem}
+            stickyHeader
           />
         </Box>
       </Card>
