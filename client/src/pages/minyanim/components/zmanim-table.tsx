@@ -206,10 +206,12 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
-      <Card>
-        <Divider />
-        <Box sx={{ overflowX: 'auto', position: 'relative' }}>
+    <Card>
+      <Divider />
+      <Box sx={{ overflowX: 'auto', position: 'relative', maxWidth: '100%' }}>
+        <Box sx={{ minWidth: '1000px' }}> {/* Ensures table takes up minimum space and enables internal scrolling */}
           <DataTable<LineItemTable>
+
             columns={columns}
             edited
             onAddRowClick={handlePlusClick}
@@ -218,6 +220,8 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
             onDeleteClick={handleDelete}
             rows={settingTimesItem}
           />
+        </Box>
+      
         </Box>
       </Card>
     </Box>
