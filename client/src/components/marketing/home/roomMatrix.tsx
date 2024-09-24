@@ -14,13 +14,13 @@ import axios from 'axios';
 import { Room } from '@/types/room';
 
 import { socket } from '../../../socket';
+import { AddMessage } from './add-message';
 import { SystemMessages } from './systemMessages';
 
 const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
 
 export function RoomMatrix(): React.JSX.Element {
   const [assetsState, setAssetsState] = React.useState<Room[]>([]);
-  const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({}); // ניהול state לפי חדר
 
   React.useEffect(() => {
     axios
@@ -56,20 +56,6 @@ export function RoomMatrix(): React.JSX.Element {
       .catch((error) => {
         console.error('Error updating status:', error);
       });
-  };
-
-  const handleMessageClick = (roomName: string) => {
-    setDisplayMessages((prevState) => ({
-      ...prevState,
-      [roomName]: true,
-    }));
-  };
-
-  const handleCloseMessage = (roomName: string) => {
-    setDisplayMessages((prevState) => ({
-      ...prevState,
-      [roomName]: false,
-    }));
   };
 
   return (
@@ -114,17 +100,8 @@ export function RoomMatrix(): React.JSX.Element {
                 </Button>
               </CardContent>
               <Divider />
-              <CardActions sx={{ justifyContent: 'center' }}>
-                <IconButton color="secondary" size="small" onClick={() => handleMessageClick(room.nameRoom)}>
-                  <SpeakerIcon />
-                </IconButton>
-              </CardActions>
+              <AddMessage roomName={room.nameRoom} />
             </Card>
-            <SystemMessages
-              open={displayMessages[room.nameRoom] || false}
-              handleClose={() => handleCloseMessage(room.nameRoom)}
-              room={room.nameRoom}
-            />
           </Grid>
         ))}
       </Grid>
