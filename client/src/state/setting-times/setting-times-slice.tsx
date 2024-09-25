@@ -2,8 +2,7 @@ import { sortByTime } from '@/helpers/functions-times';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-import type { LineItemTable } from '@/types/minyanim';
-import { Room } from '@/types/room';
+import type { LineItemTable, typeForEdit } from '@/types/minyanim';
 
 export interface Istate {
   settingTimesItem: LineItemTable[];
@@ -21,11 +20,21 @@ const settingTimesSlice = createSlice({
     },
     updateSettingTimesValue: (
       state,
-      action: PayloadAction<{ index: number; value: string | Date | Room | number|boolean; field: string }>
+      action: PayloadAction<{
+        index: number;
+        value: typeForEdit;
+        field: keyof LineItemTable;
+        internalField?: string;
+      }>
     ) => {
       
       const update = state.settingTimesItem[action.payload.index] as LineItemTable;
-      const newUpdate: LineItemTable = { ...update, [action.payload.field]: action.payload.value };
+      const newUpdate: LineItemTable = {
+        ...update,
+        [action.payload.field]: action.payload.internalField
+          ? { ...(update[action.payload.field] as {}), [action.payload.internalField]: action.payload.value }
+          : action.payload.value,
+      };
       [...state.settingTimesItem, (state.settingTimesItem[action.payload.index] = newUpdate)];
     },
     setSettingTimes: (state: Istate, action: PayloadAction<{ setting: LineItemTable[] }>) => {

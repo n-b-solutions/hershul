@@ -14,10 +14,11 @@ import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { LineItemTable } from '@/types/minyanim';
+import type { LineItemTable, SpesificDate, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
+import { eLocationClick } from '@/consts/setting-minyans';
 
 const styleTypography = {
   display: 'grid',
@@ -37,8 +38,8 @@ const getFormat = (value: number | string): React.JSX.Element => {
 
 const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
 export function Calendar(props: {
-  handlePlusClick: (index: number, location: number) => void; // Updated signature
-  handleBlurInput: (value: LineItemTable[keyof LineItemTable], index: number, field: string) => void;
+  handlePlusClick: (index: number, location?: eLocationClick) => void; // Updated signature
+  handleBlurInput: (value: typeForEdit, index: number, field: keyof LineItemTable) => void;
   selectedDate: Dayjs;
   setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs>>;
   rooms: Room[];
@@ -135,7 +136,7 @@ export function Calendar(props: {
           });
 
           // Update inactiveDates in Redux
-          const updatedInactiveDates = [...currentInactiveDates, { date: selectedDate.toISOString(), isRoutine }];
+          const updatedInactiveDates:SpesificDate[] = [...currentInactiveDates, { date: selectedDate.toDate(), isRoutine: isRoutine || false }];
           dispatch(
             updateSettingTimesValue({
               index,
@@ -150,7 +151,7 @@ export function Calendar(props: {
     }
   };
 
-  const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
+  const handleChange = (value: typeForEdit, index: number, field: keyof LineItemTable): void => {
     value != undefined && dispatch(updateSettingTimesValue({ index, field, value }));
   };
   const handleDateChange = (newDate: Dayjs | null) => {

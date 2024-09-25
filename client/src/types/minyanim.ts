@@ -1,27 +1,28 @@
+import { MessageRoom, MessageTab } from './message';
 import { Room } from './room';
 
+export type tFieldMinyanTable = 'blink' | 'startDate' | 'endDate' | 'room';
 export interface TypeOfDate {
   value: string;
   label: string;
 }
 
 export interface LineItemTable {
-  inactiveDates: any;
+  inactiveDates: SpesificDate[];
   id: string;
-  blink?: number;
-  startDate: Date;
-  endDate: Date;
+  blink?: BlinkAlertTypeName;
+  startDate: AlertTypeName;
+  endDate: AlertTypeName;
   room: Room;
   isRoutine?:boolean;
   dateType: string;
-  spesificDate?: { date: string; isRoutine: boolean }; // ודא שזה מוגדר
+  spesificDate?: SpesificDate; // ודא שזה מוגדר
 }
-interface SpesificDate{
+export interface SpesificDate{
   date: Date;
   isRoutine: boolean;
 }
 export interface GetNewMinyan {
-  messages: string;
   startDate: AlertType;
   endDate: AlertType;
   roomId: string;
@@ -41,10 +42,7 @@ export type NewMinyan = {
   dateType: string;
   steadyFlag: boolean;
   blink?: number;
-  spesificDate?: {
-    date: Date;
-    isRoutine: boolean;
-  };
+  spesificDate?: SpesificDate;
 };
 
 export interface NewMinyan1 {
@@ -55,11 +53,21 @@ export interface NewMinyan1 {
 }
 export interface AlertType {
   time: Date;
-  messageId?: string;
+  message?: MessageRoom;
+}
+
+export interface AlertTypeName {
+  time: Date;
+  message?: MessageTab;
 }
 export interface BlinkAlertType {
   secondsNum: number;
-  messageId?: string;
+  message?: MessageRoom;
+}
+
+export interface BlinkAlertTypeName {
+  secondsNum: number;
+  message?: MessageTab;
 }
 export interface Minyan {
   roomName: string;
@@ -75,3 +83,5 @@ export interface MinyanApi {
   endDate: AlertType;
   blink?: BlinkAlertType;
 }
+
+export type typeForEdit = string | Date | Room | number | boolean | SpesificDate[];

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { API_BASE_URL } from '@/consts/api';
 import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
 import { getMiddleTime } from '@/helpers/functions-times';
 import {
@@ -11,7 +12,7 @@ import {
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
-import { Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
@@ -19,11 +20,13 @@ import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { GetNewMinyan, LineItemTable, NewMinyan } from '@/types/minyanim';
+import { MessageTab } from '@/types/message';
+import type { GetNewMinyan, LineItemTable, NewMinyan, tFieldMinyanTable, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
+import { ActionsMessage } from './actions-message';
 import { Calendar } from './calendar';
 
 const styleTypography = {
@@ -34,10 +37,19 @@ const styleTypography = {
   height: '54px',
 };
 
-const columns = (props: { roomArray: Room[]; roomsOptionsArray: SelectOption[] }) =>
+const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOptionsArray: SelectOption[] }) =>
   [
     {
-      formatter: (row): React.JSX.Element => getFormat(row.blink ? row.blink : ''),
+      formatter: (row, index): React.JSX.Element =>
+        getFormat({
+          value: row.blink?.secondsNum || '',
+          roomName: row.room.nameRoom,
+          message: row.blink?.message,
+          id: row.id,
+          field: 'blink',
+          index,
+        }),
+      valueForEdit: (row) => row.blink?.secondsNum,
       typeEditinput: 'number',
       name: 'Blink',
       width: '250px',
@@ -47,7 +59,15 @@ const columns = (props: { roomArray: Room[]; roomsOptionsArray: SelectOption[] }
       tooltip: 'Time to start Blink before lights on',
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(dayjs(row.startDate).format('hh:mm A')),
+      formatter: (row, index): React.JSX.Element =>
+        getFormat({
+          value: dayjs(row.startDate.time).format('hh:mm A'),
+          roomName: row.room.nameRoom,
+          message: row.startDate.message,
+          id: row.id,
+          field: 'startDate',
+          index,
+        }),
       typeEditinput: 'time',
       padding: 'none',
       name: 'Start Time',
@@ -55,10 +75,18 @@ const columns = (props: { roomArray: Room[]; roomsOptionsArray: SelectOption[] }
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate),
+      valueForEdit: (row) => dayjs(row.startDate.time),
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(dayjs(row.endDate).format('hh:mm A')),
+      formatter: (row, index): React.JSX.Element =>
+        getFormat({
+          value: dayjs(row.endDate.time).format('hh:mm A'),
+          roomName: row.room.nameRoom,
+          message: row.endDate.message,
+          id: row.id,
+          field: 'endDate',
+          index: index,
+        }),
       typeEditinput: 'time',
       padding: 'none',
       name: 'End Time',
@@ -66,14 +94,14 @@ const columns = (props: { roomArray: Room[]; roomsOptionsArray: SelectOption[] }
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate),
+      valueForEdit: (row) => dayjs(row.endDate.time),
     },
     {
-      formatter: (row): React.JSX.Element => getFormat(row.room?.nameRoom),
+      formatter: (row): React.JSX.Element => getFormat({ value: row.room?.nameRoom }),
       typeEditinput: 'select',
       valueForEdit: (row) => row.room.id,
-      selectOptions: props.roomsOptionsArray,
-      valueOption: props.roomArray,
+      selectOptions: roomsOptionsArray,
+      valueOption: roomArray,
       padding: 'none',
       name: 'Room',
       width: '250px',
@@ -82,15 +110,37 @@ const columns = (props: { roomArray: Room[]; roomsOptionsArray: SelectOption[] }
     },
   ] satisfies ColumnDef<LineItemTable>[];
 
-const getFormat = (value: number | string): React.JSX.Element => {
+const getFormat = (props: {
+  value: number | string;
+  roomName?: string;
+  message?: MessageTab;
+  id?: string;
+  field?: tFieldMinyanTable;
+  index?: number;
+}): React.JSX.Element => {
   return (
-    <Typography component="span" position="relative" sx={{ ...styleTypography }} variant="inherit">
-      {value}
-    </Typography>
+    <Grid container direction="row" justifyContent="center" spacing={2}>
+      <Grid item>
+        <Typography component="span" position="relative" sx={{ ...styleTypography }} variant="inherit">
+          {props.value}
+        </Typography>
+      </Grid>
+      {props.value && (
+        <Grid item>
+          {props.roomName && props.id && props.field && (
+            <ActionsMessage
+              field={props.field}
+              roomName={props.roomName}
+              message={props.message}
+              minyanId={props.id}
+              index={props?.index ?? 0}
+            />
+          )}
+        </Grid>
+      )}
+    </Grid>
   );
 };
-
-const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
 
 export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const { typeDate } = props;
@@ -109,12 +159,12 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .then((res) =>
         dispatch(
           setSettingTimes({
-            setting: res.data.map((minyan: any) => {
+            setting: res.data.map((minyan: GetNewMinyan) => {
               return {
                 ...minyan,
-                blink: minyan.blink?.secondsNum,
-                startDate: minyan.startDate?.time,
-                endDate: minyan.endDate?.time,
+                blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
+                startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
+                endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
                 isRoutine: minyan.spesificDate?.isRoutine,
               };
             }),
@@ -137,7 +187,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   }, []);
 
-  const handlePlusClick = async (index: number, location: number, isCalendar = false): Promise<any> => {
+  const handlePlusClick = async (index: number, location?: eLocationClick, isCalendar = false): Promise<any> => {
     const newRow: NewMinyan = getNewMinyan(index, location, isCalendar);
 
     try {
@@ -147,9 +197,9 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
       // Prepare the newRow object with or without spesificDate based on isCalendar
       const dispatchData: any = {
-        blink: data.blink?.secondsNum,
-        endDate: data.endDate?.time,
-        startDate: data.startDate?.time,
+        blink: data.blink,
+        endDate: data.endDate,
+        startDate: data.startDate,
         room: currentRoom!,
         id: data.id,
       };
@@ -171,12 +221,18 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     }
   };
 
-  const getNewMinyan = (index: number, location: number, isCalendar: boolean) => {
+  const getNewMinyan = (index: number, location?: eLocationClick, isCalendar = false) => {
     const indexBefore = location === eLocationClick.top ? index - 1 : index;
     const indexAfter = location === eLocationClick.top ? index : index + 1;
-    const newMinyan = {
-      startDate: getMiddleTime(settingTimesItem[indexBefore]?.startDate, settingTimesItem[indexAfter]?.startDate),
-      endDate: getMiddleTime(settingTimesItem[indexBefore]?.endDate, settingTimesItem[indexAfter]?.endDate),
+    const newMinyan: NewMinyan = {
+      startDate:
+        index === -1
+          ? new Date()
+          : getMiddleTime(settingTimesItem[indexBefore]?.startDate.time, settingTimesItem[indexAfter]?.startDate.time),
+      endDate:
+        index === -1
+          ? new Date()
+          : getMiddleTime(settingTimesItem[indexBefore]?.endDate.time, settingTimesItem[indexAfter]?.endDate.time),
       roomId: rooms[0].id,
       dateType: dateType,
       steadyFlag: false,
@@ -185,7 +241,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     // Add spesificDate if isCalendar is true
     if (isCalendar) {
       newMinyan.spesificDate = {
-        date: selectedDate.toISOString(), // Convert to ISO string
+        date: selectedDate.toDate(),
         isRoutine: false,
       };
     }
@@ -193,8 +249,13 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     return newMinyan;
   };
 
-  const handleChange = (value: LineItemTable[keyof LineItemTable], index: number, field: string): void => {
-    value && dispatch(updateSettingTimesValue({ index, field, value }));
+  const handleChange = (
+    value: typeForEdit,
+    index: number,
+    field: keyof LineItemTable,
+    internalField?: string
+  ): void => {
+    value && dispatch(updateSettingTimesValue({ index, field, value, internalField }));
   };
 
   const handleDelete = (index: number) => {
@@ -208,13 +269,12 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const handleBlurInput = async (
     value: LineItemTable[keyof LineItemTable],
     index: number,
-    field: string,
-    row?:LineItemTable
+    field: keyof LineItemTable,
+    internalField?: string,
+    row?: LineItemTable
   ): Promise<void> => {
-
     const updateId = settingTimesItem[index].id;
     if (field == 'inactiveDates') {
-      
       await axios
         .put(`${API_BASE_URL}/minyan/updateInactiveDate/${updateId}`, {
           data: {
@@ -246,13 +306,14 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
                 : field;
     axios
       .put(`${API_BASE_URL}/minyan/${updateId}`, {
-        value: value,
-        fieldForEdit: fieldForEdit,
+        value,
+        field: fieldForEdit,
+        internalField,
       })
       .then((res) => {
         const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
         if (editValue) {
-          dispatch(updateSettingTimesValue({ index, field, value: editValue }));
+          dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
           dispatch(sortSettingTimesItem());
         }
       })
@@ -260,11 +321,10 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   };
 
   return (
-    <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
+    <Box sx={{ height: '100%', bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
       {typeDate === 'calendar' ? (
         <Calendar
-          handlePlusClick={(index: number, location: number) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
-          handleDelete={handleDelete}
+          handlePlusClick={(index: number, location?: eLocationClick) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
           handleBlurInput={handleBlurInput}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
@@ -272,17 +332,18 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           roomsOption={roomsOption}
         />
       ) : (
-        <Card>
+        <Card sx={{ height: '100%' }}>
           <Divider />
-          <Box sx={{ overflowX: 'auto', position: 'relative' }}>
+          <Box sx={{ maxHeight: '100%', overflowX: 'auto', position: 'relative' }}>
             <DataTable<LineItemTable>
-              columns={columns}
+              columns={columns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
               edited
               onAddRowClick={handlePlusClick}
               onChangeInput={handleChange}
               onBlurInput={handleBlurInput}
               onDeleteClick={handleDelete}
               rows={settingTimesItem}
+              stickyHeader
             />
           </Box>
         </Card>

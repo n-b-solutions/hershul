@@ -327,25 +327,27 @@ const MinyanListController = {
 
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-
-    const { fieldForEdit, value } = req.body;
-
+    const { field, value, internalField } = req.body;
+    const fieldForEdit = internalField ? `${field}.${internalField}` : field;
     try {
       const updatedMinyan = await MinyanListModel.findByIdAndUpdate(
         id,
         { [fieldForEdit]: value },
         { new: true, runValidators: true }
-      );
-      console.log(updatedMinyan);
-
+      ).populate(`${field}.${internalField}`);
       if (!updatedMinyan) {
         res.status(404).send("Minyan not found");
         return;
       }
 
       io.emit("minyanUpdated", await MinyanListModel.find());
-
-      res.status(200).json(updatedMinyan[fieldForEdit]);
+      res
+        .status(200)
+        .json(
+          internalField
+            ? updatedMinyan?.[field]?.[internalField]
+            : updatedMinyan?.[field]
+        );
     } catch (error) {
       console.error(`Error updating minyan with ID ${id}:`, error);
       res.status(500).send("Internal Server Error");
