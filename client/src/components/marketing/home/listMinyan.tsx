@@ -184,11 +184,13 @@ export function ListMinyan(): React.JSX.Element {
       <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <CardHeader title="Schedule" />
         <Divider />
-        <Box sx={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Box sx={{ flex: 1, overflow: 'auto' }}>
           {minyans.length === 0 ? (
-            <Typography variant="h6" color="text.secondary">
-              No action expected in the next two hours
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <Typography variant="h6" color="text.secondary">
+                No action expected in the next two hours
+              </Typography>
+            </Box>
           ) : (
             <DataTable<Minyan> columns={columns} rows={minyans} />
           )}
