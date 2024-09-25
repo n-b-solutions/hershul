@@ -25,7 +25,7 @@ const ScheduleController = {
       const roomId = minyan.roomId.toString();
       const startDate = new Date(minyan.startDate.time);
       const endDate = new Date(minyan.endDate.time);
-      const blinkMinutes = Number(minyan.blink);
+      const blinkMinutes = Number(minyan.blink?.secondsNum);
       const blurStartTime = new Date(
         startDate.getTime() - blinkMinutes * 60000
       );
@@ -50,10 +50,12 @@ const ScheduleController = {
     const rooms = await RoomStatusModel.find();
 
     for (const room of rooms) {
-      const currentStatus = roomStatusMap.get(room.id.toString());
+      const currentStatus = roomStatusMap.get(room?._id?.toString());
       if (currentStatus && room.status !== currentStatus) {
         room.status = currentStatus;
-        await room.save();
+        await RoomStatusModel.findByIdAndUpdate(room._id, {
+          $set: { status: currentStatus },
+        });
       }
       updates.push(room);
     }
