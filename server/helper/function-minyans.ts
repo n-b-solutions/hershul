@@ -25,16 +25,16 @@ export async function getQueryDateType(date?: Date): Promise<string> {
   let queryDateType: string;
   console.log("date", date);
 
-  let dayOfWeek
+  let dayOfWeek;
   if (date) {
     console.log("date");
-  
-     dayOfWeek= date.getDay();
+
+    dayOfWeek = date.getDay();
   } else {
     const today = new Date();
-    dayOfWeek = today.getDay() // במקרה ואין תאריך, מציג את היום הנוכחי
+    dayOfWeek = today.getDay(); // במקרה ואין תאריך, מציג את היום הנוכחי
   }
-console.log(dayOfWeek);
+  console.log(dayOfWeek);
 
   const roshChodesh = await isRoshChodesh();
 
@@ -58,7 +58,7 @@ console.log(dayOfWeek);
         queryDateType = eDateType.SATURDAY;
         break;
       default:
-    queryDateType = eDateType.DEFAULT; // Fallback default value
+        queryDateType = eDateType.DEFAULT; // Fallback default value
     }
   }
 

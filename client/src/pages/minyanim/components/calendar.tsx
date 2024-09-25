@@ -55,11 +55,11 @@ export function Calendar(props: {
       try {
         // First fetch: get the default calendar minyanim
         const date = selectedDate.toDate(); // תאריך בפורמט ISO
-        console.log("getcalendar",date);
+        console.log('getcalendar', date);
 
         const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getCalendar/${date}`);
         console.log(calendarRes.data);
-        
+
         const minyanim = calendarRes.data.map((minyan: any) => {
           let isRoutine = minyan.specificDate?.isRoutine;
           if (!isRoutine && isDateInactive(selectedDate.toDate(), minyan.inactiveDates)) {
@@ -95,7 +95,7 @@ export function Calendar(props: {
         .catch((err) => console.log('Error fetching data:', err));
     } else {
       const minyanId = settingTimesItem[index].id;
-  
+
       try {
         const currentMinyanRes = settingTimesItem[index];
         const currentInactiveDates = currentMinyanRes.inactiveDates || [];
@@ -107,7 +107,7 @@ export function Calendar(props: {
           const elementDate = new Date(inactiveDate.date).toISOString().split('T')[0];
           return elementDate === selectedDate.toISOString().split('T')[0];
         });
-  
+
         if (isDateInInactive) {
           // If the date exists, remove it
           await axios.put(`${API_BASE_URL}/minyan/updateInactiveDate/${minyanId}`, {
@@ -116,12 +116,12 @@ export function Calendar(props: {
               isRoutine: isRoutine,
             },
           });
-  
+
           const updatedInactiveDates = currentInactiveDates.filter((inactiveDate: any) => {
             const elementDate = new Date(inactiveDate.date).toISOString().split('T')[0];
             return elementDate !== selectedDate.toISOString().split('T')[0];
           });
-  
+
           dispatch(
             updateSettingTimesValue({
               index,
@@ -135,12 +135,12 @@ export function Calendar(props: {
             date: selectedDate.toDate(), // Keep it as string
             isRoutine: isRoutine,
           });
-  
+
           const updatedInactiveDates: SpecificDate[] = [
             ...currentInactiveDates,
             { date: selectedDate.toDate(), isRoutine: isRoutine || false }, // Keep it as string
           ];
-  
+
           dispatch(
             updateSettingTimesValue({
               index,
@@ -154,7 +154,6 @@ export function Calendar(props: {
       }
     }
   };
-  
 
   const handleChange = (value: typeForEdit, index: number, field: keyof LineItemTable): void => {
     value != undefined && dispatch(updateSettingTimesValue({ index, field, value }));
@@ -167,11 +166,13 @@ export function Calendar(props: {
   const getRowProps = (row: LineItemTable): { sx: React.CSSProperties; type: string } => {
     const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
 
-    const rowType = isInactiveDate ? 'disable' : row.dateType === 'calendar' ? 'calendar' : 'other';
+    // Check if dateType is not defined or empty, and default to 'calendar'
+    const rowType = isInactiveDate ? 'disable' : row.dateType === 'calendar' || !row.dateType ? 'calendar' : 'other';
 
     return {
       sx: {
-        backgroundColor: isInactiveDate ? 'lightgray' : row.dateType !== 'calendar' ? 'lightgreen' : '',
+        // Default to no background color for new or undefined rows, and avoid assigning 'lightgreen' too early
+        backgroundColor: isInactiveDate ? 'lightgray' : row.dateType !== 'calendar' && row.dateType ? 'lightgreen' : '',
       },
       type: rowType,
     };

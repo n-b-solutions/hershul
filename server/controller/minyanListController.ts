@@ -91,14 +91,24 @@ const MinyanListController = {
   getCalendar: async (req: Request, res: Response): Promise<void> => {
     const { date } = req.params;
     console.log("getCalendar");
-console.log(date);
+    console.log(date);
 
     try {
       const queryDateType = await getQueryDateType(new Date(date));
+      console.log(queryDateType);
+
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0); // תחילת היום
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999); // סוף היום
 
       const minyanListByDate = await MinyanListModel.find({
         dateType: "calendar",
-        "specificDate.date": date,
+        "specificDate.date": {
+          $gte: startOfDay,
+          $lt: endOfDay,
+        },
       })
         .populate("roomId")
         .populate("startDate.messageId")
@@ -116,6 +126,10 @@ console.log(date);
         ...minyanListByDate,
         ...minyanListByQueryDateType,
       ];
+      console.log("minyanListByDate", minyanListByDate);
+      console.log("minyanListByQueryDateType", minyanListByQueryDateType);
+
+      console.log("combinedMinyanList ", combinedMinyanList);
 
       const fullMinyanList = combinedMinyanList.map((minyan) => ({
         startDate: {
@@ -234,7 +248,7 @@ console.log(date);
     const { data } = req.body;
     try {
       console.log("addInactiveDates");
-      
+
       // שליפת המניין לפי ID
       const minyan = await MinyanListModel.findById(id);
       if (!minyan) {
