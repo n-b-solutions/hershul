@@ -70,9 +70,6 @@ export function Calendar(props: {
           // החזרת האובייקט המעודכן
           return {
             ...minyan,
-            blink: minyan.blink?.secondsNum,
-            startDate: minyan.startDate?.time,
-            endDate: minyan.endDate?.time,
             isRoutine, // משתמשים ב-isRoutine בתוך האובייקט
           };
         });
