@@ -136,7 +136,7 @@ export function Calendar(props: {
             isRoutine: isRoutine,
           });
   
-          const updatedInactiveDates: SpesificDate[] = [
+          const updatedInactiveDates: SpecificDate[] = [
             ...currentInactiveDates,
             { date: selectedDate.toDate(), isRoutine: isRoutine || false }, // Keep it as string
           ];
