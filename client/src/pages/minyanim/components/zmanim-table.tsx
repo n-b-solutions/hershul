@@ -266,7 +266,9 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
-      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: 'calc(100% - 24px)' }}>
+        {' '}
+        {/* הגדרה של גובה מקסימלי */}
         <DataTable<LineItemTable>
           columns={columns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
           edited
@@ -280,5 +282,4 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       </Box>
     </Box>
   );
-
 }
