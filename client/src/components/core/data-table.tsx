@@ -271,7 +271,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                       position: 'absolute',
                       width: '25px',
                       color: '#635bff',
-                      // zIndex:'999',
+                      zIndex:'999',
                       right: `${plusMode.right || 0}px`,
                       ...getPlusYPosition(),
                     }}
@@ -311,6 +311,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   position: 'absolute',
                   width: '25px',
                   color: '#635bff',
+                  zIndex:'999',
                   right: '50%',
                   top: '38px',
                 }}
