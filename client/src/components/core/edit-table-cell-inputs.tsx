@@ -26,8 +26,6 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
   const [select, setSelect] = useState(props.value);
-  console.log(props.fieldName);
-
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
     const editValue = props.valueOption?.find((value: any) => value.id === event.target.value);
@@ -113,7 +111,6 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
         <Switch
           checked={isChecked}
           onChange={(e) => {
-            console.log('Switch clicked:', e.target.checked);
             setIsChecked(e.target.checked);
             handle(e.target.checked as TRowModel[keyof TRowModel] as typeForEdit);
           }}
