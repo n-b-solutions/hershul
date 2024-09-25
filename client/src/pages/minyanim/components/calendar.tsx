@@ -16,7 +16,7 @@ import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { LineItemTable, SpesificDate, typeForEdit } from '@/types/minyanim';
+import type { LineItemTable, SpecificDate, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
@@ -61,7 +61,7 @@ export function Calendar(props: {
         console.log(calendarRes.data);
         
         const minyanim = calendarRes.data.map((minyan: any) => {
-          let isRoutine = minyan.spesificDate?.isRoutine;
+          let isRoutine = minyan.specificDate?.isRoutine;
           if (!isRoutine && isDateInactive(selectedDate.toDate(), minyan.inactiveDates)) {
             const inactiveDate = minyan.inactiveDates.find(
               (item: any) =>
@@ -73,9 +73,6 @@ export function Calendar(props: {
           // החזרת האובייקט המעודכן
           return {
             ...minyan,
-            blink: minyan.blink?.secondsNum,
-            startDate: minyan.startDate?.time,
-            endDate: minyan.endDate?.time,
             isRoutine, // משתמשים ב-isRoutine בתוך האובייקט
           };
         });

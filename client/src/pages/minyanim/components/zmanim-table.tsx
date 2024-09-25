@@ -165,7 +165,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
                 blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
                 startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
                 endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
-                isRoutine: minyan.spesificDate?.isRoutine,
+                isRoutine: minyan.specificDate?.isRoutine,
               };
             }),
           })
@@ -195,7 +195,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       const currentRoom = rooms.find((m) => m.id === res.data.roomId);
       const { roomId: room, ...data } = res.data;
 
-      // Prepare the newRow object with or without spesificDate based on isCalendar
+      // Prepare the newRow object with or without specificDate based on isCalendar
       const dispatchData: any = {
         blink: data.blink,
         endDate: data.endDate,
@@ -205,7 +205,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       };
 
       if (isCalendar) {
-        dispatchData.spesificDate = {
+        dispatchData.specificDate = {
           date: selectedDate.toISOString(), // Convert to ISO string
           isRoutine: false,
         };
@@ -238,9 +238,9 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       steadyFlag: false,
     };
 
-    // Add spesificDate if isCalendar is true
+    // Add specificDate if isCalendar is true
     if (isCalendar) {
-      newMinyan.spesificDate = {
+      newMinyan.specificDate = {
         date: selectedDate.toDate(),
         isRoutine: false,
       };
@@ -273,17 +273,12 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     internalField?: string
   ): void => {
     const updateId = settingTimesItem[index].id;
-  
-    // Depending on the field, you may need to handle async API calls inside the function synchronously
-    const fieldForEdit = mapFieldForEdit(field); // Helper function to map the fields
-  
     // Synchronous dispatch update
     dispatch(updateSettingTimesValue({ index, field, value, internalField }));
-  
     // Async API call can be handled here, but avoid returning Promise<void>
     axios.put(`${API_BASE_URL}/minyan/${updateId}`, {
       value,
-      field: fieldForEdit,
+      field,
       internalField,
     }).then((res) => {
       const editValue = rooms?.find((room) => room.id === res.data) || value;
@@ -293,25 +288,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       }
     }).catch((err) => console.log('Error fetching data:', err));
   };
-  
-  // Helper function to map fields
-  const mapFieldForEdit = (field: keyof LineItemTable): string => {
-    switch (field) {
-      case 'room':
-        return 'roomId';
-      case 'endDate':
-        return 'endDateTime';
-      case 'startDate':
-        return 'startDateTime';
-      case 'blink':
-        return 'blinkSecondsNum';
-      case 'spesificDate':
-        return 'isRoutine';
-      default:
-        return field as string;
-    }
-  };
-  
 
   return (
     <Box sx={{ height: '100%', bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>

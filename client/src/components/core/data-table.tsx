@@ -86,7 +86,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
   const [currentRowType, setCurrentRowType] = React.useState<string>('');
   const [isCellClick, setIsCellClick] = React.useState<{ isclick: 'true' | 'false' | 'partial'; id: string }>({
-    isclick: 'true',
+    isclick: 'false',
     id: '',
   });
   const [plusMode, setPlusMode] = React.useState<{ mode: eLocationClick | null; index?: number; right?: number }>({
@@ -124,7 +124,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
     if (onBlurInput && value != undefined && fieldName) {
       // וידוא שהערך הוא מהסוג הנכון
       const editValue: typeForEdit = value as typeForEdit;
-      onBlurInput(editValue, index, fieldName);
+      onBlurInput(editValue, index, fieldName, internalField);
     }
     const id = (event.target as HTMLInputElement).id;
     setIsCellClick({ isclick: 'false', id });
@@ -288,7 +288,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                   </TableCell>
                 )
               )}
-              {onAddRowClick && !isCellClick.isclick && plusMode.mode && plusMode.index === index ? (
+              {onAddRowClick && isCellClick.isclick == 'false'&& plusMode.mode && plusMode.index === index ? (
                 <TableCell sx={{ padding: '0px', width: '0px', position: 'relative' }}>
                   <Grid
                     onClick={() => onAddRowClick(index, plusMode.mode!)}

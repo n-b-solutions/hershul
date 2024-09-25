@@ -15,7 +15,7 @@ interface BlinkAlertType {
   secondsNum: number;
   messageId?: ObjectId;
 }
-interface SpesificDate{
+interface SpecificDate{
   date: Date;
   isRoutine: boolean;
 }
@@ -26,8 +26,8 @@ export interface MinyanDocument extends Document {
   dateType: DateTypes;
   blink?: BlinkAlertType;
   steadyFlag: Boolean;
-  spesificDate?:SpesificDate;
-    inactiveDates?:SpesificDate[];
+  specificDate?:SpecificDate;
+    inactiveDates?:SpecificDate[];
 }
 
 export enum eDateType {

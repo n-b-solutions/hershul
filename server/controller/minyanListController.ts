@@ -135,10 +135,10 @@ console.log(date);
         dateType: minyan.dateType,
         room: minyan.roomId,
         id: minyan.id,
-        spesificDate: minyan.spesificDate
+        specificDate: minyan.specificDate
           ? {
-              date: minyan.spesificDate.date,
-              isRoutine: minyan.spesificDate.isRoutine,
+              date: minyan.specificDate.date,
+              isRoutine: minyan.specificDate.isRoutine,
             }
           : null,
         inactiveDates: minyan.inactiveDates, // Include inactiveDates here
@@ -180,10 +180,10 @@ console.log(date);
         dateType: minyan.dateType,
         room: minyan.roomId,
         id: minyan.id,
-        spesificDate: minyan.spesificDate
+        specificDate: minyan.specificDate
           ? {
-              date: minyan.spesificDate.date,
-              isRoutine: minyan.spesificDate.isRoutine,
+              date: minyan.specificDate.date,
+              isRoutine: minyan.specificDate.isRoutine,
             }
           : null,
         inactiveDates: minyan.inactiveDates, // Include inactiveDates here
@@ -205,7 +205,7 @@ console.log(date);
         dateType,
         blink,
         steadyFlag,
-        spesificDate,
+        specificDate,
         inactiveDates,
       } = req.body;
 
@@ -216,7 +216,7 @@ console.log(date);
         blink: { secondsNum: blink, message: null },
         dateType,
         steadyFlag,
-        spesificDate,
+        specificDate,
         inactiveDates,
       });
       await newMinyan.save();

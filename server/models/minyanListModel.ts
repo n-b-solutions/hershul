@@ -20,7 +20,7 @@ const MinyanSchema: Schema<MinyanDocument> = new Schema({
   },
   steadyFlag: { type: Boolean, required: true },
   dateType: { type: String, required: true },
-  spesificDate: {
+  specificDate: {
     date: { type: Date, required: false },
     isRoutine: { type: Boolean, required: false },
   },

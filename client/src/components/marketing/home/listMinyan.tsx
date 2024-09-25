@@ -135,7 +135,7 @@ export function ListMinyan(): React.JSX.Element {
       });
     };
 
-    setMinyans(sortMinyans);
+    setMinyans(sortMinyans(filteredMinyans));
   }, []);
 
   useEffect(() => {
