@@ -91,9 +91,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   });
   const tableBodyRef = React.useRef<HTMLTableSectionElement>(null);
   const cellRef = React.useRef<HTMLDivElement>(null);
+  const rowRef = React.useRef<HTMLTableRowElement>(null);
 
   React.useEffect(() => {
     cellRef.current?.focus();
+    rowRef?.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   });
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
@@ -193,6 +195,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
           const rowSelected = rowId ? selected?.has(rowId) : false;
           return (
             <TableRow
+              ref={row.isEdited ? rowRef : null}
               onMouseMove={(event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => handleMouseHover(event, index)}
               onMouseOver={() => setIsToShowDelete({ hover: true, index })}
               onMouseLeave={() => {
@@ -282,7 +285,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                       position: 'absolute',
                       width: '25px',
                       color: '#635bff',
-                      zIndex:'999',
+                      zIndex: '999',
                       right: `${plusMode.right || 0}px`,
                       ...getPlusYPosition(),
                     }}
@@ -300,6 +303,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                   }}
                 >
                   <IconButton
+                    disabled={!!rowRef?.current}
                     onClick={() => onDeleteClick(index)}
                     sx={{ position: 'absolute', right: '20px', top: '9px' }}
                   >
@@ -322,7 +326,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                   position: 'absolute',
                   width: '25px',
                   color: '#635bff',
-                  zIndex:'999',
+                  zIndex: '999',
                   right: '50%',
                   top: '38px',
                 }}
