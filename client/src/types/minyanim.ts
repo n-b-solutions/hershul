@@ -8,7 +8,7 @@ export interface TypeOfDate {
 }
 
 export interface LineItemTable {
-  inactiveDates: SpesificDate[];
+  inactiveDates: SpecificDate[];
   id: string;
   blink?: BlinkAlertTypeName;
   startDate: AlertTypeName;
@@ -16,9 +16,9 @@ export interface LineItemTable {
   room: Room;
   isRoutine?:boolean;
   dateType: string;
-  spesificDate?: SpesificDate; // ודא שזה מוגדר
+  specificDate?: SpecificDate; // ודא שזה מוגדר
 }
-export interface SpesificDate{
+export interface SpecificDate{
   date: Date;
   isRoutine: boolean;
 }
@@ -30,11 +30,11 @@ export interface GetNewMinyan {
   steadyFlag: boolean;
   blink?: BlinkAlertType;
   id: string;
-  spesificDate?:SpesificDate;
-  inactiveDates?:SpesificDate[];
+  specificDate?:SpecificDate;
+  inactiveDates?:SpecificDate[];
 }
 
-// הגדרה חדשה ל-NewMinyan כולל spesificDate
+// הגדרה חדשה ל-NewMinyan כולל specificDate
 export type NewMinyan = {
   startDate: Date;
   endDate: Date;
@@ -42,7 +42,7 @@ export type NewMinyan = {
   dateType: string;
   steadyFlag: boolean;
   blink?: number;
-  spesificDate?: SpesificDate;
+  specificDate?: SpecificDate;
 };
 
 export interface NewMinyan1 {
@@ -84,4 +84,4 @@ export interface MinyanApi {
   blink?: BlinkAlertType;
 }
 
-export type typeForEdit = string | Date | Room | number | boolean | SpesificDate[] | SpesificDate | BlinkAlertTypeName | AlertTypeName;
+export type typeForEdit = string | Date | Room | number | boolean | SpecificDate[] | SpecificDate | BlinkAlertTypeName | AlertTypeName;

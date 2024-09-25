@@ -165,7 +165,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
                 blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
                 startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
                 endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
-                isRoutine: minyan.spesificDate?.isRoutine,
+                isRoutine: minyan.specificDate?.isRoutine,
               };
             }),
           })
@@ -195,7 +195,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       const currentRoom = rooms.find((m) => m.id === res.data.roomId);
       const { roomId: room, ...data } = res.data;
 
-      // Prepare the newRow object with or without spesificDate based on isCalendar
+      // Prepare the newRow object with or without specificDate based on isCalendar
       const dispatchData: any = {
         blink: data.blink,
         endDate: data.endDate,
@@ -205,7 +205,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       };
 
       if (isCalendar) {
-        dispatchData.spesificDate = {
+        dispatchData.specificDate = {
           date: selectedDate.toISOString(), // Convert to ISO string
           isRoutine: false,
         };
@@ -238,9 +238,9 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       steadyFlag: false,
     };
 
-    // Add spesificDate if isCalendar is true
+    // Add specificDate if isCalendar is true
     if (isCalendar) {
-      newMinyan.spesificDate = {
+      newMinyan.specificDate = {
         date: selectedDate.toDate(),
         isRoutine: false,
       };

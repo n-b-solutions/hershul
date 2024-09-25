@@ -14,7 +14,7 @@ import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { LineItemTable, SpesificDate, typeForEdit } from '@/types/minyanim';
+import type { LineItemTable, SpecificDate, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
@@ -56,11 +56,9 @@ export function Calendar(props: {
       try {
         // First fetch: get the default calendar minyanim
         const date = selectedDate.toISOString();  // תאריך בפורמט ISO
-        console.log(date);
-        
         const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getCalendar/${date}`);
         const minyanim = calendarRes.data.map((minyan: any) => {
-          let isRoutine = minyan.spesificDate?.isRoutine;
+          let isRoutine = minyan.specificDate?.isRoutine;
           if (!isRoutine && isDateInactive(selectedDate.toDate(), minyan.inactiveDates)) {
             const inactiveDate = minyan.inactiveDates.find(
               (item: any) =>
@@ -140,7 +138,7 @@ export function Calendar(props: {
           });
 
           // Update inactiveDates in Redux
-          const updatedInactiveDates:SpesificDate[] = [...currentInactiveDates, { date: selectedDate.toDate(), isRoutine: isRoutine || false }];
+          const updatedInactiveDates:SpecificDate[] = [...currentInactiveDates, { date: selectedDate.toDate(), isRoutine: isRoutine || false }];
           dispatch(
             updateSettingTimesValue({
               index,

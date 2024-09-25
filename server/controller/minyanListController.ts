@@ -135,10 +135,10 @@ const MinyanListController = {
         dateType: minyan.dateType,
         room: minyan.roomId,
         id: minyan.id,
-        spesificDate: minyan.spesificDate
+        specificDate: minyan.specificDate
           ? {
-              date: minyan.spesificDate.date,
-              isRoutine: minyan.spesificDate.isRoutine,
+              date: minyan.specificDate.date,
+              isRoutine: minyan.specificDate.isRoutine,
             }
           : null,
         inactiveDates: minyan.inactiveDates, // Include inactiveDates here
@@ -181,10 +181,10 @@ const MinyanListController = {
         dateType: minyan.dateType,
         room: minyan.roomId,
         id: minyan.id,
-        spesificDate: minyan.spesificDate
+        specificDate: minyan.specificDate
           ? {
-              date: minyan.spesificDate.date,
-              isRoutine: minyan.spesificDate.isRoutine,
+              date: minyan.specificDate.date,
+              isRoutine: minyan.specificDate.isRoutine,
             }
           : null,
         inactiveDates: minyan.inactiveDates, // Include inactiveDates here
@@ -206,7 +206,7 @@ const MinyanListController = {
         dateType,
         blink,
         steadyFlag,
-        spesificDate,
+        specificDate,
         inactiveDates,
       } = req.body;
 
@@ -217,7 +217,7 @@ const MinyanListController = {
         blink: { secondsNum: blink, message: null },
         dateType,
         steadyFlag,
-        spesificDate,
+        specificDate,
         inactiveDates,
       });
       await newMinyan.save();
