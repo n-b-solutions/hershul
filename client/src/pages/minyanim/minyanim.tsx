@@ -31,8 +31,7 @@ export function Page(): React.JSX.Element {
       <Helmet>
         <title>{metadata.title}</title>
       </Helmet>
-      <Grid container sx={{ width: '100%', height: '90vh' }}>
-        {' '}
+      <Grid container sx={{ width: '100%', height: '100%' }}>
         <Grid item xs={12}>
           <Tabs onChange={handleTypeChange} sx={{ px: 3 }} value={valueType} variant="scrollable">
             {typesOfDates.map((tab) => (
@@ -41,7 +40,6 @@ export function Page(): React.JSX.Element {
           </Tabs>
         </Grid>
         <Grid item xs={12} sx={{ height: 'calc(100% - 48px)', overflowY: 'auto' }}>
-          {' '}
           <ZmanimTable typeDate={valueType} />
         </Grid>
       </Grid>
