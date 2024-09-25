@@ -1,6 +1,6 @@
 import React, { Ref, useState } from 'react';
 import { SECONDS_NUM, TIME } from '@/consts/setting-minyans';
-import { OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
+import { Input, OutlinedInput, Select, SelectChangeEvent, TextField } from '@mui/material';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';
 
@@ -87,6 +87,9 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
           inputRef={props.cellRef}
           onBlur={(e) => {
             handleBlurInput(e.target.value as typeForEdit, e);
+          }}
+          onKeyDownCapture={(e) => {
+            e.key === 'Enter' && handleBlurInput(props.value as typeForEdit, e);
           }}
         >
           {props.selectOptions.map((option: SelectOption) => (
