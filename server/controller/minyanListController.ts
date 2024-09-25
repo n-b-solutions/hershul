@@ -90,12 +90,10 @@ const MinyanListController = {
   },
   getCalendar: async (req: Request, res: Response): Promise<void> => {
     const { date } = req.params;
-    console.log("getCalendar");
-    console.log(date);
+
 
     try {
       const queryDateType = await getQueryDateType(new Date(date));
-      console.log(queryDateType);
 
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0); // תחילת היום
@@ -126,10 +124,7 @@ const MinyanListController = {
         ...minyanListByDate,
         ...minyanListByQueryDateType,
       ];
-      console.log("minyanListByDate", minyanListByDate);
-      console.log("minyanListByQueryDateType", minyanListByQueryDateType);
 
-      console.log("combinedMinyanList ", combinedMinyanList);
 
       const fullMinyanList = combinedMinyanList.map((minyan) => ({
         startDate: {
@@ -246,8 +241,8 @@ const MinyanListController = {
   addInactiveDates: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { data } = req.body;
+
     try {
-      console.log("addInactiveDates");
 
       // שליפת המניין לפי ID
       const minyan = await MinyanListModel.findById(id);
@@ -266,6 +261,7 @@ const MinyanListController = {
 
       // שמירת הדוקומנט המעודכן
       await minyan.save();
+      console.log(minyan);
 
       res.status(200).json(minyan.inactiveDates);
     } catch (error) {
@@ -310,6 +306,7 @@ const MinyanListController = {
   updateInactiveDate: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { data } = req.body;
+console.log(data);
 
     try {
       const minyan = await MinyanListModel.findById(id);

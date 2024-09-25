@@ -87,6 +87,8 @@ export function Calendar(props: {
     fetchMinyanim();
   }, [dispatch, selectedDate]);
   const handleDelete = async (index: number) => {
+    console.log('handleDelete ', settingTimesItem[index].dateType);
+
     if (settingTimesItem[index].dateType === 'calendar') {
       // Deleting Minyan
       axios
@@ -107,6 +109,7 @@ export function Calendar(props: {
           const elementDate = new Date(inactiveDate.date).toISOString().split('T')[0];
           return elementDate === selectedDate.toISOString().split('T')[0];
         });
+        console.log(isDateInInactive);
 
         if (isDateInInactive) {
           // If the date exists, remove it
@@ -131,6 +134,8 @@ export function Calendar(props: {
           );
         } else {
           // If the date does not exist, add it
+          console.log('isRoutine before adding:', isRoutine);
+
           await axios.put(`${API_BASE_URL}/minyan/addInactiveDates/${minyanId}`, {
             date: selectedDate.toDate(), // Keep it as string
             isRoutine: isRoutine,
@@ -140,7 +145,7 @@ export function Calendar(props: {
             ...currentInactiveDates,
             { date: selectedDate.toDate(), isRoutine: isRoutine || false }, // Keep it as string
           ];
-
+          console.log('Updated inactiveDates array:', updatedInactiveDates);
           dispatch(
             updateSettingTimesValue({
               index,
@@ -166,12 +171,10 @@ export function Calendar(props: {
   const getRowProps = (row: LineItemTable): { sx: React.CSSProperties; type: string } => {
     const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
 
-    // Check if dateType is not defined or empty, and default to 'calendar'
     const rowType = isInactiveDate ? 'disable' : row.dateType === 'calendar' || !row.dateType ? 'calendar' : 'other';
 
     return {
       sx: {
-        // Default to no background color for new or undefined rows, and avoid assigning 'lightgreen' too early
         backgroundColor: isInactiveDate ? 'lightgray' : row.dateType !== 'calendar' && row.dateType ? 'lightgreen' : '',
       },
       type: rowType,
