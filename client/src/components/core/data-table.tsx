@@ -20,7 +20,7 @@ import { EditTableCellInputs } from './edit-table-cell-inputs';
 
 export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
-  field: string; // Updated to allow function
+  field?: keyof TRowModel; // Ensure it's a key of TRowModel
   formatter?: (row: TRowModel, index: number) => React.ReactNode;
   valueForEdit?: (row: TRowModel) => any;
   valueForField?: (row: TRowModel) => any;
@@ -55,7 +55,9 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onChangeInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onBlurInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onDeleteClick?: (index: number) => void;
-  rowProps?: (row: TRowModel) => { sx: React.CSSProperties }; // Add this line
+  rowProps?: (row: TRowModel) => {
+    type: any; sx: React.CSSProperties 
+}; // Add this line
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null; dateType?: string }>({
@@ -119,10 +121,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
     fieldName?: keyof TRowModel,
     internalField?: string
   ): void => {
-    onBlurInput &&
-      value != undefined &&
-      fieldName &&
-      onBlurInput(value as TRowModel[keyof TRowModel], index, fieldName);
+    if (onBlurInput && value != undefined && fieldName) {
+      // וידוא שהערך הוא מהסוג הנכון
+      const editValue: typeForEdit = value as typeForEdit;
+      onBlurInput(editValue, index, fieldName);
+    }
     const id = (event.target as HTMLInputElement).id;
     setIsCellClick({ isclick: 'false', id });
     setPlusMode({ mode: null });
@@ -279,8 +282,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                       ((column.formatter
                         ? column.formatter(row, index)
                         : column.field
-                          ? row[column.field]
-                          : null) as React.ReactNode)
+                        ? row[column.field as keyof TRowModel] 
+                        : null) as React.ReactNode)
                     )}
                   </TableCell>
                 )

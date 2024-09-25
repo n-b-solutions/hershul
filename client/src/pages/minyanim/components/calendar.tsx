@@ -19,6 +19,7 @@ import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 import { eLocationClick } from '@/consts/setting-minyans';
+import { API_BASE_URL } from '@/consts/api';
 
 const styleTypography = {
   display: 'grid',
@@ -36,7 +37,7 @@ const getFormat = (value: number | string): React.JSX.Element => {
   );
 };
 
-const API_BASE_URL = import.meta.env.VITE_LOCAL_SERVER;
+
 export function Calendar(props: {
   handlePlusClick: (index: number, location?: eLocationClick) => void; // Updated signature
   handleBlurInput: (value: typeForEdit, index: number, field: keyof LineItemTable) => void;
@@ -54,7 +55,10 @@ export function Calendar(props: {
     const fetchMinyanim = async () => {
       try {
         // First fetch: get the default calendar minyanim
-        const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getCalendar/${selectedDate}`);
+        const date = selectedDate.toISOString();  // תאריך בפורמט ISO
+        console.log(date);
+        
+        const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getCalendar/${date}`);
         const minyanim = calendarRes.data.map((minyan: any) => {
           let isRoutine = minyan.spesificDate?.isRoutine;
           if (!isRoutine && isDateInactive(selectedDate.toDate(), minyan.inactiveDates)) {
@@ -174,7 +178,7 @@ export function Calendar(props: {
 
   const columns = [
     {
-      formatter: (row) => getFormat(row.blink ? row.blink : ''),
+      formatter: (row) => getFormat(row.blink?.secondsNum ? row.blink.secondsNum : ''),
       typeEditinput: 'number',
       name: 'Blink',
       width: '250px',
@@ -184,7 +188,7 @@ export function Calendar(props: {
       tooltip: 'Time to start Blink before lights on',
     },
     {
-      formatter: (row) => getFormat(dayjs(row.startDate).format('hh:mm')),
+      formatter: (row) => getFormat(dayjs(row.startDate.time).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'Start Date',
@@ -192,10 +196,10 @@ export function Calendar(props: {
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate).format('hh:mm'),
+      valueForEdit: (row) => dayjs(row.startDate.time).format('hh:mm'),
     },
     {
-      formatter: (row) => getFormat(dayjs(row.endDate).format('hh:mm')),
+      formatter: (row) => getFormat(dayjs(row.endDate.time).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'End Date',
@@ -203,7 +207,7 @@ export function Calendar(props: {
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate).format('hh:mm'),
+      valueForEdit: (row) => dayjs(row.endDate.time).format('hh:mm'),
     },
     {
       formatter: (row) => getFormat(row.room?.nameRoom),

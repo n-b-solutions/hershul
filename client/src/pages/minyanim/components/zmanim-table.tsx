@@ -266,59 +266,52 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .catch((err) => console.log('Error fetching data:', err));
   };
 
-  const handleBlurInput = async (
-    value: LineItemTable[keyof LineItemTable],
+  const handleBlurInput = (
+    value: typeForEdit,  // Align this to the expected type
     index: number,
     field: keyof LineItemTable,
-    internalField?: string,
-    row?: LineItemTable
-  ): Promise<void> => {
+    internalField?: string
+  ): void => {
     const updateId = settingTimesItem[index].id;
-    if (field == 'inactiveDates') {
-      await axios
-        .put(`${API_BASE_URL}/minyan/updateInactiveDate/${updateId}`, {
-          data: {
-            date: selectedDate.toISOString(),
-            isRoutine: value,
-          },
-        })
-        .then((res) => {
-          const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
-          if (editValue) {
-            dispatch(updateSettingTimesValue({ index, field, value: editValue }));
-            dispatch(sortSettingTimesItem());
-          }
-        })
-        .catch((err) => console.log('Error fetching data:', err));
-      return;
-    }
-    const fieldForEdit =
-      field === eFieldName.room
-        ? eFieldName.roomId
-        : field === eFieldName.endDate
-          ? eFieldName.endDateTime
-          : field === eFieldName.startDate
-            ? eFieldName.startDateTime
-            : field === eFieldName.blink
-              ? eFieldName.blinkSecondsNum
-              : field == eFieldName.spesificDate
-                ? eFieldName.isRoutine
-                : field;
-    axios
-      .put(`${API_BASE_URL}/minyan/${updateId}`, {
-        value,
-        field: fieldForEdit,
-        internalField,
-      })
-      .then((res) => {
-        const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
-        if (editValue) {
-          dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
-          dispatch(sortSettingTimesItem());
-        }
-      })
-      .catch((err) => console.log('Error fetching data:', err));
+  
+    // Depending on the field, you may need to handle async API calls inside the function synchronously
+    const fieldForEdit = mapFieldForEdit(field); // Helper function to map the fields
+  
+    // Synchronous dispatch update
+    dispatch(updateSettingTimesValue({ index, field, value, internalField }));
+  
+    // Async API call can be handled here, but avoid returning Promise<void>
+    axios.put(`${API_BASE_URL}/minyan/${updateId}`, {
+      value,
+      field: fieldForEdit,
+      internalField,
+    }).then((res) => {
+      const editValue = rooms?.find((room) => room.id === res.data) || value;
+      if (editValue) {
+        dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
+        dispatch(sortSettingTimesItem());
+      }
+    }).catch((err) => console.log('Error fetching data:', err));
   };
+  
+  // Helper function to map fields
+  const mapFieldForEdit = (field: keyof LineItemTable): string => {
+    switch (field) {
+      case 'room':
+        return 'roomId';
+      case 'endDate':
+        return 'endDateTime';
+      case 'startDate':
+        return 'startDateTime';
+      case 'blink':
+        return 'blinkSecondsNum';
+      case 'spesificDate':
+        return 'isRoutine';
+      default:
+        return field as string;
+    }
+  };
+  
 
   return (
     <Box sx={{ height: '100%', bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
