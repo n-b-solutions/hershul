@@ -86,7 +86,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     hover: false,
     index: 0,
   });
-  const rowRef = React.useRef<HTMLTableRowElement>(null);
+  const tableBodyRef = React.useRef<HTMLTableSectionElement>(null);
   const cellRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -94,10 +94,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   });
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
-    if ((event.target as HTMLTextAreaElement).localName === 'div') {
-      const id = (event.currentTarget as HTMLTextAreaElement).id;
-      setIsCellClick({ isclick: true, id });
-    }
+    const id = (event.currentTarget as HTMLTextAreaElement).id;
+    setIsCellClick({ isclick: true, id });
     setPlusMode({ mode: null });
   };
 
@@ -121,15 +119,16 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   };
 
   const handleMouseHover = (event: any, index: number) => {
-    setIsToShowDelete({ hover: true, index });
-    const { y: rectY, height: rectHight } = event.target?.getBoundingClientRect();
-    const { clientY } = event;
-    const rowWidth = rowRef.current?.clientWidth;
-    const middleY = rectY + rectHight / 2;
-    if (clientY < middleY) {
-      rowWidth && setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2 });
-    } else {
-      rowWidth && setPlusMode({ mode: eLocationClick.bottom, index, right: rowWidth / 2 });
+    const currentRowElement = tableBodyRef.current?.children[index]?.getBoundingClientRect();
+    if (currentRowElement) {
+      const { clientY: mouseY } = event;
+      const { width: rowWidth, height: rowHeight, y: rowY } = currentRowElement;
+      const middleY = rowY + rowHeight / 2;
+      if (mouseY < middleY) {
+        setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2 });
+      } else {
+        setPlusMode({ mode: eLocationClick.bottom, index, right: rowWidth / 2 });
+      }
     }
   };
 
@@ -185,16 +184,14 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
           )}
         </TableRow>
       </TableHead>
-      <TableBody>
+      <TableBody ref={tableBodyRef}>
         {rows.map((row, index): React.JSX.Element => {
           const rowId = row.id ? row.id : uniqueRowId?.(row);
           const rowSelected = rowId ? selected?.has(rowId) : false;
           return (
             <TableRow
-              ref={rowRef}
-              onMouseOver={(event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
-                handleMouseHover(event, index);
-              }}
+              onMouseMove={(event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => handleMouseHover(event, index)}
+              onMouseOver={() => setIsToShowDelete({ hover: true, index })}
               onMouseLeave={() => {
                 setIsToShowDelete && setIsToShowDelete({ hover: false, index });
                 setPlusMode({ mode: null });
