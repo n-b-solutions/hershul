@@ -303,6 +303,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                   }}
                 >
                   <IconButton
+                    disabled={!!rowRef?.current}
                     onClick={() => onDeleteClick(index)}
                     sx={{ position: 'absolute', right: '20px', top: '9px' }}
                   >
