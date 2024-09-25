@@ -10,8 +10,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Trash } from '@phosphor-icons/react';
-import { PlusCircle } from '@phosphor-icons/react/dist/ssr';
+import { ArrowArcLeft, PlusCircle, Trash } from '@phosphor-icons/react';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
 import { typeForEdit } from '@/types/minyanim';
@@ -21,9 +20,10 @@ import { EditTableCellInputs } from './edit-table-cell-inputs';
 
 export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
-  field?: keyof TRowModel;
+  field?: keyof TRowModel; // Ensure it's a key of TRowModel
   formatter?: (row: TRowModel, index: number) => React.ReactNode;
   valueForEdit?: (row: TRowModel) => any;
+  valueForField?: (row: TRowModel) => any;
   valueOption?: any & { id: string }[];
   typeEditinput?: string;
   hideName?: boolean;
@@ -32,10 +32,12 @@ export interface ColumnDef<TRowModel> {
   padding?: Padding;
   tooltip?: string;
   selectOptions?: SelectOption[];
+  editable?: boolean;
 }
 type Padding = 'normal' | 'checkbox' | 'none';
 type RowId = number | string;
 export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
+  type?: string;
   columns: ColumnDef<TRowModel>[];
   hideHead?: boolean;
   hover?: boolean;
@@ -53,9 +55,13 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onChangeInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onBlurInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onDeleteClick?: (index: number) => void;
+  rowProps?: (row: TRowModel) => {
+    type: any; sx: React.CSSProperties 
+}; // Add this line
 }
 
-export function DataTable<TRowModel extends object & { id?: RowId | null }>({
+export function DataTable<TRowModel extends object & { id?: RowId | null; dateType?: string }>({
+  type,
   columns,
   hideHead,
   hover,
@@ -73,12 +79,16 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   onChangeInput,
   onBlurInput,
   onDeleteClick,
+  rowProps,
   ...props
 }: DataTableProps<TRowModel>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
-
-  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({ isclick: false, id: '' });
+  const [currentRowType, setCurrentRowType] = React.useState<string>('');
+  const [isCellClick, setIsCellClick] = React.useState<{ isclick: 'true' | 'false' | 'partial'; id: string }>({
+    isclick: 'true',
+    id: '',
+  });
   const [plusMode, setPlusMode] = React.useState<{ mode: eLocationClick | null; index?: number; right?: number }>({
     mode: null,
   });
@@ -86,18 +96,21 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     hover: false,
     index: 0,
   });
-  const rowRef = React.useRef<HTMLTableRowElement>(null);
+  const tableBodyRef = React.useRef<HTMLTableSectionElement>(null);
   const cellRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     cellRef.current?.focus();
   });
 
-  const handleClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
-    if ((event.target as HTMLTextAreaElement).localName === 'div') {
-      const id = (event.currentTarget as HTMLTextAreaElement).id;
-      setIsCellClick({ isclick: true, id });
-    }
+  const handleClick = (event: React.MouseEvent<HTMLSpanElement>, row: TRowModel): void => {
+    const id = (event.currentTarget as HTMLTextAreaElement).id;
+    const rowType = rowProps && rowProps(row)?.type;
+    setCurrentRowType(rowType);
+    // Only allow clicks if dateType is not 'calendar'
+    if (rowType === 'other') setIsCellClick({ isclick: 'false', id });
+    else if (rowType === 'disable') setIsCellClick({ isclick: 'partial', id });
+    else setIsCellClick({ isclick: 'true', id });
     setPlusMode({ mode: null });
   };
 
@@ -108,11 +121,15 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
     fieldName?: keyof TRowModel,
     internalField?: string
   ): void => {
-    onBlurInput && value && fieldName && onBlurInput(value as typeForEdit, index, fieldName, internalField);
-    const id = (event.target as HTMLInputElement).id;
-    setIsCellClick({ isclick: false, id });
-    setPlusMode({ mode: null });
-  };
+     if (onBlurInput && value != undefined && fieldName) {
+    // וידוא שהערך הוא מהסוג הנכון
+    const editValue: typeForEdit = value as typeForEdit;
+    onBlurInput(editValue, index, fieldName);
+  }
+  const id = (event.target as HTMLInputElement).id;
+  setIsCellClick({ isclick: 'false', id });
+  setPlusMode({ mode: null });
+};
 
   const getValue = (index: number, field: keyof TRowModel): TRowModel[keyof TRowModel] => {
     const currentRow = rows[index];
@@ -121,15 +138,16 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   };
 
   const handleMouseHover = (event: any, index: number) => {
-    setIsToShowDelete({ hover: true, index });
-    const { y: rectY, height: rectHight } = event.target?.getBoundingClientRect();
-    const { clientY } = event;
-    const rowWidth = rowRef.current?.clientWidth;
-    const middleY = rectY + rectHight / 2;
-    if (clientY < middleY) {
-      rowWidth && setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2 });
-    } else {
-      rowWidth && setPlusMode({ mode: eLocationClick.bottom, index, right: rowWidth / 2 });
+    const currentRowElement = tableBodyRef.current?.children[index]?.getBoundingClientRect();
+    if (currentRowElement) {
+      const { clientY: mouseY } = event;
+      const { width: rowWidth, height: rowHeight, y: rowY } = currentRowElement;
+      const middleY = rowY + rowHeight / 2;
+      if (mouseY < middleY) {
+        setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2 });
+      } else {
+        setPlusMode({ mode: eLocationClick.bottom, index, right: rowWidth / 2 });
+      }
     }
   };
 
@@ -185,16 +203,16 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
           )}
         </TableRow>
       </TableHead>
-      <TableBody>
+      <TableBody ref={tableBodyRef}>
         {rows.map((row, index): React.JSX.Element => {
           const rowId = row.id ? row.id : uniqueRowId?.(row);
           const rowSelected = rowId ? selected?.has(rowId) : false;
+          const rowType = rowProps ? rowProps(row).type : ''; // Check if rowProps is defined
+
           return (
             <TableRow
-              ref={rowRef}
-              onMouseOver={(event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
-                handleMouseHover(event, index);
-              }}
+              onMouseMove={(event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => handleMouseHover(event, index)}
+              onMouseOver={() => setIsToShowDelete({ hover: true, index })}
               onMouseLeave={() => {
                 setIsToShowDelete && setIsToShowDelete({ hover: false, index });
                 setPlusMode({ mode: null });
@@ -207,7 +225,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   onClick(event, row);
                 },
               })}
-              sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
+              sx={{
+                ...(onClick && { cursor: 'pointer' }),
+                ...(onAddRowClick && { positions: 'relative' }),
+                ...(rowProps ? rowProps(row).sx : {}),
+              }}
             >
               {selectable ? (
                 <TableCell padding="checkbox">
@@ -235,18 +257,18 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                     id={column.field && column.field?.toString() + index}
                     key={column.name}
                     onClick={(e) => {
-                      edited && handleClick(e);
+                      edited && handleClick(e, row);
                     }}
                     padding={column?.padding}
                     sx={{ ...(column.align && { textAlign: column.align }) }}
                   >
                     {edited &&
                     column.field &&
-                    isCellClick.isclick &&
+                    (isCellClick.isclick == 'true' || (isCellClick.isclick == 'partial' && column.editable == true)) &&
                     onChangeInput &&
                     isCellClick.id === column.field.toString() + index ? (
                       <EditTableCellInputs
-                        fieldName={column.field}
+                        fieldName={column.valueForField ? column.valueForField(row) : column.field}
                         cellRef={cellRef}
                         index={index}
                         handleBlur={handleBlurInput}
@@ -260,8 +282,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                       ((column.formatter
                         ? column.formatter(row, index)
                         : column.field
-                          ? row[column.field]
-                          : null) as React.ReactNode)
+                        ? row[column.field as keyof TRowModel] 
+                        : null) as React.ReactNode)
                     )}
                   </TableCell>
                 )
@@ -295,7 +317,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                     onClick={() => onDeleteClick(index)}
                     sx={{ position: 'absolute', right: '20px', top: '9px' }}
                   >
-                    <Trash size={24} />
+                    {rowType === 'disable' ? <ArrowArcLeft size={24} /> : <Trash size={24} />}{' '}
                   </IconButton>
                 </TableCell>
               ) : null}
