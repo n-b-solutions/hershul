@@ -1,10 +1,9 @@
 import * as React from 'react';
 import GlobalStyles from '@mui/material/GlobalStyles';
 
-
 interface LayoutProps {
   children: React.ReactNode;
-} 
+}
 
 export function Layout({ children }: LayoutProps): React.JSX.Element {
   return (
@@ -12,6 +11,7 @@ export function Layout({ children }: LayoutProps): React.JSX.Element {
       <GlobalStyles
         styles={{
           body: {
+            height: '100vh',
             '--MainNav-height': '72px',
             '--MainNav-zIndex': 1000,
             '--SideNav-width': '280px',
@@ -21,9 +21,7 @@ export function Layout({ children }: LayoutProps): React.JSX.Element {
           },
         }}
       />
-      <div>
-        {children}
-      </div>
+      <div style={{ height: 'calc(100vh - 42px)' }}>{children}</div>
     </React.Fragment>
   );
 }

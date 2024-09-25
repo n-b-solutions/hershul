@@ -138,7 +138,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   };
 
   return (
-    <Table {...props}>
+    <Table {...props} onScroll={() => onAddRowClick && setPlusMode({ mode: null })}>
       <TableHead sx={{ ...(hideHead && { visibility: 'collapse', '--TableCell-borderWidth': 0 }) }}>
         <TableRow>
           {selectable ? (
@@ -274,6 +274,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                       position: 'absolute',
                       width: '25px',
                       color: '#635bff',
+                      // zIndex:'999',
                       right: `${plusMode.right || 0}px`,
                       ...getPlusYPosition(),
                     }}

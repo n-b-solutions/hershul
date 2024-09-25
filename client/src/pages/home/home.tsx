@@ -7,7 +7,6 @@ import type { Metadata } from '@/types/metadata';
 import { config } from '@/config';
 import { ListMinyan } from '@/components/marketing/home/listMinyan';
 import { RoomMatrix } from '@/components/marketing/home/roomMatrix';
-import Header from '@/components/marketing/home/header';
 
 const metadata = { title: config.site.name, description: config.site.description } satisfies Metadata;
 
@@ -23,12 +22,10 @@ export function Page(): React.JSX.Element {
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
-          height: '100vh',
+          height: '100%',
         }}
       >
-        <Grid container>
-       
-        </Grid>
+        <Grid container></Grid>
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <RoomMatrix />
