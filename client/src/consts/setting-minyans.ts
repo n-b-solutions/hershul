@@ -14,6 +14,7 @@ export const enum eFieldName {
   endDateTime = 'endDate.time',
   startDateTime = 'startDate.time',
   blinkSecondsNum = 'blink.secondsNum',
+  isEdited='isEdited'
 }
 
 export const SECONDS_NUM = 'secondsNum';

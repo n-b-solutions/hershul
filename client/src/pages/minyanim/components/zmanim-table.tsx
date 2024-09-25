@@ -161,6 +161,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
                 blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
                 startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
                 endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
+                isEdited: false,
               };
             }),
           })
@@ -258,6 +259,12 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
         const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
         if (editValue) {
           dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
+          dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: true }));
+          setTimeout(() => {
+            settingTimesItem.map((_, index) => {
+              dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: false }));
+            });
+          }, 2000);
           if (field === eFieldName.endDate || field === eFieldName.startDate) dispatch(sortSettingTimesItem());
         }
       })

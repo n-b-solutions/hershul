@@ -55,7 +55,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onDeleteClick?: (index: number) => void;
 }
 
-export function DataTable<TRowModel extends object & { id?: RowId | null }>({
+export function DataTable<TRowModel extends object & { id?: RowId | null; isEdited?: boolean }>({
   columns,
   hideHead,
   hover,
@@ -78,7 +78,10 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
-  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({ isclick: false, id: '' });
+  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({
+    isclick: false,
+    id: '',
+  });
   const [plusMode, setPlusMode] = React.useState<{ mode: eLocationClick | null; index?: number; right?: number }>({
     mode: null,
   });
@@ -204,7 +207,15 @@ export function DataTable<TRowModel extends object & { id?: RowId | null }>({
                   onClick(event, row);
                 },
               })}
-              sx={{ ...(onClick && { cursor: 'pointer' }), ...(onAddRowClick && { positions: 'relative' }) }}
+              sx={{
+                ...(onClick && { cursor: 'pointer' }),
+                ...(onAddRowClick && {
+                  positions: 'relative',
+                }),
+                ...(edited && {
+                  bgcolor: row.isEdited ? '#dcdfe4' : 'none',
+                }),
+              }}
             >
               {selectable ? (
                 <TableCell padding="checkbox">
