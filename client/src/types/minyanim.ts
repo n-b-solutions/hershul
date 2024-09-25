@@ -13,6 +13,7 @@ export interface LineItemTable {
   startDate: AlertTypeName;
   endDate: AlertTypeName;
   room: Room;
+  isEdited?:boolean;
 }
 
 export interface GetNewMinyan {
@@ -74,4 +75,4 @@ export interface MinyanApi {
   blink?: BlinkAlertType;
 }
 
-export type typeForEdit = string | Date | Room | number;
+export type typeForEdit = string | Date | Room | number|boolean;
