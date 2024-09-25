@@ -89,11 +89,12 @@ const MinyanListController = {
     }
   },
   getCalendar: async (req: Request, res: Response): Promise<void> => {
-    const { date } = req.body;
+    const { date } = req.params;
     console.log("getCalendar");
+console.log(date);
 
     try {
-      const queryDateType = await getQueryDateType();
+      const queryDateType = await getQueryDateType(new Date(date));
 
       const minyanListByDate = await MinyanListModel.find({
         dateType: "calendar",
@@ -103,7 +104,6 @@ const MinyanListController = {
         .populate("startDate.messageId")
         .populate("endDate.messageId")
         .populate("blink.messageId");
-      console.log(queryDateType);
 
       const minyanListByQueryDateType = await MinyanListModel.find({
         dateType: queryDateType,
@@ -143,7 +143,6 @@ const MinyanListController = {
           : null,
         inactiveDates: minyan.inactiveDates, // Include inactiveDates here
       }));
-      console.log(fullMinyanList);
 
       res.status(200).json(fullMinyanList);
     } catch (error) {
@@ -234,6 +233,8 @@ const MinyanListController = {
     const { id } = req.params;
     const { data } = req.body;
     try {
+      console.log("addInactiveDates");
+      
       // שליפת המניין לפי ID
       const minyan = await MinyanListModel.findById(id);
       if (!minyan) {
