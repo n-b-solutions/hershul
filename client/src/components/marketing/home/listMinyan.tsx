@@ -7,6 +7,7 @@ import { Divider, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
+import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import axios from 'axios';
@@ -32,15 +33,25 @@ const columns: ColumnDef<Minyan>[] = [
   },
   {
     formatter: (row): React.JSX.Element => (
-      <div>
-        <Typography sx={{ whiteSpace: 'nowrap' }} variant="subtitle2">
-          {row.action}
-        </Typography>
-      </div>
+      <Chip
+        label={row.action}
+        sx={{
+          backgroundColor:
+            row.action === 'on'
+              ? 'green'
+              : row.action === 'off'
+                ? 'red'
+                : row.action === 'blink'
+                  ? 'yellow'
+                  : 'default',
+          color: 'white',
+        }}
+      />
     ),
     name: 'Action',
     width: '70px',
   },
+
   {
     formatter: (row): React.JSX.Element => (
       <div>
@@ -174,7 +185,15 @@ export function ListMinyan(): React.JSX.Element {
         <CardHeader title="Schedule" />
         <Divider />
         <Box sx={{ flex: 1, overflow: 'auto' }}>
-          <DataTable<Minyan> columns={columns} rows={minyans} />
+          {minyans.length === 0 ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <Typography variant="h6" color="text.secondary">
+                No action expected in the next two hours
+              </Typography>
+            </Box>
+          ) : (
+            <DataTable<Minyan> columns={columns} rows={minyans} />
+          )}
         </Box>
       </Card>
     </Box>

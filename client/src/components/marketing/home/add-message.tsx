@@ -16,8 +16,6 @@ export function AddMessage(props: {
   const messages = useSelector(selectMessageRooms);
   const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({}); // ניהול state לפי חדר
 
-  const filteredMessages = messages.filter((contact) => contact.name === props.roomName);
-
   const handleMessageClick = (roomName: string) => {
     setDisplayMessages((prevState) => ({
       ...prevState,
@@ -36,7 +34,14 @@ export function AddMessage(props: {
   return (
     <>
       {isSettingPage ? (
-        <IconButton color="secondary" size="small" onClick={() => handleMessageClick(roomName)}>
+        <IconButton
+          color="secondary"
+          size="small"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleMessageClick(roomName);
+          }}
+        >
           <Plus size={10} />
         </IconButton>
       ) : (
