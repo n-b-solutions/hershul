@@ -70,7 +70,7 @@ export function CreateSystemMessages(props: {
   const isSaveDisabled = !name || !audioBlob;
 
   return (
-    <Dialog open={open} onClose={() => handleClose()}>
+    <Dialog open={open} onClose={() => handleClose()} onClick={(event)=> event.stopPropagation()}>
       <Box sx={{ p: 3 }}>
         <Box maxWidth="sm">
           <Grid container spacing={3}>
