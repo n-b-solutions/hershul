@@ -12,10 +12,7 @@ import {
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
-import { Grid, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Divider from '@mui/material/Divider';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,123 +21,9 @@ import { MessageTab } from '@/types/message';
 import type { GetNewMinyan, LineItemTable, NewMinyan, tFieldMinyanTable, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
-import type { ColumnDef } from '@/components/core/data-table';
 
-import { ActionsMessage } from './actions-message';
 import { Calendar } from './calendar';
-
-const styleTypography = {
-  display: 'grid',
-  justifyItems: 'center',
-  alignItems: 'center',
-  whiteSpace: 'nowrap',
-  height: '54px',
-};
-
-const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOptionsArray: SelectOption[] }) =>
-  [
-    {
-      formatter: (row, index): React.JSX.Element =>
-        getFormat({
-          value: row.blink?.secondsNum || '',
-          roomName: row.room?.nameRoom,
-          message: row.blink?.message,
-          id: row?.id,
-          field: 'blink',
-          index,
-        }),
-      valueForEdit: (row) => row.blink?.secondsNum,
-      typeEditinput: 'number',
-      name: 'Blink',
-      width: '250px',
-      field: 'blink',
-      padding: 'none',
-      align: 'center',
-      tooltip: 'Time to start Blink before lights on',
-    },
-    {
-      formatter: (row, index): React.JSX.Element =>
-        getFormat({
-          value: dayjs(row.startDate?.time).format('hh:mm A'),
-          roomName: row.room?.nameRoom,
-          message: row.startDate?.message,
-          id: row?.id,
-          field: 'startDate',
-          index,
-        }),
-      typeEditinput: 'time',
-      padding: 'none',
-      name: 'Start Time',
-      width: '250px',
-      field: 'startDate',
-      align: 'center',
-      tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate?.time),
-    },
-    {
-      formatter: (row, index): React.JSX.Element =>
-        getFormat({
-          value: dayjs(row.endDate?.time).format('hh:mm A'),
-          roomName: row.room?.nameRoom,
-          message: row.endDate?.message,
-          id: row?.id,
-          field: 'endDate',
-          index: index,
-        }),
-      typeEditinput: 'time',
-      padding: 'none',
-      name: 'End Time',
-      width: '250px',
-      field: 'endDate',
-      align: 'center',
-      tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate?.time),
-    },
-    {
-      formatter: (row): React.JSX.Element => getFormat({ value: row.room?.nameRoom }),
-      typeEditinput: 'select',
-      valueForEdit: (row) => row.room?.id,
-      selectOptions: roomsOptionsArray,
-      valueOption: roomArray,
-      padding: 'none',
-      name: 'Room',
-      width: '250px',
-      field: 'room',
-      align: 'center',
-    },
-  ] satisfies ColumnDef<LineItemTable>[];
-
-const getFormat = (props: {
-  value: number | string;
-  roomName?: string;
-  message?: MessageTab;
-  id?: string;
-  field?: tFieldMinyanTable;
-  index?: number;
-}): React.JSX.Element => {
-  return (
-    <Grid container direction="row" justifyContent="center" spacing={2}>
-      <Grid item>
-        <Typography component="span" position="relative" sx={{ ...styleTypography }} variant="inherit">
-          {props.value}
-        </Typography>
-      </Grid>
-      {props.value && (
-        <Grid item>
-          {props.roomName && props.id && props.field && (
-            <ActionsMessage
-              field={props.field}
-              roomName={props.roomName}
-              message={props.message}
-              minyanId={props.id}
-              index={props?.index ?? 0}
-            />
-          )}
-        </Grid>
-      )}
-    </Grid>
-  );
-};
+import { getMinyansColumns } from '../config/minyanim-columns.config';
 
 export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const { typeDate } = props;
@@ -330,7 +213,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
         <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
           {/* הגדרה של גובה מקסימלי */}
           <DataTable<LineItemTable>
-            columns={columns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
+            columns={getMinyansColumns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
             edited
             onAddRowClick={handlePlusClick}
             onChangeInput={handleChange}

@@ -27,6 +27,8 @@ import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
+import { getMinyansColumns } from '../config/minyanim-columns.config';
+
 const styleTypography = {
   display: 'grid',
   justifyItems: 'center',
@@ -41,6 +43,17 @@ const getFormat = (value: number | string): React.JSX.Element => {
       {value}
     </Typography>
   );
+};
+
+const isRoutineColumn: ColumnDef<LineItemTable> = {
+  typeEditinput: 'switch',
+  valueForEdit: (row) => row.isRoutine,
+  name: 'Is Routine',
+  width: '150px',
+  padding: 'none',
+  align: 'center',
+  field: 'isRoutine',
+  editable: true,
 };
 
 export function Calendar(props: {
@@ -222,72 +235,6 @@ export function Calendar(props: {
     };
   };
 
-  const columns = [
-    {
-      formatter: (row) => getFormat(row.blink?.secondsNum ? row.blink.secondsNum : ''),
-      typeEditinput: 'number',
-      name: 'Blink',
-      width: '250px',
-      field: 'blink',
-      padding: 'none',
-      align: 'center',
-      tooltip: 'Time to start Blink before lights on',
-    },
-    {
-      formatter: (row) => getFormat(dayjs(row.startDate?.time).format('hh:mm')),
-      typeEditinput: 'time',
-      padding: 'none',
-      name: 'Start Date',
-      width: '250px',
-      field: 'startDate',
-      align: 'center',
-      tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate?.time).format('hh:mm'),
-    },
-    {
-      formatter: (row) => getFormat(dayjs(row.endDate?.time).format('hh:mm')),
-      typeEditinput: 'time',
-      padding: 'none',
-      name: 'End Date',
-      width: '250px',
-      field: 'endDate',
-      align: 'center',
-      tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate?.time).format('hh:mm'),
-    },
-    {
-      formatter: (row) => getFormat(row.room?.nameRoom),
-      typeEditinput: 'select',
-      valueForEdit: (row) => row.room?.id,
-      selectOptions: roomsOption, // Assuming roomsOption is populated correctly
-      valueOption: rooms, // Assuming rooms is the list of room objects
-      padding: 'none',
-      name: 'Room',
-      width: '250px',
-      field: 'room',
-      align: 'center',
-    },
-    {
-      formatter: (row) => {
-        if (row.isRoutine === undefined) return <></>;
-        return row.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
-      },
-      typeEditinput: 'switch',
-      valueForEdit: (row) => row.isRoutine,
-      // valueForField: (row: any) => {
-      //   const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
-      //   return isInactiveDate ? 'inactiveDates' : 'isRoutine';
-      // },
-
-      name: 'Is Routine',
-      width: '150px',
-      padding: 'none',
-      align: 'center',
-      field: 'isRoutine',
-      editable: true,
-    },
-  ] satisfies ColumnDef<LineItemTable>[];
-
   return (
     <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
       <DatePicker
@@ -301,8 +248,8 @@ export function Calendar(props: {
         <Divider />
         <Box sx={{ overflowX: 'auto', position: 'relative' }}>
           <DataTable<LineItemTable>
-            type="calendar" // כאן אנחנו משתמשים במשתנה type
-            columns={columns}
+            type="calendar"
+            columns={[...getMinyansColumns({ roomArray: rooms, roomsOptionsArray: roomsOption }), isRoutineColumn]}
             edited
             onAddRowClick={handlePlusClick}
             onChangeInput={handleChange}
