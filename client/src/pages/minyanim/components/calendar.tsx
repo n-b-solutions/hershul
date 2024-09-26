@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { API_BASE_URL } from '@/consts/api';
-import { eLocationClick } from '@/consts/setting-minyans';
+import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
 import { isDateInactive } from '@/helpers/functions-times';
 import {
   deleteMinyan,
@@ -174,6 +174,7 @@ export function Calendar(props: {
     internalField?: string
   ): void => {
     const updateId = settingTimesItem[index].id;
+    const fieldForEditDB = field === eFieldName.room ? eFieldName.roomId : field;
     // Synchronous dispatch update
     dispatch(updateSettingTimesValue({ index, field, value, internalField }));
     // Async API call can be handled here, but avoid returning Promise<void>
@@ -184,12 +185,10 @@ export function Calendar(props: {
         isRoutine: value,
       });
     } else {
-      console.log(field);
-      
       axios
         .put(`${API_BASE_URL}/minyan/${updateId}`, {
           value,
-          field,
+          field: fieldForEditDB,
           internalField,
         })
         .then((res) => {
@@ -235,7 +234,7 @@ export function Calendar(props: {
       tooltip: 'Time to start Blink before lights on',
     },
     {
-      formatter: (row) => getFormat(dayjs(row.startDate.time).format('hh:mm')),
+      formatter: (row) => getFormat(dayjs(row.startDate?.time).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'Start Date',
@@ -243,10 +242,10 @@ export function Calendar(props: {
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate.time).format('hh:mm'),
+      valueForEdit: (row) => dayjs(row.startDate?.time).format('hh:mm'),
     },
     {
-      formatter: (row) => getFormat(dayjs(row.endDate.time).format('hh:mm')),
+      formatter: (row) => getFormat(dayjs(row.endDate?.time).format('hh:mm')),
       typeEditinput: 'time',
       padding: 'none',
       name: 'End Date',
@@ -254,12 +253,12 @@ export function Calendar(props: {
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate.time).format('hh:mm'),
+      valueForEdit: (row) => dayjs(row.endDate?.time).format('hh:mm'),
     },
     {
       formatter: (row) => getFormat(row.room?.nameRoom),
       typeEditinput: 'select',
-      valueForEdit: (row) => ({ label: row.room?.nameRoom, value: row.room?.id }),
+      valueForEdit: (row) => row.room?.id,
       selectOptions: roomsOption, // Assuming roomsOption is populated correctly
       valueOption: rooms, // Assuming rooms is the list of room objects
       padding: 'none',

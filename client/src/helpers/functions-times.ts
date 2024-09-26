@@ -1,6 +1,7 @@
 import { ONE_MINUTE } from '@/consts/setting-minyans';
-import { LineItemTable } from '@/types/minyanim';
 import dayjs from 'dayjs';
+
+import { LineItemTable } from '@/types/minyanim';
 
 export const isDateInactive = (selectedDate: Date, inactiveDates: any[] = []): boolean => {
   if (!inactiveDates || !Array.isArray(inactiveDates)) return false;
@@ -12,16 +13,19 @@ export const isDateInactive = (selectedDate: Date, inactiveDates: any[] = []): b
   });
 };
 
-
 export const sortByTime = (array: any): any => {
   const sortArray = array.sort((a: LineItemTable, b: LineItemTable) => {
-    const timeStartA = dayjs().hour(dayjs(a.startDate?.time).get('hour')).minute(dayjs(a.startDate.time).get('minute'));
-    const timeStartB = dayjs().hour(dayjs(b.startDate.time).get('hour')).minute(dayjs(b.startDate.time).get('minute'));
-    const timeEndA = dayjs().hour(dayjs(a.endDate.time).get('hour')).minute(dayjs(a.endDate.time).get('minute'));
-    const timeEndB = dayjs().hour(dayjs(b.endDate.time).get('hour')).minute(dayjs(b.endDate.time).get('minute'));
+    const timeStartA = dayjs()
+      .hour(dayjs(a.startDate?.time).get('hour'))
+      .minute(dayjs(a.startDate?.time).get('minute'));
+    const timeStartB = dayjs().hour(dayjs(b.startDate.time).get('hour')).minute(dayjs(b.startDate?.time).get('minute'));
+    const timeEndA = dayjs().hour(dayjs(a.endDate?.time).get('hour')).minute(dayjs(a.endDate?.time).get('minute'));
+    const timeEndB = dayjs().hour(dayjs(b.endDate?.time).get('hour')).minute(dayjs(b.endDate?.time).get('minute'));
     if (timeStartA.isAfter(timeStartB)) return 1;
     else if (timeStartA.isSame(timeStartB)) {
       if (timeEndA.isAfter(timeEndB)) return 1;
+      else;
+      if (timeEndA.isSame(timeEndB)) return 1;
       else return -1;
     } else return -1;
   });

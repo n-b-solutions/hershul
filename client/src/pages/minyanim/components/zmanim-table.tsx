@@ -43,9 +43,9 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
       formatter: (row, index): React.JSX.Element =>
         getFormat({
           value: row.blink?.secondsNum || '',
-          roomName: row.room.nameRoom,
+          roomName: row.room?.nameRoom,
           message: row.blink?.message,
-          id: row.id,
+          id: row?.id,
           field: 'blink',
           index,
         }),
@@ -61,10 +61,10 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
     {
       formatter: (row, index): React.JSX.Element =>
         getFormat({
-          value: dayjs(row.startDate.time).format('hh:mm A'),
-          roomName: row.room.nameRoom,
-          message: row.startDate.message,
-          id: row.id,
+          value: dayjs(row.startDate?.time).format('hh:mm A'),
+          roomName: row.room?.nameRoom,
+          message: row.startDate?.message,
+          id: row?.id,
           field: 'startDate',
           index,
         }),
@@ -75,15 +75,15 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate.time),
+      valueForEdit: (row) => dayjs(row.startDate?.time),
     },
     {
       formatter: (row, index): React.JSX.Element =>
         getFormat({
-          value: dayjs(row.endDate.time).format('hh:mm A'),
-          roomName: row.room.nameRoom,
-          message: row.endDate.message,
-          id: row.id,
+          value: dayjs(row.endDate?.time).format('hh:mm A'),
+          roomName: row.room?.nameRoom,
+          message: row.endDate?.message,
+          id: row?.id,
           field: 'endDate',
           index: index,
         }),
@@ -94,12 +94,12 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate.time),
+      valueForEdit: (row) => dayjs(row.endDate?.time),
     },
     {
       formatter: (row): React.JSX.Element => getFormat({ value: row.room?.nameRoom }),
       typeEditinput: 'select',
-      valueForEdit: (row) => row.room.id,
+      valueForEdit: (row) => row.room?.id,
       selectOptions: roomsOptionsArray,
       valueOption: roomArray,
       padding: 'none',
@@ -166,6 +166,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
                 startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
                 endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
                 isRoutine: minyan.specificDate?.isRoutine,
+                isEdited: false,
               };
             }),
           })
@@ -191,35 +192,52 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     const newRow: NewMinyan = getNewMinyan(index, location, isCalendar);
 
     try {
-      const res = await axios.post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow });
-      const currentRoom = rooms.find((m) => m.id === res.data.roomId);
-      const { roomId: room, ...data } = res.data;
+      await axios
+        .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
+        .then((res) => {
+          const currentRoom = rooms.find((m) => m.id === res.data.roomId);
+          const { roomId: room, ...data } = res.data;
+          // Prepare the newRow object with or without specificDate based on isCalendar
+          const dispatchData: any = {
+            blink: data.blink,
+            endDate: data.endDate,
+            startDate: data.startDate,
+            room: currentRoom!,
+            id: data.id,
+            isEdited: true,
+          };
 
-      // Prepare the newRow object with or without specificDate based on isCalendar
-      const dispatchData: any = {
-        blink: data.blink,
-        endDate: data.endDate,
-        startDate: data.startDate,
-        room: currentRoom!,
-        id: data.id,
-      };
-
-      if (isCalendar) {
-        dispatchData.specificDate = {
-          date: selectedDate.toISOString(), // Convert to ISO string
-          isRoutine: false,
-        };
-        dispatchData.isRoutine = false;
-      }
-      dispatch(
-        addSettingTimes({
-          newRow: dispatchData,
+          if (isCalendar) {
+            dispatchData.specificDate = {
+              date: selectedDate.toISOString(), // Convert to ISO string
+              isRoutine: false,
+            };
+            dispatchData.isRoutine = false;
+          }
+          dispatch(
+            addSettingTimes({
+              newRow: dispatchData,
+            })
+          );
         })
-      );
-      dispatch(sortSettingTimesItem());
+        .then(async () => {
+          dispatch(await sortSettingTimesItem());
+        })
+        .then(() => {
+          setTimeout(() => {
+            setFalseEdited();
+          }, 1000);
+        });
     } catch (err) {
       console.log('Error fetching data:', err);
     }
+  };
+
+  const setFalseEdited = () => {
+    settingTimesItem.map((_, index) => {
+      dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: false }));
+    });
+    dispatch(updateSettingTimesValue({ index: settingTimesItem.length, field: eFieldName.isEdited, value: false }));
   };
 
   const getNewMinyan = (index: number, location?: eLocationClick, isCalendar = false) => {
@@ -273,27 +291,32 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     internalField?: string
   ): void => {
     const updateId = settingTimesItem[index].id;
+    const fieldForEditDB = field === eFieldName.room ? eFieldName.roomId : field;
     // Synchronous dispatch update
     dispatch(updateSettingTimesValue({ index, field, value, internalField }));
     // Async API call can be handled here, but avoid returning Promise<void>
     axios
       .put(`${API_BASE_URL}/minyan/${updateId}`, {
         value,
-        field,
+        field: fieldForEditDB,
         internalField,
       })
       .then((res) => {
         const editValue = rooms?.find((room) => room.id === res.data) || value;
         if (editValue) {
           dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
-          dispatch(sortSettingTimesItem());
+          dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: true }));
+          setTimeout(() => {
+            setFalseEdited();
+          }, 1000);
+          if (field === eFieldName.endDate || field === eFieldName.startDate) dispatch(sortSettingTimesItem());
         }
       })
       .catch((err) => console.log('Error fetching data:', err));
   };
 
   return (
-    <Box sx={{ height: '100%', bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
       {typeDate === 'calendar' ? (
         <Calendar
           handlePlusClick={(index: number, location?: eLocationClick) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
@@ -304,21 +327,19 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           roomsOption={roomsOption}
         />
       ) : (
-        <Card sx={{ height: '100%' }}>
-          <Divider />
-          <Box sx={{ maxHeight: '100%', overflowX: 'auto', position: 'relative' }}>
-            <DataTable<LineItemTable>
-              columns={columns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
-              edited
-              onAddRowClick={handlePlusClick}
-              onChangeInput={handleChange}
-              onBlurInput={handleBlurInput}
-              onDeleteClick={handleDelete}
-              rows={settingTimesItem}
-              stickyHeader
-            />
-          </Box>
-        </Card>
+        <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
+          {/* הגדרה של גובה מקסימלי */}
+          <DataTable<LineItemTable>
+            columns={columns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
+            edited
+            onAddRowClick={handlePlusClick}
+            onChangeInput={handleChange}
+            onBlurInput={handleBlurInput}
+            onDeleteClick={handleDelete}
+            rows={settingTimesItem}
+            stickyHeader
+          />
+        </Box>
       )}
     </Box>
   );

@@ -50,7 +50,6 @@ export function SystemMessages(props: {
   };
 
   const handleItemClick = (message: string, messageId?: string) => {
-    console.log(`Clicked on : ${message}`);
     handleClose(messageId);
   };
 
@@ -74,6 +73,7 @@ export function SystemMessages(props: {
         BackdropProps={{ invisible: true }}
         open={open}
         onClose={(messageId: string) => handleClose(messageId)}
+        onClick={(event)=> event.stopPropagation()}
       >
         <Box sx={{ bgcolor: 'transparent', p: 0, display: 'flex', justifyContent: 'center' }}>
           <Paper

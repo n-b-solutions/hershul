@@ -17,6 +17,7 @@ export interface LineItemTable {
   isRoutine?:boolean;
   dateType: string;
   specificDate?: SpecificDate; // ודא שזה מוגדר
+  isEdited?:boolean;
 }
 export interface SpecificDate{
   date: Date|string;

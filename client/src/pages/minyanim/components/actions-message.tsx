@@ -56,7 +56,13 @@ export function ActionsMessage(props: {
       </Grid>
       <Grid item>
         {message?.name ? (
-          <IconButton size="small" onClick={() => handleClick()}>
+          <IconButton
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleClick();
+            }}
+          >
             <Trash size={10} />
           </IconButton>
         ) : (

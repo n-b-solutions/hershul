@@ -56,11 +56,12 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onBlurInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onDeleteClick?: (index: number) => void;
   rowProps?: (row: TRowModel) => {
-    type: any; sx: React.CSSProperties 
-}; // Add this line
+    type: any;
+    sx: React.CSSProperties;
+  }; // Add this line
 }
 
-export function DataTable<TRowModel extends object & { id?: RowId | null; dateType?: string }>({
+export function DataTable<TRowModel extends object & { id?: RowId | null; dateType?: string; isEdited?: boolean }>({
   type,
   columns,
   hideHead,
@@ -85,7 +86,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
   const [currentRowType, setCurrentRowType] = React.useState<string>('');
-  const [isCellClick, setIsCellClick] = React.useState<{ isclick: 'true' | 'false' | 'partial'; id: string }>({
+  const [isCellClick, setIsCellClick] = React.useState<{
+    isclick: 'true' | 'false' | 'partial';
+    id: string;
+    index?: number;
+  }>({
     isclick: 'false',
     id: '',
   });
@@ -98,9 +103,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
   });
   const tableBodyRef = React.useRef<HTMLTableSectionElement>(null);
   const cellRef = React.useRef<HTMLDivElement>(null);
+  const rowRef = React.useRef<HTMLTableRowElement>(null);
 
   React.useEffect(() => {
     cellRef.current?.focus();
+    rowRef?.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   });
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>, row: TRowModel): void => {
@@ -122,14 +129,14 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
     internalField?: string
   ): void => {
     console.log(fieldName);
-    
+
     if (onBlurInput && value != undefined && fieldName) {
       // וידוא שהערך הוא מהסוג הנכון
       const editValue: typeForEdit = value as typeForEdit;
       onBlurInput(editValue, index, fieldName, internalField);
     }
     const id = (event.target as HTMLInputElement).id;
-    setIsCellClick({ isclick: 'false', id });
+    setIsCellClick({ isclick: 'false', id, index });
     setPlusMode({ mode: null });
   };
 
@@ -213,6 +220,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
 
           return (
             <TableRow
+              ref={row.isEdited ? rowRef : null}
               onMouseMove={(event: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => handleMouseHover(event, index)}
               onMouseOver={() => setIsToShowDelete({ hover: true, index })}
               onMouseLeave={() => {
@@ -229,7 +237,12 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
               })}
               sx={{
                 ...(onClick && { cursor: 'pointer' }),
-                ...(onAddRowClick && { positions: 'relative' }),
+                ...(onAddRowClick && {
+                  positions: 'relative',
+                }),
+                ...(edited && {
+                  bgcolor: row.isEdited ? '#dcdfe4' : 'none',
+                }),
                 ...(rowProps ? rowProps(row).sx : {}),
               }}
             >
@@ -284,13 +297,13 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                       ((column.formatter
                         ? column.formatter(row, index)
                         : column.field
-                        ? row[column.field as keyof TRowModel] 
-                        : null) as React.ReactNode)
+                          ? row[column.field as keyof TRowModel]
+                          : null) as React.ReactNode)
                     )}
                   </TableCell>
                 )
               )}
-              {onAddRowClick && isCellClick.isclick == 'false'&& plusMode.mode && plusMode.index === index ? (
+              {onAddRowClick && isCellClick.isclick == 'false' && plusMode.mode && plusMode.index === index ? (
                 <TableCell sx={{ padding: '0px', width: '0px', position: 'relative' }}>
                   <Grid
                     onClick={() => onAddRowClick(index, plusMode.mode!)}
@@ -298,7 +311,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                       position: 'absolute',
                       width: '25px',
                       color: '#635bff',
-                      // zIndex:'999',
+                      zIndex: '999',
                       right: `${plusMode.right || 0}px`,
                       ...getPlusYPosition(),
                     }}
@@ -307,7 +320,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                   </Grid>
                 </TableCell>
               ) : null}
-              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index ? (
+              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index && isCellClick.isclick === 'false'
+               ? (
                 <TableCell
                   sx={{
                     padding: '0px',
@@ -316,6 +330,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                   }}
                 >
                   <IconButton
+                    disabled={!!rowRef?.current}
                     onClick={() => onDeleteClick(index)}
                     sx={{ position: 'absolute', right: '20px', top: '9px' }}
                   >
@@ -338,6 +353,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                   position: 'absolute',
                   width: '25px',
                   color: '#635bff',
+                  zIndex: '999',
                   right: '50%',
                   top: '38px',
                 }}
