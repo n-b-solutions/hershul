@@ -9,23 +9,15 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Tooltip from '@mui/material/Tooltip';
 import Grid from '@mui/material/Unstable_Grid2';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 import { Room } from '@/types/room';
 import { Option } from '@/components/core/option';
-
-import { createMessageRoom, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
-import type { AppDispatch } from '../../../state/store';
 import AudioRecorder from './audioRecorder';
 
-const rooms = [
-  { id: '1', nameRoom: 'room1' },
-  { id: '2', nameRoom: 'room2' },
-  { id: '3', nameRoom: 'room3' },
-  { id: '4', nameRoom: 'room4' },
-  { id: '5', nameRoom: 'room5' },
-  { id: '6', nameRoom: 'room6' },
-] satisfies Room[];
+import { createMessageRoom, selectMessageRoomLoading } from '@/state/message-room/message-room-slice';
+import type { AppDispatch } from '@/state/store';
+import { API_BASE_URL } from '@/consts/api';
 
 export function CreateSystemMessages(props: {
   open: boolean;
@@ -35,12 +27,11 @@ export function CreateSystemMessages(props: {
   const [selectedRoom, setSelectedRoom] = React.useState<string>(props.room || '');
   const [name, setName] = React.useState<string>('');
   const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
+  const [rooms, setRooms] = React.useState<Room[]>([]); // Add state for rooms
   const { open, handleClose, room } = props;
 
   const dispatch = useDispatch<AppDispatch>();
   const loading = useSelector(selectMessageRoomLoading);
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
 
   React.useEffect(() => {
     if (!open) {
@@ -50,6 +41,19 @@ export function CreateSystemMessages(props: {
       setAudioBlob(null);
     }
   }, [open, room]);
+
+  // Fetch rooms from the API when the component mounts
+  React.useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/roomStatus`); // Adjust API endpoint as needed
+        setRooms(response.data);
+      } catch (error) {
+        console.error('Error fetching rooms:', error);
+      }
+    };
+    fetchRooms();
+  }, []);
 
   const handleRoomChange = (event: SelectChangeEvent<string>) => {
     setSelectedRoom(event.target.value);
