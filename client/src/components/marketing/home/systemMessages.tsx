@@ -19,7 +19,11 @@ import {
 import type { AppDispatch } from '../../../state/store';
 import { CreateSystemMessages } from './createSystemMessages';
 
-export function SystemMessages(props: { open: boolean; handleClose: () => void; room: string }): React.JSX.Element {
+export function SystemMessages(props: {
+  open: boolean;
+  handleClose: (messageId?: string) => void;
+  room: string;
+}): React.JSX.Element {
   const { open, handleClose, room } = props;
   const dispatch = useDispatch<AppDispatch>();
 
@@ -40,13 +44,13 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void; 
     setIsCreateDialogOpen(true);
   };
 
-  const handleCreateDialogClose = () => {
+  const handleCreateDialogClose = (messageId?: string) => {
     setIsCreateDialogOpen(false);
+    if (messageId) handleClose(messageId);
   };
 
-  const handleItemClick = (message: string) => {
-    console.log(`Clicked on : ${message}`);
-    handleClose();
+  const handleItemClick = (message: string, messageId?: string) => {
+    handleClose(messageId);
   };
 
   const filteredMessages = messages.filter(
@@ -68,7 +72,8 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void; 
         }}
         BackdropProps={{ invisible: true }}
         open={open}
-        onClose={handleClose}
+        onClose={(messageId: string) => handleClose(messageId)}
+        onClick={(event)=> event.stopPropagation()}
       >
         <Box sx={{ bgcolor: 'transparent', p: 0, display: 'flex', justifyContent: 'center' }}>
           <Paper
@@ -107,7 +112,7 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void; 
                   {filteredMessages.length > 0 ? (
                     filteredMessages.map((contact) => (
                       <ListItem disablePadding key={contact.id}>
-                        <ListItemButton onClick={() => handleItemClick(contact.name)}>
+                        <ListItemButton onClick={() => handleItemClick(contact.name, contact.id)}>
                           <ListItemText
                             disableTypography
                             primary={
@@ -136,7 +141,11 @@ export function SystemMessages(props: { open: boolean; handleClose: () => void; 
         </Box>
       </Dialog>
 
-      <CreateSystemMessages open={isCreateDialogOpen} handleClose={handleCreateDialogClose} room={room} />
+      <CreateSystemMessages
+        open={isCreateDialogOpen}
+        handleClose={(messageId?: string) => handleCreateDialogClose(messageId)}
+        room={room}
+      />
     </>
   );
 }

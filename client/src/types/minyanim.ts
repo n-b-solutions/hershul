@@ -1,5 +1,7 @@
+import { MessageRoom, MessageTab } from './message';
 import { Room } from './room';
 
+export type tFieldMinyanTable = 'blink' | 'startDate' | 'endDate' | 'room';
 export interface TypeOfDate {
   value: string;
   label: string;
@@ -7,14 +9,14 @@ export interface TypeOfDate {
 
 export interface LineItemTable {
   id: string;
-  blink?: number;
-  startDate: Date;
-  endDate: Date;
+  blink?: BlinkAlertTypeName;
+  startDate: AlertTypeName;
+  endDate: AlertTypeName;
   room: Room;
+  isEdited?:boolean;
 }
 
 export interface GetNewMinyan {
-  messages: string;
   announcement: boolean;
   startDate: AlertType;
   endDate: AlertType;
@@ -42,11 +44,21 @@ export interface NewMinyan1 {
 }
 export interface AlertType {
   time: Date;
-  messageId?: string;
+  message?: MessageRoom;
+}
+
+export interface AlertTypeName {
+  time: Date;
+  message?: MessageTab;
 }
 export interface BlinkAlertType {
   secondsNum: number;
-  messageId?: string;
+  message?: MessageRoom;
+}
+
+export interface BlinkAlertTypeName {
+  secondsNum: number;
+  message?: MessageTab;
 }
 export interface Minyan {
   roomName: string;
@@ -62,3 +74,5 @@ export interface MinyanApi {
   endDate: AlertType;
   blink?: BlinkAlertType;
 }
+
+export type typeForEdit = string | Date | Room | number|boolean;

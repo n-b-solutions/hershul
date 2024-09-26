@@ -14,6 +14,10 @@ export const enum eFieldName {
   endDateTime = 'endDate.time',
   startDateTime = 'startDate.time',
   blinkSecondsNum = 'blink.secondsNum',
+  isEdited='isEdited'
 }
 
+export const SECONDS_NUM = 'secondsNum';
+export const TIME = 'time';
+export const MESSAGE_ID = 'messageId';
 export const NO_DATA = 'No minyans have been determined for this category';
