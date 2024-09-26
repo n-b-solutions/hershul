@@ -42,9 +42,9 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
       formatter: (row, index): React.JSX.Element =>
         getFormat({
           value: row.blink?.secondsNum || '',
-          roomName: row.room.nameRoom,
+          roomName: row.room?.nameRoom,
           message: row.blink?.message,
-          id: row.id,
+          id: row?.id,
           field: 'blink',
           index,
         }),
@@ -60,10 +60,10 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
     {
       formatter: (row, index): React.JSX.Element =>
         getFormat({
-          value: dayjs(row.startDate.time).format('hh:mm A'),
-          roomName: row.room.nameRoom,
-          message: row.startDate.message,
-          id: row.id,
+          value: dayjs(row.startDate?.time).format('hh:mm A'),
+          roomName: row.room?.nameRoom,
+          message: row.startDate?.message,
+          id: row?.id,
           field: 'startDate',
           index,
         }),
@@ -74,15 +74,15 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate.time),
+      valueForEdit: (row) => dayjs(row.startDate?.time),
     },
     {
       formatter: (row, index): React.JSX.Element =>
         getFormat({
-          value: dayjs(row.endDate.time).format('hh:mm A'),
-          roomName: row.room.nameRoom,
-          message: row.endDate.message,
-          id: row.id,
+          value: dayjs(row.endDate?.time).format('hh:mm A'),
+          roomName: row.room?.nameRoom,
+          message: row.endDate?.message,
+          id: row?.id,
           field: 'endDate',
           index: index,
         }),
@@ -93,12 +93,12 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate.time),
+      valueForEdit: (row) => dayjs(row.endDate?.time),
     },
     {
       formatter: (row): React.JSX.Element => getFormat({ value: row.room?.nameRoom }),
       typeEditinput: 'select',
-      valueForEdit: (row) => row.room.id,
+      valueForEdit: (row) => row.room?.id,
       selectOptions: roomsOptionsArray,
       valueOption: roomArray,
       padding: 'none',
@@ -187,23 +187,38 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     const newRow: NewMinyan = getNewMinyan(index, location);
     await axios
       .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
-      .then((res) => {
+      .then(async (res) => {
         const currentRoom = rooms.find((m) => m.id === res.data.roomId);
         const { roomId: room, ...data } = res.data;
         dispatch(
-          addSettingTimes({
+          await addSettingTimes({
             newRow: {
               blink: data.blink,
               endDate: data.endDate,
               startDate: data.startDate,
               room: currentRoom!,
               id: data.id,
+              isEdited: true,
             },
           })
         );
       })
-      .then(() => dispatch(sortSettingTimesItem()))
+      .then(async () => {
+        dispatch(await sortSettingTimesItem());
+      })
+      .then(() => {
+        setTimeout(() => {
+          setFalseEdited();
+        }, 1000);
+      })
       .catch((err) => console.log('Error fetching data:', err));
+  };
+
+  const setFalseEdited = () => {
+    settingTimesItem.map((_, index) => {
+      dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: false }));
+    });
+    dispatch(updateSettingTimesValue({ index: settingTimesItem.length, field: eFieldName.isEdited, value: false }));
   };
 
   const getNewMinyan = (index: number, location?: eLocationClick) => {
@@ -261,10 +276,8 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
           dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: true }));
           setTimeout(() => {
-            settingTimesItem.map((_, index) => {
-              dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: false }));
-            });
-          }, 2000);
+            setFalseEdited();
+          }, 1000);
           if (field === eFieldName.endDate || field === eFieldName.startDate) dispatch(sortSettingTimesItem());
         }
       })
