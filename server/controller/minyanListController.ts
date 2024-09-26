@@ -91,7 +91,6 @@ const MinyanListController = {
   getCalendar: async (req: Request, res: Response): Promise<void> => {
     const { date } = req.params;
 
-
     try {
       const queryDateType = await getQueryDateType(new Date(date));
 
@@ -124,7 +123,6 @@ const MinyanListController = {
         ...minyanListByDate,
         ...minyanListByQueryDateType,
       ];
-
 
       const fullMinyanList = combinedMinyanList.map((minyan) => ({
         startDate: {
@@ -240,10 +238,9 @@ const MinyanListController = {
   },
   addInactiveDates: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    const { data } = req.body;
+    const data = req.body;
 
     try {
-
       // שליפת המניין לפי ID
       const minyan = await MinyanListModel.findById(id);
       if (!minyan) {
@@ -272,7 +269,7 @@ const MinyanListController = {
 
   removeInactiveDates: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    const { data } = req.body;
+    const data = req.body;
 
     try {
       const minyan = await MinyanListModel.findById(id);
@@ -285,12 +282,17 @@ const MinyanListController = {
         res.status(400).send("No inactive dates found");
         return;
       }
+      const startOfDay = new Date(data.date);
+      startOfDay.setHours(0, 0, 0, 0); // תחילת היום
+
+      const endOfDay = new Date(data.date);
+      endOfDay.setHours(23, 59, 59, 999); // סוף היום
 
       minyan.inactiveDates = minyan.inactiveDates.filter(
         (inactiveDate) =>
           !(
-            inactiveDate.date.getTime() === new Date(data.date).getTime() &&
-            inactiveDate.isRoutine === data.isRoutine
+            new Date(inactiveDate.date) >= startOfDay &&
+            new Date(inactiveDate.date) <= endOfDay
           )
       );
 
@@ -305,8 +307,8 @@ const MinyanListController = {
 
   updateInactiveDate: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    const { data } = req.body;
-console.log(data);
+    const data = req.body;
+    console.log(data);
 
     try {
       const minyan = await MinyanListModel.findById(id);
@@ -321,8 +323,16 @@ console.log(data);
       }
 
       const targetDate = new Date(data.date).getTime();
+      console.log("targetDate ", targetDate);
+      const startOfDay = new Date(data.date);
+      startOfDay.setHours(0, 0, 0, 0); // תחילת היום
+
+      const endOfDay = new Date(data.date);
+      endOfDay.setHours(23, 59, 59, 999); // סוף היום
+
       const inactiveDate = minyan.inactiveDates.find(
-        (item) => new Date(item.date).getTime() === targetDate
+        (item) =>
+          new Date(item.date) >= startOfDay && new Date(item.date) <= endOfDay
       );
 
       if (!inactiveDate) {
@@ -344,13 +354,13 @@ console.log(data);
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { field, value, internalField } = req.body;
-    const fieldForEdit = internalField ? `${field}.${internalField}` : field;
+    const fieldForEdit = internalField ? `${field}.${internalField}` : field;    
     try {
       const updatedMinyan = await MinyanListModel.findByIdAndUpdate(
         id,
         { [fieldForEdit]: value },
         { new: true, runValidators: true }
-      ).populate(`${field}.${internalField}`);
+      )
       if (!updatedMinyan) {
         res.status(404).send("Minyan not found");
         return;

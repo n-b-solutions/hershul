@@ -27,6 +27,7 @@ const settingTimesSlice = createSlice({
         internalField?: string;
       }>
     ) => {
+      console.log(action.payload.value);
       
       const update = state.settingTimesItem[action.payload.index] as LineItemTable;
       const newUpdate: LineItemTable = {
@@ -35,7 +36,11 @@ const settingTimesSlice = createSlice({
           ? { ...(update[action.payload.field] as {}), [action.payload.internalField]: action.payload.value }
           : action.payload.value,
       };
+      console.log(newUpdate);
+      
       [...state.settingTimesItem, (state.settingTimesItem[action.payload.index] = newUpdate)];
+      console.log(state.settingTimesItem);
+      
     },
     setSettingTimes: (state: Istate, action: PayloadAction<{ setting: LineItemTable[] }>) => {
       state.settingTimesItem = action.payload.setting;

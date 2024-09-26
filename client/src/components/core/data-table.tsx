@@ -121,6 +121,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
     fieldName?: keyof TRowModel,
     internalField?: string
   ): void => {
+    console.log(fieldName);
+    
     if (onBlurInput && value != undefined && fieldName) {
       // וידוא שהערך הוא מהסוג הנכון
       const editValue: typeForEdit = value as typeForEdit;

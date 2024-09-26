@@ -19,7 +19,7 @@ export interface LineItemTable {
   specificDate?: SpecificDate; // ודא שזה מוגדר
 }
 export interface SpecificDate{
-  date: Date;
+  date: Date|string;
   isRoutine: boolean;
 }
 export interface GetNewMinyan {
@@ -32,6 +32,7 @@ export interface GetNewMinyan {
   id: string;
   specificDate?:SpecificDate;
   inactiveDates?:SpecificDate[];
+
 }
 
 // הגדרה חדשה ל-NewMinyan כולל specificDate
@@ -43,6 +44,8 @@ export type NewMinyan = {
   steadyFlag: boolean;
   blink?: number;
   specificDate?: SpecificDate;
+  isRoutine?: boolean;
+
 };
 
 export interface NewMinyan1 {
@@ -84,4 +87,4 @@ export interface MinyanApi {
   blink?: BlinkAlertType;
 }
 
-export type typeForEdit = string | Date | Room | number | boolean | SpecificDate[] | SpecificDate | BlinkAlertTypeName | AlertTypeName;
+export type typeForEdit = string | Date | Room | number | boolean | SpecificDate[] | SpecificDate | BlinkAlertTypeName | AlertTypeName |undefined;

@@ -209,6 +209,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           date: selectedDate.toISOString(), // Convert to ISO string
           isRoutine: false,
         };
+        dispatchData.isRoutine = false;
       }
       dispatch(
         addSettingTimes({
@@ -245,7 +246,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
         isRoutine: false,
       };
     }
-
     return newMinyan;
   };
 
@@ -267,7 +267,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   };
 
   const handleBlurInput = (
-    value: typeForEdit,  // Align this to the expected type
+    value: typeForEdit, // Align this to the expected type
     index: number,
     field: keyof LineItemTable,
     internalField?: string
@@ -276,17 +276,20 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     // Synchronous dispatch update
     dispatch(updateSettingTimesValue({ index, field, value, internalField }));
     // Async API call can be handled here, but avoid returning Promise<void>
-    axios.put(`${API_BASE_URL}/minyan/${updateId}`, {
-      value,
-      field,
-      internalField,
-    }).then((res) => {
-      const editValue = rooms?.find((room) => room.id === res.data) || value;
-      if (editValue) {
-        dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
-        dispatch(sortSettingTimesItem());
-      }
-    }).catch((err) => console.log('Error fetching data:', err));
+    axios
+      .put(`${API_BASE_URL}/minyan/${updateId}`, {
+        value,
+        field,
+        internalField,
+      })
+      .then((res) => {
+        const editValue = rooms?.find((room) => room.id === res.data) || value;
+        if (editValue) {
+          dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
+          dispatch(sortSettingTimesItem());
+        }
+      })
+      .catch((err) => console.log('Error fetching data:', err));
   };
 
   return (
@@ -294,7 +297,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       {typeDate === 'calendar' ? (
         <Calendar
           handlePlusClick={(index: number, location?: eLocationClick) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
-          handleBlurInput={handleBlurInput}
+          // handleBlurInput={handleBlurInput}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
           rooms={rooms}

@@ -4,7 +4,12 @@ import * as React from 'react';
 import { API_BASE_URL } from '@/consts/api';
 import { eLocationClick } from '@/consts/setting-minyans';
 import { isDateInactive } from '@/helpers/functions-times';
-import { deleteMinyan, setSettingTimes, updateSettingTimesValue } from '@/state/setting-times/setting-times-slice';
+import {
+  deleteMinyan,
+  setSettingTimes,
+  sortSettingTimesItem,
+  updateSettingTimesValue,
+} from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -15,6 +20,7 @@ import { CheckCircle, XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
+import { date } from 'zod';
 
 import type { LineItemTable, SpecificDate, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
@@ -39,13 +45,12 @@ const getFormat = (value: number | string): React.JSX.Element => {
 
 export function Calendar(props: {
   handlePlusClick: (index: number, location?: eLocationClick) => void; // Updated signature
-  handleBlurInput: (value: typeForEdit, index: number, field: keyof LineItemTable) => void;
   selectedDate: Dayjs;
   setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs>>;
   rooms: Room[];
   roomsOption: SelectOption[];
 }): React.JSX.Element {
-  const { handlePlusClick, handleBlurInput, selectedDate, setSelectedDate, rooms, roomsOption } = props;
+  const { handlePlusClick, selectedDate, setSelectedDate, rooms, roomsOption } = props;
 
   const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
   const dispatch = useDispatch();
@@ -55,11 +60,7 @@ export function Calendar(props: {
       try {
         // First fetch: get the default calendar minyanim
         const date = selectedDate.toDate(); // תאריך בפורמט ISO
-        console.log('getcalendar', date);
-
         const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getCalendar/${date}`);
-        console.log(calendarRes.data);
-
         const minyanim = calendarRes.data.map((minyan: any) => {
           let isRoutine = minyan.specificDate?.isRoutine;
           if (!isRoutine && isDateInactive(selectedDate.toDate(), minyan.inactiveDates)) {
@@ -67,7 +68,7 @@ export function Calendar(props: {
               (item: any) =>
                 new Date(item.date).toISOString().split('T')[0] === selectedDate.toISOString().split('T')[0]
             );
-            isRoutine = inactiveDate?.isRoutine ?? false;
+            isRoutine = inactiveDate?.isRoutine;
           }
 
           // החזרת האובייקט המעודכן
@@ -87,8 +88,6 @@ export function Calendar(props: {
     fetchMinyanim();
   }, [dispatch, selectedDate]);
   const handleDelete = async (index: number) => {
-    console.log('handleDelete ', settingTimesItem[index].dateType);
-
     if (settingTimesItem[index].dateType === 'calendar') {
       // Deleting Minyan
       axios
@@ -109,11 +108,9 @@ export function Calendar(props: {
           const elementDate = new Date(inactiveDate.date).toISOString().split('T')[0];
           return elementDate === selectedDate.toISOString().split('T')[0];
         });
-        console.log(isDateInInactive);
-
         if (isDateInInactive) {
           // If the date exists, remove it
-          await axios.put(`${API_BASE_URL}/minyan/updateInactiveDate/${minyanId}`, {
+          await axios.put(`${API_BASE_URL}/minyan/removeInactiveDates/${minyanId}`, {
             data: {
               date: selectedDate.toISOString(), // Keep it as string
               isRoutine: isRoutine,
@@ -132,25 +129,36 @@ export function Calendar(props: {
               value: updatedInactiveDates,
             })
           );
+          dispatch(
+            updateSettingTimesValue({
+              index,
+              field: 'isRoutine',
+              value: undefined,
+            })
+          );
         } else {
           // If the date does not exist, add it
-          console.log('isRoutine before adding:', isRoutine);
-
           await axios.put(`${API_BASE_URL}/minyan/addInactiveDates/${minyanId}`, {
             date: selectedDate.toDate(), // Keep it as string
-            isRoutine: isRoutine,
+            isRoutine: isRoutine || false,
           });
 
           const updatedInactiveDates: SpecificDate[] = [
             ...currentInactiveDates,
-            { date: selectedDate.toDate(), isRoutine: isRoutine || false }, // Keep it as string
+            { date: selectedDate.toISOString(), isRoutine: isRoutine || false }, // Keep it as string
           ];
-          console.log('Updated inactiveDates array:', updatedInactiveDates);
           dispatch(
             updateSettingTimesValue({
               index,
               field: 'inactiveDates',
               value: updatedInactiveDates,
+            })
+          );
+          dispatch(
+            updateSettingTimesValue({
+              index,
+              field: 'isRoutine',
+              value: false,
             })
           );
         }
@@ -159,7 +167,41 @@ export function Calendar(props: {
       }
     }
   };
-
+  const handleBlurInput = (
+    value: typeForEdit, // Align this to the expected type
+    index: number,
+    field: keyof LineItemTable,
+    internalField?: string
+  ): void => {
+    const updateId = settingTimesItem[index].id;
+    // Synchronous dispatch update
+    dispatch(updateSettingTimesValue({ index, field, value, internalField }));
+    // Async API call can be handled here, but avoid returning Promise<void>
+    const isInactiveDate = isDateInactive(selectedDate.toDate(), settingTimesItem[index].inactiveDates);
+    if (isInactiveDate) {
+      axios.put(`${API_BASE_URL}/minyan/updateInactiveDate/${updateId}`, {
+        date: selectedDate.toISOString(),
+        isRoutine: value,
+      });
+    } else {
+      console.log(field);
+      
+      axios
+        .put(`${API_BASE_URL}/minyan/${updateId}`, {
+          value,
+          field,
+          internalField,
+        })
+        .then((res) => {
+          const editValue = rooms?.find((room) => room.id === res.data) || value;
+          if (editValue) {
+            dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
+            dispatch(sortSettingTimesItem());
+          }
+        })
+        .catch((err) => console.log('Error fetching data:', err));
+    }
+  };
   const handleChange = (value: typeForEdit, index: number, field: keyof LineItemTable): void => {
     value != undefined && dispatch(updateSettingTimesValue({ index, field, value }));
   };
@@ -233,10 +275,11 @@ export function Calendar(props: {
       },
       typeEditinput: 'switch',
       valueForEdit: (row) => row.isRoutine,
-      valueForField: (row: any) => {
-        const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
-        return isInactiveDate ? 'inactiveDates' : 'isRoutine';
-      },
+      // valueForField: (row: any) => {
+      //   const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
+      //   return isInactiveDate ? 'inactiveDates' : 'isRoutine';
+      // },
+
       name: 'Is Routine',
       width: '150px',
       padding: 'none',
