@@ -1,9 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { API_BASE_URL } from '@/consts/api';
-import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
-import { isDateInactive } from '@/helpers/functions-times';
+import { Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Divider from '@mui/material/Divider';
+import { DatePicker } from '@mui/x-date-pickers';
+import axios from 'axios';
+import dayjs, { Dayjs } from 'dayjs';
+import { useDispatch, useSelector } from 'react-redux';
+
 import {
   deleteMinyan,
   setSettingTimes,
@@ -11,22 +17,13 @@ import {
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
-import { Typography } from '@mui/material';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Divider from '@mui/material/Divider';
-import { DatePicker } from '@mui/x-date-pickers';
-import { CheckCircle, XCircle } from '@phosphor-icons/react';
-import axios from 'axios';
-import dayjs, { Dayjs } from 'dayjs';
-import { useDispatch, useSelector } from 'react-redux';
-import { date } from 'zod';
-
+import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
+import { API_BASE_URL } from '@/consts/api';
+import { isDateInactive } from '@/helpers/functions-times';
 import type { LineItemTable, SpecificDate, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
-
 import { getMinyansColumns } from '../config/minyanim-columns.config';
 
 const styleTypography = {
@@ -101,6 +98,8 @@ export function Calendar(props: {
     fetchMinyanim();
   }, [dispatch, selectedDate]);
   const handleDelete = async (index: number) => {
+    console.log(settingTimesItem[index].dateType);
+
     if (settingTimesItem[index].dateType === 'calendar') {
       // Deleting Minyan
       axios

@@ -1,6 +1,11 @@
 'use client';
 
 import * as React from 'react';
+import axios from 'axios';
+import dayjs, { Dayjs } from 'dayjs';
+import { useDispatch, useSelector } from 'react-redux';
+import Box from '@mui/material/Box';
+
 import { API_BASE_URL } from '@/consts/api';
 import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
 import { getMiddleTime } from '@/helpers/functions-times';
@@ -12,17 +17,11 @@ import {
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
-import Box from '@mui/material/Box';
-import axios from 'axios';
-import dayjs, { Dayjs } from 'dayjs';
-import { useDispatch, useSelector } from 'react-redux';
-
-import { MessageTab } from '@/types/message';
-import type { GetNewMinyan, LineItemTable, NewMinyan, tFieldMinyanTable, typeForEdit } from '@/types/minyanim';
+import type { GetNewMinyan, LineItemTable, NewMinyan, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
-
 import { Calendar } from './calendar';
+
 import { getMinyansColumns } from '../config/minyanim-columns.config';
 
 export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
@@ -33,11 +32,10 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
   const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
-  const dateType = props.typeDate;
   React.useEffect(() => {
     axios
       .get(`${API_BASE_URL}/minyan/getMinyanimByDateType`, {
-        params: { dateType },
+        params: { typeDate },
       })
       .then((res) =>
         dispatch(
@@ -57,7 +55,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       )
       .then(() => dispatch(sortSettingTimesItem()))
       .catch((err) => console.log('Error fetching data:', err));
-  }, [dateType]);
+  }, [typeDate]);
 
   React.useEffect(() => {
     axios
@@ -88,6 +86,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
             room: currentRoom!,
             id: data.id,
             isEdited: true,
+            dateType:data.dateType
           };
 
           if (isCalendar) {
@@ -136,7 +135,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           ? new Date()
           : getMiddleTime(settingTimesItem[indexBefore]?.endDate.time, settingTimesItem[indexAfter]?.endDate.time),
       roomId: rooms[0].id,
-      dateType: dateType,
+      dateType: typeDate,
       steadyFlag: false,
     };
 
