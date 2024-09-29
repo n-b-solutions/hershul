@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { createMessageRoom, selectMessageRoomLoading } from '@/state/message-room/message-room-slice';
+import type { AppDispatch } from '@/state/store';
 import { Dialog } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -6,18 +8,13 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem'; 
 import Tooltip from '@mui/material/Tooltip';
 import Grid from '@mui/material/Unstable_Grid2';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
 
-import { Room } from '@/types/room';
-import { Option } from '@/components/core/option';
+import { fetchRooms, selectRooms, selectRoomsLoading } from '../../../state/room/room-slice';
 import AudioRecorder from './audioRecorder';
-
-import { createMessageRoom, selectMessageRoomLoading } from '@/state/message-room/message-room-slice';
-import type { AppDispatch } from '@/state/store';
-import { API_BASE_URL } from '@/consts/api';
 
 export function CreateSystemMessages(props: {
   open: boolean;
@@ -27,11 +24,12 @@ export function CreateSystemMessages(props: {
   const [selectedRoom, setSelectedRoom] = React.useState<string>(props.room || '');
   const [name, setName] = React.useState<string>('');
   const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
-  const [rooms, setRooms] = React.useState<Room[]>([]); // Add state for rooms
-  const { open, handleClose, room } = props;
 
+  const { open, handleClose, room } = props;
   const dispatch = useDispatch<AppDispatch>();
+  const rooms = useSelector(selectRooms); // Fetch rooms from Redux store
   const loading = useSelector(selectMessageRoomLoading);
+  const roomsLoading = useSelector(selectRoomsLoading); // Check if rooms are loading
 
   React.useEffect(() => {
     if (!open) {
@@ -42,18 +40,10 @@ export function CreateSystemMessages(props: {
     }
   }, [open, room]);
 
-  // Fetch rooms from the API when the component mounts
+  // Fetch rooms from Redux when the component mounts
   React.useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/roomStatus`); // Adjust API endpoint as needed
-        setRooms(response.data);
-      } catch (error) {
-        console.error('Error fetching rooms:', error);
-      }
-    };
-    fetchRooms();
-  }, []);
+    dispatch(fetchRooms());
+  }, [dispatch]);
 
   const handleRoomChange = (event: SelectChangeEvent<string>) => {
     setSelectedRoom(event.target.value);
@@ -74,7 +64,7 @@ export function CreateSystemMessages(props: {
   const isSaveDisabled = !name || !audioBlob;
 
   return (
-    <Dialog open={open} onClose={() => handleClose()} onClick={(event)=> event.stopPropagation()}>
+    <Dialog open={open} onClose={() => handleClose()} onClick={(event) => event.stopPropagation()}>
       <Box sx={{ p: 3 }}>
         <Box maxWidth="sm">
           <Grid container spacing={3}>
@@ -89,11 +79,17 @@ export function CreateSystemMessages(props: {
               <FormControl fullWidth disabled={!!room}>
                 <InputLabel>Room</InputLabel>
                 <Select value={selectedRoom} onChange={handleRoomChange} input={<OutlinedInput label="Room" />}>
-                  {rooms.map((room) => (
-                    <Option key={room.id} value={room.nameRoom}>
-                      {room.nameRoom}
-                    </Option>
-                  ))}
+                  {roomsLoading ? (
+                    <MenuItem value="" disabled>
+                      Loading rooms...
+                    </MenuItem>
+                  ) : (
+                    rooms.map((room) => (
+                      <MenuItem key={room.id} value={room.nameRoom}>
+                        {room.nameRoom}
+                      </MenuItem>
+                    ))
+                  )}
                 </Select>
               </FormControl>
             </Grid>
