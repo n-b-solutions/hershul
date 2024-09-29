@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const mongo_uri = process.env.VITE_MONGO_URI;
 const db_name = process.env.VITE_MONGO_DB_NAME;
 
