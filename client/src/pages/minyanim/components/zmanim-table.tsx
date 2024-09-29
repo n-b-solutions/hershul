@@ -42,7 +42,7 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
       formatter: (row, index): React.JSX.Element =>
         getFormat({
           value: row.blink?.secondsNum || '',
-          roomName: row.room.nameRoom,
+          roomName: row.room?.nameRoom,
           message: row.blink?.message,
           id: row.id,
           field: 'blink',
@@ -60,9 +60,9 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
     {
       formatter: (row, index): React.JSX.Element =>
         getFormat({
-          value: dayjs(row.startDate.time).format('hh:mm A'),
-          roomName: row.room.nameRoom,
-          message: row.startDate.message,
+          value: dayjs(row.startDate?.time).format('hh:mm A'),
+          roomName: row.room?.nameRoom,
+          message: row.startDate?.message,
           id: row.id,
           field: 'startDate',
           index,
@@ -74,14 +74,14 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
       field: 'startDate',
       align: 'center',
       tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate.time),
+      valueForEdit: (row) => dayjs(row.startDate?.time),
     },
     {
       formatter: (row, index): React.JSX.Element =>
         getFormat({
-          value: dayjs(row.endDate.time).format('hh:mm A'),
-          roomName: row.room.nameRoom,
-          message: row.endDate.message,
+          value: dayjs(row.endDate?.time).format('hh:mm A'),
+          roomName: row.room?.nameRoom,
+          message: row.endDate?.message,
           id: row.id,
           field: 'endDate',
           index: index,
@@ -93,12 +93,12 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
       field: 'endDate',
       align: 'center',
       tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate.time),
+      valueForEdit: (row) => dayjs(row.endDate?.time),
     },
     {
       formatter: (row): React.JSX.Element => getFormat({ value: row.room?.nameRoom }),
       typeEditinput: 'select',
-      valueForEdit: (row) => row.room.id,
+      valueForEdit: (row) => row.room?.id,
       selectOptions: roomsOptionsArray,
       valueOption: roomArray,
       padding: 'none',

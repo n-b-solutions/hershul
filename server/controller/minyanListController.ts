@@ -4,7 +4,7 @@ import MinyanListModel from "../models/minyanListModel";
 import { io } from "../socketio";
 import axios from "axios";
 import mongoose from "mongoose";
-import { eDateType } from "../types/minyan";
+import { eDateType } from "../../bin/types/minyan.type";
 
 // Function to determine if today is Rosh Chodesh
 const isRoshChodesh = async (): Promise<boolean> => {
@@ -177,7 +177,21 @@ const MinyanListController = {
       res.status(500).send("Internal Server Error");
     }
   },
-
+  getCountMinyanByCategory: async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { category } = req.params;
+      const countMinyans = await MinyanListModel.countDocuments({
+        dateType: category,
+      });
+      res.status(200).json(countMinyans ?? 0);
+    } catch (error) {
+      console.error(`Error fetching minyan for :`, error);
+      res.status(500).send("Internal Server Error");
+    }
+  },
   post: async (req: Request, res: Response): Promise<void> => {
     try {
       const { roomId, startDate, endDate, dateType, blink, steadyFlag } =
@@ -195,6 +209,48 @@ const MinyanListController = {
       io.emit("minyanUpdated", await MinyanListModel.find());
 
       res.status(201).json(newMinyan);
+    } catch (error) {
+      console.error("Error creating minyan:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  },
+
+  postDuplicateMinyanByCategory: async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { category } = req.params;
+      const { currentDateType } = req.body;
+
+      const filterMinyansByCategory = await MinyanListModel.find({
+        dateType: category,
+      });
+      const minyansForCategory = filterMinyansByCategory.map((minyan) => ({
+        startDate: minyan.startDate,
+        endDate: minyan.endDate,
+        blink: minyan.blink,
+        dateType: currentDateType,
+        roomId: minyan.roomId,
+        steadyFlag: minyan.steadyFlag,
+      }));
+
+      await MinyanListModel.insertMany(minyansForCategory);
+      const listMinyans = await MinyanListModel.find({
+        dateType: currentDateType,
+      }).populate("roomId");
+
+      const newList = listMinyans.map((minyan) => ({
+        startDate: minyan.startDate,
+        endDate: minyan.endDate,
+        blink: minyan.blink,
+        dateType: minyan.dateType,
+        room: minyan.roomId,
+        steadyFlag: minyan.steadyFlag,
+        id: minyan._id,
+      }));
+
+      res.status(201).json(newList);
     } catch (error) {
       console.error("Error creating minyan:", error);
       res.status(500).send("Internal Server Error");
