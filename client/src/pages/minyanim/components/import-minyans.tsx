@@ -43,7 +43,9 @@ export function ImportMinyans(): React.JSX.Element {
           .catch((err: any) => console.log('Error fetching data: ', err));
       })
     ).then((res: any) => {
-      setDatetypeArray(res?.filter((dtCount: CountMinyanOfDate) => dtCount.count !== 0));
+      setDatetypeArray(
+        res?.filter((dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.DEFAULT)
+      );
     });
   }, []);
 
@@ -125,17 +127,17 @@ export function ImportMinyans(): React.JSX.Element {
                     </Option>
                   ))}
                 </Select>
-                <Select fullWidth disabled value={EMPTY_STRING}>
+                <Select fullWidth disabled={datetype !== eDateType.DEFAULT} value={EMPTY_STRING}>
                   <Option value={EMPTY_STRING} disabled>
                     Select Date
                   </Option>
                 </Select>
 
-                {countMinyan && (
+                {countMinyan ? (
                   <Typography variant="h6" sx={{ color: 'red', textAlign: 'center' }}>
                     {WARRNING_IMPORT_MINYAN(countMinyan)}
                   </Typography>
-                )}
+                ) : null}
               </Stack>
               <Stack direction="row" spacing={3} sx={{ alignItems: 'center', justifyContent: 'space-between', p: 2 }}>
                 <div>
