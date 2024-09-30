@@ -1,11 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import axios from 'axios';
-import dayjs, { Dayjs } from 'dayjs';
-import { useDispatch, useSelector } from 'react-redux';
-import Box from '@mui/material/Box';
-
 import { API_BASE_URL } from '@/consts/api';
 import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
 import { getMiddleTime } from '@/helpers/functions-times';
@@ -17,12 +12,17 @@ import {
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
+import Box from '@mui/material/Box';
+import axios from 'axios';
+import dayjs, { Dayjs } from 'dayjs';
+import { useDispatch, useSelector } from 'react-redux';
+
 import type { GetNewMinyan, LineItemTable, NewMinyan, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
-import { Calendar } from './calendar';
 
 import { getMinyansColumns } from '../config/minyanim-columns.config';
+import { Calendar } from './calendar';
 
 export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const { typeDate } = props;
@@ -86,7 +86,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
             room: currentRoom!,
             id: data.id,
             isEdited: true,
-            dateType:data.dateType
+            dateType: data.dateType,
           };
 
           if (isCalendar) {
@@ -199,18 +199,17 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
-      {typeDate === 'calendar' ? (
-        <Calendar
-          handlePlusClick={(index: number, location?: eLocationClick) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
-          // handleBlurInput={handleBlurInput}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          rooms={rooms}
-          roomsOption={roomsOption}
-        />
-      ) : (
-        <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
-          {/* הגדרה של גובה מקסימלי */}
+      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
+        {typeDate === 'calendar' ? (
+          <Calendar
+            handlePlusClick={(index: number, location?: eLocationClick) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
+            // handleBlurInput={handleBlurInput}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            rooms={rooms}
+            roomsOption={roomsOption}
+          />
+        ) : (
           <DataTable<LineItemTable>
             columns={getMinyansColumns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
             edited
@@ -221,8 +220,8 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
             rows={settingTimesItem}
             stickyHeader
           />
-        </Box>
-      )}
+        )}
+      </Box>
     </Box>
   );
 }

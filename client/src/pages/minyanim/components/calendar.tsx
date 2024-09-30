@@ -1,6 +1,16 @@
 'use client';
 
 import * as React from 'react';
+import { API_BASE_URL } from '@/consts/api';
+import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
+import { isDateInactive } from '@/helpers/functions-times';
+import {
+  deleteMinyan,
+  setSettingTimes,
+  sortSettingTimesItem,
+  updateSettingTimesValue,
+} from '@/state/setting-times/setting-times-slice';
+import type { RootState } from '@/state/store';
 import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -10,20 +20,11 @@ import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import {
-  deleteMinyan,
-  setSettingTimes,
-  sortSettingTimesItem,
-  updateSettingTimesValue,
-} from '@/state/setting-times/setting-times-slice';
-import type { RootState } from '@/state/store';
-import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
-import { API_BASE_URL } from '@/consts/api';
-import { isDateInactive } from '@/helpers/functions-times';
 import type { LineItemTable, SpecificDate, typeForEdit } from '@/types/minyanim';
 import { Room, SelectOption } from '@/types/room';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
+
 import { getMinyansColumns } from '../config/minyanim-columns.config';
 
 const styleTypography = {
@@ -235,30 +236,25 @@ export function Calendar(props: {
   };
 
   return (
-    <Box sx={{ bgcolor: 'var(--mui-palette-background-level1)', p: 3 }}>
+    <>
       <DatePicker
         format="MMM D, YYYY"
         label="Specific Date"
         value={selectedDate}
         minDate={dayjs()}
         onChange={handleDateChange}
-      />{' '}
-      <Card>
-        <Divider />
-        <Box sx={{ overflowX: 'auto', position: 'relative' }}>
-          <DataTable<LineItemTable>
-            type="calendar"
-            columns={[...getMinyansColumns({ roomArray: rooms, roomsOptionsArray: roomsOption }), isRoutineColumn]}
-            edited
-            onAddRowClick={handlePlusClick}
-            onChangeInput={handleChange}
-            onBlurInput={handleBlurInput}
-            onDeleteClick={handleDelete}
-            rows={settingTimesItem}
-            rowProps={(row) => getRowProps(row)} // Call getRowProps for each row
-          />
-        </Box>
-      </Card>
-    </Box>
+      />
+      <DataTable<LineItemTable>
+        type="calendar"
+        columns={[...getMinyansColumns({ roomArray: rooms, roomsOptionsArray: roomsOption }), isRoutineColumn]}
+        edited
+        onAddRowClick={handlePlusClick}
+        onChangeInput={handleChange}
+        onBlurInput={handleBlurInput}
+        onDeleteClick={handleDelete}
+        rows={settingTimesItem}
+        rowProps={(row) => getRowProps(row)} // Call getRowProps for each row
+      />
+    </>
   );
 }
