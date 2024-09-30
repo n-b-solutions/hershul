@@ -54,6 +54,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onChangeInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onBlurInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onDeleteClick?: (index: number) => void;
+  scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null; isEdited?: boolean }>({
@@ -74,12 +75,13 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   onChangeInput,
   onBlurInput,
   onDeleteClick,
+  scrollAction,
   ...props
 }: DataTableProps<TRowModel>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
-  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({
+  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string; index?: number }>({
     isclick: false,
     id: '',
   });
@@ -114,7 +116,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   ): void => {
     onBlurInput && value && fieldName && onBlurInput(value as typeForEdit, index, fieldName, internalField);
     const id = (event.target as HTMLInputElement).id;
-    setIsCellClick({ isclick: false, id });
+    setIsCellClick({ isclick: false, id, index });
     setPlusMode({ mode: null });
   };
 
@@ -125,6 +127,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   };
 
   const handleMouseHover = (event: any, index: number) => {
+    scrollAction?.setIsScroll(false);
     const currentRowElement = tableBodyRef.current?.children[index]?.getBoundingClientRect();
     if (currentRowElement) {
       const { clientY: mouseY } = event;
@@ -142,8 +145,13 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
     return plusMode.mode === eLocationClick.bottom ? { top: '39px' } : { bottom: '33px' };
   };
 
+  React.useEffect(() => {
+    console.log('yes');
+    scrollAction?.isScroll && onAddRowClick && setPlusMode({ mode: null });
+  }, [scrollAction?.isScroll]);
+
   return (
-    <Table {...props} onScroll={() => onAddRowClick && setPlusMode({ mode: null })}>
+    <Table {...props}>
       <TableHead sx={{ ...(hideHead && { visibility: 'collapse', '--TableCell-borderWidth': 0 }) }}>
         <TableRow>
           {selectable ? (
@@ -295,7 +303,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                   </Grid>
                 </TableCell>
               ) : null}
-              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index ? (
+              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index && !isCellClick.isclick ? (
                 <TableCell
                   sx={{
                     padding: '0px',

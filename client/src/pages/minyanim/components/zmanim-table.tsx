@@ -44,7 +44,7 @@ const columns = ({ roomArray, roomsOptionsArray }: { roomArray: Room[]; roomsOpt
           value: row.blink?.secondsNum || '',
           roomName: row.room?.nameRoom,
           message: row.blink?.message,
-          id: row.id,
+          id: row?.id,
           field: 'blink',
           index,
         }),
@@ -146,6 +146,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
+  const [isScroll, setIsScroll] = React.useState<boolean>(false);
   const dateType = props.typeDate;
   React.useEffect(() => {
     axios
@@ -187,23 +188,38 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     const newRow: NewMinyan = getNewMinyan(index, location);
     await axios
       .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
-      .then((res) => {
+      .then(async (res) => {
         const currentRoom = rooms.find((m) => m.id === res.data.roomId);
         const { roomId: room, ...data } = res.data;
         dispatch(
-          addSettingTimes({
+          await addSettingTimes({
             newRow: {
               blink: data.blink,
               endDate: data.endDate,
               startDate: data.startDate,
               room: currentRoom!,
               id: data.id,
+              isEdited: true,
             },
           })
         );
       })
-      .then(() => dispatch(sortSettingTimesItem()))
+      .then(async () => {
+        dispatch(await sortSettingTimesItem());
+      })
+      .then(() => {
+        setTimeout(() => {
+          setFalseEdited();
+        }, 1000);
+      })
       .catch((err) => console.log('Error fetching data:', err));
+  };
+
+  const setFalseEdited = () => {
+    settingTimesItem.map((_, index) => {
+      dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: false }));
+    });
+    dispatch(updateSettingTimesValue({ index: settingTimesItem.length, field: eFieldName.isEdited, value: false }));
   };
 
   const getNewMinyan = (index: number, location?: eLocationClick) => {
@@ -261,10 +277,8 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
           dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: true }));
           setTimeout(() => {
-            settingTimesItem.map((_, index) => {
-              dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: false }));
-            });
-          }, 2000);
+            setFalseEdited();
+          }, 1000);
           if (field === eFieldName.endDate || field === eFieldName.startDate) dispatch(sortSettingTimesItem());
         }
       })
@@ -273,7 +287,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
-      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }} onScroll={() => setIsScroll(true)}>
         {' '}
         {/* הגדרה של גובה מקסימלי */}
         <DataTable<LineItemTable>
@@ -285,6 +299,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           onDeleteClick={handleDelete}
           rows={settingTimesItem}
           stickyHeader
+          scrollAction={{ isScroll, setIsScroll }}
         />
       </Box>
     </Box>
