@@ -146,6 +146,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
+  const [isScroll, setIsScroll] = React.useState<boolean>(false);
   const dateType = props.typeDate;
   React.useEffect(() => {
     axios
@@ -286,7 +287,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
-      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }} onScroll={() => setIsScroll(true)}>
         {' '}
         {/* הגדרה של גובה מקסימלי */}
         <DataTable<LineItemTable>
@@ -298,6 +299,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           onDeleteClick={handleDelete}
           rows={settingTimesItem}
           stickyHeader
+          scrollAction={{ isScroll, setIsScroll }}
         />
       </Box>
     </Box>
