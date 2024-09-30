@@ -6,7 +6,9 @@ import { createServer } from 'http';
 import connectDB from './DB/mongoConnect';
 import { initSocketio } from './socketio';
 import { router } from './router';
+import { config } from 'dotenv';
 
+config();
 const app = express();
 const server = createServer(app);
 
@@ -14,7 +16,7 @@ const server = createServer(app);
 connectDB().catch((err) => console.log(err));
 
 //connect to socket io
-initSocketio();
+initSocketio(server);
 
 // set security HTTP headers
 app.use(helmet());
@@ -26,11 +28,7 @@ app.use(cors());
 
 app.use('/', router);
 
-if (process.env.NODE_ENV === 'production') {
-  const port = process.env.VITE_PORT ? +process.env.VITE_PORT : 4000;
-  server.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
-}
-
-export const viteNodeApp = app;
+const port = process.env.VITE_PORT ? +process.env.VITE_PORT : 4000;
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

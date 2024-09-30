@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "lib": ["es2022"],
+    "module": "CommonJS",
+    "moduleDetection": "force",
+    "moduleResolution": "node",
+    "noUncheckedIndexedAccess": true,
+    "outDir": "./build",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2022",
+    "noImplicitAny": false,
+  },
+  "exclude": ["node_modules", "DB/migrations", "DB/data", "build"]
+}

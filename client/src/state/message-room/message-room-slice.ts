@@ -4,14 +4,13 @@ import axios from 'axios';
 import { MessageRoom, MessageRoomState } from '@/types/message';
 
 import { RootState } from '../store';
+import { API_BASE_URL } from '@/consts/api';
 
 const initialState: MessageRoomState = {
   rooms: [],
   loading: false,
   error: null,
 };
-
-const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
 
 export const fetchMessageRooms = createAsyncThunk('messageRoom/fetchMessageRooms', async () => {
   const response = await axios.get<MessageRoom[]>(`${API_BASE_URL}/message`);
