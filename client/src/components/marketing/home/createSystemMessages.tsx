@@ -6,9 +6,9 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem'; 
 import Tooltip from '@mui/material/Tooltip';
 import Grid from '@mui/material/Unstable_Grid2';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,34 +16,24 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchRooms, selectRooms, selectRoomsLoading } from '../../../state/room/room-slice';
 import AudioRecorder from './audioRecorder';
 
-export function CreateSystemMessages(props: {
+export function CreateSystemMessages({
+  open,
+  handleClose,
+  room,
+}: {
   open: boolean;
   handleClose: (id?: string) => void;
   room?: string;
 }): React.JSX.Element {
-  const [selectedRoom, setSelectedRoom] = React.useState<string>(props.room || '');
+  const [selectedRoom, setSelectedRoom] = React.useState<string>(room || '');
   const [name, setName] = React.useState<string>('');
   const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
 
-  const { open, handleClose, room } = props;
   const dispatch = useDispatch<AppDispatch>();
   const rooms = useSelector(selectRooms); // Fetch rooms from Redux store
   const loading = useSelector(selectMessageRoomLoading);
   const roomsLoading = useSelector(selectRoomsLoading); // Check if rooms are loading
-
-  React.useEffect(() => {
-    if (!open) {
-      // Reset form fields when modal closes
-      setSelectedRoom(room || '');
-      setName('');
-      setAudioBlob(null);
-    }
-  }, [open, room]);
-
-  // Fetch rooms from Redux when the component mounts
-  React.useEffect(() => {
-    dispatch(fetchRooms());
-  }, [dispatch]);
+  const isSaveDisabled = !name || !audioBlob;
 
   const handleRoomChange = (event: SelectChangeEvent<string>) => {
     setSelectedRoom(event.target.value);
@@ -61,7 +51,24 @@ export function CreateSystemMessages(props: {
     }
   };
 
-  const isSaveDisabled = !name || !audioBlob;
+  React.useEffect(() => {
+    if (!open) {
+      // Reset form fields when modal closes
+      setSelectedRoom(room || '');
+      setName('');
+      setAudioBlob(null);
+    }
+  }, [open, room]);
+
+  // Fetch rooms from Redux when the component mounts
+  React.useEffect(() => {
+    const getRooms = async () => {
+      if (!rooms) {
+        await dispatch(fetchRooms());
+      }
+    };
+    getRooms();
+  }, []);
 
   return (
     <Dialog open={open} onClose={() => handleClose()} onClick={(event) => event.stopPropagation()}>
