@@ -80,7 +80,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
-  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string }>({
+  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string; index?: number }>({
     isclick: false,
     id: '',
   });
@@ -115,7 +115,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   ): void => {
     onBlurInput && value && fieldName && onBlurInput(value as typeForEdit, index, fieldName, internalField);
     const id = (event.target as HTMLInputElement).id;
-    setIsCellClick({ isclick: false, id });
+    setIsCellClick({ isclick: false, id, index });
     setPlusMode({ mode: null });
   };
 
@@ -302,7 +302,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                   </Grid>
                 </TableCell>
               ) : null}
-              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index ? (
+              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index && !isCellClick.isclick ? (
                 <TableCell
                   sx={{
                     padding: '0px',

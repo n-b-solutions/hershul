@@ -1,55 +1,39 @@
 import * as React from 'react';
+import { createMessageRoom, selectMessageRoomLoading } from '@/state/message-room/message-room-slice';
+import type { AppDispatch } from '@/state/store';
 import { Dialog } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Tooltip from '@mui/material/Tooltip';
 import Grid from '@mui/material/Unstable_Grid2';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 
-import { Room } from '@/types/room';
-import { Option } from '@/components/core/option';
-
-import { createMessageRoom, selectMessageRoomLoading } from '../../../state/message-room/message-room-slice';
-import type { AppDispatch } from '../../../state/store';
+import { fetchRooms, selectRooms, selectRoomsLoading } from '../../../state/room/room-slice';
 import AudioRecorder from './audioRecorder';
 
-const rooms = [
-  { id: '1', nameRoom: 'room1' },
-  { id: '2', nameRoom: 'room2' },
-  { id: '3', nameRoom: 'room3' },
-  { id: '4', nameRoom: 'room4' },
-  { id: '5', nameRoom: 'room5' },
-  { id: '6', nameRoom: 'room6' },
-] satisfies Room[];
-
-export function CreateSystemMessages(props: {
+export function CreateSystemMessages({
+  open,
+  handleClose,
+  room,
+}: {
   open: boolean;
   handleClose: (id?: string) => void;
   room?: string;
 }): React.JSX.Element {
-  const [selectedRoom, setSelectedRoom] = React.useState<string>(props.room || '');
+  const [selectedRoom, setSelectedRoom] = React.useState<string>(room || '');
   const [name, setName] = React.useState<string>('');
   const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
-  const { open, handleClose, room } = props;
 
   const dispatch = useDispatch<AppDispatch>();
+  const rooms = useSelector(selectRooms); // Fetch rooms from Redux store
   const loading = useSelector(selectMessageRoomLoading);
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
-
-  React.useEffect(() => {
-    if (!open) {
-      // Reset form fields when modal closes
-      setSelectedRoom(room || '');
-      setName('');
-      setAudioBlob(null);
-    }
-  }, [open, room]);
+  const roomsLoading = useSelector(selectRoomsLoading); // Check if rooms are loading
+  const isSaveDisabled = !name || !audioBlob;
 
   const handleRoomChange = (event: SelectChangeEvent<string>) => {
     setSelectedRoom(event.target.value);
@@ -67,10 +51,27 @@ export function CreateSystemMessages(props: {
     }
   };
 
-  const isSaveDisabled = !name || !audioBlob;
+  React.useEffect(() => {
+    if (!open) {
+      // Reset form fields when modal closes
+      setSelectedRoom(room || '');
+      setName('');
+      setAudioBlob(null);
+    }
+  }, [open, room]);
+
+  // Fetch rooms from Redux when the component mounts
+  React.useEffect(() => {
+    const getRooms = async () => {
+      if (!rooms) {
+        await dispatch(fetchRooms());
+      }
+    };
+    getRooms();
+  }, []);
 
   return (
-    <Dialog open={open} onClose={() => handleClose()} onClick={(event)=> event.stopPropagation()}>
+    <Dialog open={open} onClose={() => handleClose()} onClick={(event) => event.stopPropagation()}>
       <Box sx={{ p: 3 }}>
         <Box maxWidth="sm">
           <Grid container spacing={3}>
@@ -85,11 +86,17 @@ export function CreateSystemMessages(props: {
               <FormControl fullWidth disabled={!!room}>
                 <InputLabel>Room</InputLabel>
                 <Select value={selectedRoom} onChange={handleRoomChange} input={<OutlinedInput label="Room" />}>
-                  {rooms.map((room) => (
-                    <Option key={room.id} value={room.nameRoom}>
-                      {room.nameRoom}
-                    </Option>
-                  ))}
+                  {roomsLoading ? (
+                    <MenuItem value="" disabled>
+                      Loading rooms...
+                    </MenuItem>
+                  ) : (
+                    rooms.map((room) => (
+                      <MenuItem key={room.id} value={room.nameRoom}>
+                        {room.nameRoom}
+                      </MenuItem>
+                    ))
+                  )}
                 </Select>
               </FormControl>
             </Grid>
