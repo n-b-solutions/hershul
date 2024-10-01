@@ -16,6 +16,7 @@ import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/War
 
 import { typeForEdit } from '@/types/minyanim';
 import { SelectOption } from '@/types/room';
+import { ImportMinyans } from '@/pages/minyanim/components/import-minyans';
 
 import { EditTableCellInputs } from './edit-table-cell-inputs';
 
@@ -327,20 +328,23 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
             onMouseLeave={() => setPlusMode({ mode: null })}
           >
             <TableCell sx={{ padding: '15px' }} colSpan={columns.length}>
-              <Grid
-                onClick={() => onAddRowClick(-1)}
-                sx={{
-                  position: 'absolute',
-                  width: '25px',
-                  color: '#635bff',
-                  zIndex: '999',
-                  right: '50%',
-                  top: '38px',
-                }}
-              >
-                {plusMode.index === -1 && <PlusCircle size={32} />}
+              <Grid container display="grid">
+                <Grid
+                  onClick={() => onAddRowClick(-1)}
+                  sx={{
+                    position: 'absolute',
+                    width: '25px',
+                    color: '#635bff',
+                    zIndex: '999',
+                    right: '50%',
+                    top: '152px',
+                  }}
+                >
+                  {plusMode.index === -1 && <PlusCircle size={32} />}
+                </Grid>
+                <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
+                <ImportMinyans />
               </Grid>
-              <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
             </TableCell>
           </TableRow>
         )}
