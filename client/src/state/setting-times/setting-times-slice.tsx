@@ -4,11 +4,15 @@ import { createSlice } from '@reduxjs/toolkit';
 
 import type { LineItemTable, typeForEdit } from '@/types/minyanim';
 
+import { eDateType } from '../../../../bin/types/minyan.type';
+
 export interface Istate {
   settingTimesItem: LineItemTable[];
+  dateType: eDateType;
 }
 const initialState: Istate = {
   settingTimesItem: [],
+  dateType: eDateType.SUNDAY,
 };
 
 const settingTimesSlice = createSlice({
@@ -51,10 +55,19 @@ const settingTimesSlice = createSlice({
     sortSettingTimesItem: (state: Istate) => {
       state.settingTimesItem = sortByTime(state.settingTimesItem);
     },
+    setCurrentDateType: (state: Istate, action: PayloadAction<{ currentType: eDateType }>) => {
+      state.dateType = action.payload.currentType;
+    },
   },
 });
 
-export const { addSettingTimes, updateSettingTimesValue, setSettingTimes, deleteMinyan, sortSettingTimesItem } =
-  settingTimesSlice.actions;
+export const {
+  addSettingTimes,
+  updateSettingTimesValue,
+  setSettingTimes,
+  deleteMinyan,
+  sortSettingTimesItem,
+  setCurrentDateType,
+} = settingTimesSlice.actions;
 
 export default settingTimesSlice.reducer;

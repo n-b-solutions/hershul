@@ -15,6 +15,7 @@ import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/War
 
 import { typeForEdit } from '@/types/minyanim';
 import { SelectOption } from '@/types/room';
+import { ImportMinyans } from '@/pages/minyanim/components/import-minyans';
 
 import { EditTableCellInputs } from './edit-table-cell-inputs';
 
@@ -55,6 +56,7 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onChangeInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onBlurInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onDeleteClick?: (index: number) => void;
+  scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
   rowProps?: (row: TRowModel) => {
     type: any;
     sx: React.CSSProperties;
@@ -80,6 +82,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
   onChangeInput,
   onBlurInput,
   onDeleteClick,
+  scrollAction,
   rowProps,
   ...props
 }: DataTableProps<TRowModel>): React.JSX.Element {
@@ -147,6 +150,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
   };
 
   const handleMouseHover = (event: any, index: number) => {
+    scrollAction?.setIsScroll(false);
     const currentRowElement = tableBodyRef.current?.children[index]?.getBoundingClientRect();
     if (currentRowElement) {
       const { clientY: mouseY } = event;
@@ -164,8 +168,12 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
     return plusMode.mode === eLocationClick.bottom ? { top: '39px' } : { bottom: '33px' };
   };
 
+  React.useEffect(() => {
+    scrollAction?.isScroll && onAddRowClick && setPlusMode({ mode: null });
+  }, [scrollAction?.isScroll]);
+
   return (
-    <Table {...props} onScroll={() => onAddRowClick && setPlusMode({ mode: null })}>
+    <Table {...props}>
       <TableHead sx={{ ...(hideHead && { visibility: 'collapse', '--TableCell-borderWidth': 0 }) }}>
         <TableRow>
           {selectable ? (
@@ -347,20 +355,23 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
             onMouseLeave={() => setPlusMode({ mode: null })}
           >
             <TableCell sx={{ padding: '15px' }} colSpan={columns.length}>
-              <Grid
-                onClick={() => onAddRowClick(-1)}
-                sx={{
-                  position: 'absolute',
-                  width: '25px',
-                  color: '#635bff',
-                  zIndex: '999',
-                  right: '50%',
-                  top: '38px',
-                }}
-              >
-                {plusMode.index === -1 && <PlusCircle size={32} />}
+              <Grid container display="grid">
+                <Grid
+                  onClick={() => onAddRowClick(-1)}
+                  sx={{
+                    position: 'absolute',
+                    width: '25px',
+                    color: '#635bff',
+                    zIndex: '999',
+                    right: '50%',
+                    top: '152px',
+                  }}
+                >
+                  {plusMode.index === -1 && <PlusCircle size={32} />}
+                </Grid>
+                <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
+                <ImportMinyans />
               </Grid>
-              <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
             </TableCell>
           </TableRow>
         )}

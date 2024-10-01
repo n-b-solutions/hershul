@@ -29,12 +29,3 @@ export interface MinyanDocument extends Document {
   specificDate?:SpecificDate;
     inactiveDates?:SpecificDate[];
 }
-
-export enum eDateType {
-  SUNDAY = "sunday",
-  MONDAY = "monday",
-  FRIDAY = "friday",
-  SATURDAY = "saturday",
-  ROSH_HODESH = "roshHodesh",
-  DEFAULT = "default",
-}

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { eDateType } from "../types/minyan";
+import { eDateType } from "../../bin/types/minyan.type";
 
 // Function to determine if today is Rosh Chodesh
 export const isRoshChodesh = async (): Promise<boolean> => {

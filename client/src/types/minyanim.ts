@@ -1,9 +1,10 @@
+import { eDateType } from '../../../bin/types/minyan.type';
 import { MessageRoom, MessageTab } from './message';
 import { Room } from './room';
 
 export type tFieldMinyanTable = 'blink' | 'startDate' | 'endDate' | 'room';
 export interface TypeOfDate {
-  value: string;
+  value: eDateType;
   label: string;
 }
 
@@ -14,13 +15,13 @@ export interface LineItemTable {
   startDate: AlertTypeName;
   endDate: AlertTypeName;
   room: Room;
-  isRoutine?:boolean;
+  isRoutine?: boolean;
   dateType: string;
-  specificDate?: SpecificDate; // ודא שזה מוגדר
-  isEdited?:boolean;
+  specificDate?: SpecificDate;
+  isEdited?: boolean;
 }
-export interface SpecificDate{
-  date: Date|string;
+export interface SpecificDate {
+  date: Date | string;
   isRoutine: boolean;
 }
 export interface GetNewMinyan {
@@ -31,9 +32,8 @@ export interface GetNewMinyan {
   steadyFlag: boolean;
   blink?: BlinkAlertType;
   id: string;
-  specificDate?:SpecificDate;
-  inactiveDates?:SpecificDate[];
-
+  specificDate?: SpecificDate;
+  inactiveDates?: SpecificDate[];
 }
 
 // הגדרה חדשה ל-NewMinyan כולל specificDate
@@ -46,7 +46,6 @@ export type NewMinyan = {
   blink?: number;
   specificDate?: SpecificDate;
   isRoutine?: boolean;
-
 };
 
 export interface NewMinyan1 {
@@ -88,4 +87,4 @@ export interface MinyanApi {
   blink?: BlinkAlertType;
 }
 
-export type typeForEdit = string | Date | Room | number | boolean | SpecificDate[] | SpecificDate | BlinkAlertTypeName | AlertTypeName |undefined;
+export type typeForEdit = string | Date | Room | number | boolean;

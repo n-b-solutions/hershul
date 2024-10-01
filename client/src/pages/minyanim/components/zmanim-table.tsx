@@ -12,6 +12,7 @@ import {
   updateSettingTimesValue,
 } from '@/state/setting-times/setting-times-slice';
 import type { RootState } from '@/state/store';
+import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
@@ -24,38 +25,49 @@ import { DataTable } from '@/components/core/data-table';
 import { getMinyansColumns } from '../config/minyanim-columns.config';
 import { Calendar } from './calendar';
 
-export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
-  const { typeDate } = props;
-
+export function ZmanimTable({ dateType }: { dateType: string }): React.JSX.Element {
   const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
+  const [isScroll, setIsScroll] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(true);
   const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
+
   React.useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType`, {
-        params: { typeDate },
-      })
-      .then((res) =>
-        dispatch(
-          setSettingTimes({
-            setting: res.data.map((minyan: GetNewMinyan) => {
-              return {
-                ...minyan,
-                blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
-                startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
-                endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
-                isRoutine: minyan.specificDate?.isRoutine,
-                isEdited: false,
-              };
-            }),
-          })
-        )
-      )
-      .then(() => dispatch(sortSettingTimesItem()))
-      .catch((err) => console.log('Error fetching data:', err));
-  }, [typeDate]);
+    setLoading(true);
+    const fetchData = async () => {
+      await axios
+        .get(`${API_BASE_URL}/minyan/getMinyanimByDateType`, {
+          params: { dateType },
+        })
+        .then((res) => {
+          dispatch(
+            setSettingTimes({
+              setting: res.data.map((minyan: GetNewMinyan) => {
+                return {
+                  ...minyan,
+                  blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
+                  startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
+                  endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
+                  isRoutine: minyan.specificDate?.isRoutine,
+                  isEdited: false,
+                };
+              }),
+            })
+          );
+        })
+        .then(() => {
+          dispatch(sortSettingTimesItem());
+        })
+        .catch((err) => console.log('Error fetching data:', err))
+        .finally(() => {
+          setLoading(false);
+        });
+    };
+
+    fetchData();
+  }, [dateType]);
 
   React.useEffect(() => {
     axios
@@ -108,6 +120,9 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
         .then(() => {
           setTimeout(() => {
             setFalseEdited();
+            dispatch(
+              updateSettingTimesValue({ index: settingTimesItem.length, field: eFieldName.isEdited, value: false })
+            );
           }, 1000);
         });
     } catch (err) {
@@ -119,7 +134,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     settingTimesItem.map((_, index) => {
       dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: false }));
     });
-    dispatch(updateSettingTimesValue({ index: settingTimesItem.length, field: eFieldName.isEdited, value: false }));
   };
 
   const getNewMinyan = (index: number, location?: eLocationClick, isCalendar = false) => {
@@ -135,7 +149,7 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
           ? new Date()
           : getMiddleTime(settingTimesItem[indexBefore]?.endDate.time, settingTimesItem[indexAfter]?.endDate.time),
       roomId: rooms[0].id,
-      dateType: typeDate,
+      dateType,
       steadyFlag: false,
     };
 
@@ -199,8 +213,8 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
-      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
-        {typeDate === 'calendar' ? (
+      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }} onScroll={() => setIsScroll(true)}>
+        {dateType === 'calendar' ? (
           <Calendar
             handlePlusClick={(index: number, location?: eLocationClick) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
             // handleBlurInput={handleBlurInput}
@@ -210,16 +224,25 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
             roomsOption={roomsOption}
           />
         ) : (
-          <DataTable<LineItemTable>
-            columns={getMinyansColumns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
-            edited
-            onAddRowClick={handlePlusClick}
-            onChangeInput={handleChange}
-            onBlurInput={handleBlurInput}
-            onDeleteClick={handleDelete}
-            rows={settingTimesItem}
-            stickyHeader
-          />
+          <>
+            {loading ? (
+              <Typography textAlign="center" variant="h6">
+                Loading...
+              </Typography>
+            ) : (
+              <DataTable<LineItemTable>
+                columns={getMinyansColumns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
+                edited
+                onAddRowClick={handlePlusClick}
+                onChangeInput={handleChange}
+                onBlurInput={handleBlurInput}
+                onDeleteClick={handleDelete}
+                rows={settingTimesItem}
+                stickyHeader
+                scrollAction={{ isScroll, setIsScroll }}
+              />
+            )}
+          </>
         )}
       </Box>
     </Box>
