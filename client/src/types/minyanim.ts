@@ -87,4 +87,4 @@ export interface MinyanApi {
   blink?: BlinkAlertType;
 }
 
-export type typeForEdit = string | Date | Room | number | boolean;
+export type typeForEdit = string | Date | Room | number | boolean | SpecificDate[] | SpecificDate | BlinkAlertTypeName | AlertTypeName |undefined;
