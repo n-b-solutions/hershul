@@ -15,6 +15,4 @@ mongoose.set('toJSON', {
   }
 });
 
-connectDB().catch(err => console.log(err));
-
 export default connectDB;
