@@ -222,6 +222,9 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       .then(() => {
         setTimeout(() => {
           setFalseEdited();
+          dispatch(
+            updateSettingTimesValue({ index: settingTimesItem.length, field: eFieldName.isEdited, value: false })
+          );
         }, 1000);
       })
       .catch((err) => console.log('Error fetching data:', err));
@@ -231,7 +234,6 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
     settingTimesItem.map((_, index) => {
       dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: false }));
     });
-    dispatch(updateSettingTimesValue({ index: settingTimesItem.length, field: eFieldName.isEdited, value: false }));
   };
 
   const getNewMinyan = (index: number, location?: eLocationClick) => {

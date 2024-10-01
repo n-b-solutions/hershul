@@ -146,7 +146,6 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   };
 
   React.useEffect(() => {
-    console.log('yes');
     scrollAction?.isScroll && onAddRowClick && setPlusMode({ mode: null });
   }, [scrollAction?.isScroll]);
 
