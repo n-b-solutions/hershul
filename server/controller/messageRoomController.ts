@@ -1,27 +1,19 @@
-import { Request, Response } from "express";
-import multer from "multer";
-import fs from "fs";
-import { fileURLToPath } from "url";
-import path, { dirname } from "path";
-import MessageModel from "../models/messageModel";
-
-// Get __filename and __dirname for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { Request, Response } from 'express';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
+import MessageModel from '../models/messageModel';
 
 // Extend Express Request type to include Multer file properties
-declare global {
-  namespace Express {
-    interface Request {
-      file?: Express.Multer.File; // Correctly use Express.Multer.File
-      files?:
-        | { [fieldname: string]: Express.Multer.File[] }
-        | Express.Multer.File[]; // Matches the Multer definition
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    file?: Express.Multer.File; // Correctly use Express.Multer.File
+    files?: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[]; // Matches the Multer definition
   }
 }
+
 // Create the uploads directory for storing audio files if it doesn't exist
-const uploadDir = path.join(__dirname, "..", "uploads", "audio");
+const uploadDir = path.join(__dirname, '..', 'uploads', 'audio');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -47,7 +39,8 @@ const MessageRoomController = {
       const messages = await MessageModel.find();
       res.status(200).json(messages);
     } catch (error) {
-      res.status(500).send("Internal Server Error");
+      console.log(error);
+      res.status(500).send('Internal Server Error');
     }
   },
 
@@ -57,29 +50,30 @@ const MessageRoomController = {
     try {
       const message = await MessageModel.findById(id);
       if (!message) {
-        res.status(404).send("Message not found");
+        res.status(404).send('Message not found');
         return;
       }
       res.status(200).json(message);
     } catch (error) {
-      res.status(500).send("Internal Server Error");
+      console.log(error);
+      res.status(500).send('Internal Server Error');
     }
   },
   // Upload an audio file and create a new message
   post: async (req: Request, res: Response): Promise<void> => {
-    upload.single("audioBlob")(req, res, async (err: any) => {
+    upload.single('audioBlob')(req, res, async (err: any) => {
       if (err) {
-        res.status(500).send("Error uploading file");
+        res.status(500).send('Error uploading file');
         return;
       }
 
       const file = req.file;
       if (!file) {
-        res.status(400).send("No file uploaded.");
+        res.status(400).send('No file uploaded.');
         return;
       }
 
-      const filePath = path.join("uploads", "audio", file.filename);
+      const filePath = path.join('uploads', 'audio', file.filename);
       const { name, selectedRoom } = req.body;
 
       const newMessage = new MessageModel({
@@ -96,9 +90,10 @@ const MessageRoomController = {
   // Update an existing message
   put: async (req: Request, res: Response): Promise<void> => {
     try {
-      res.send("Resource updated");
+      res.send('Resource updated');
     } catch (error) {
-      res.status(500).send("Internal Server Error");
+      console.log(error);
+      res.status(500).send('Internal Server Error');
     }
   },
 
@@ -107,12 +102,13 @@ const MessageRoomController = {
     try {
       const deleteMessage = await MessageModel.findByIdAndDelete(id);
       if (!deleteMessage) {
-        res.status(404).send("Message not found");
+        res.status(404).send('Message not found');
         return;
       }
-      res.status(200).send("Message deleted");
+      res.status(200).send('Message deleted');
     } catch (error) {
-      res.status(500).send("Internal Server Error");
+      console.log(error);
+      res.status(500).send('Internal Server Error');
     }
   },
 };

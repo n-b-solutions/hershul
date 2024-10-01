@@ -3,10 +3,10 @@ import { CronJob } from 'cron';
 
 import ScheduleController from './controller/scheduleController';
 
-let io;
+let io: SocketioServer;
 
-export const initSocketio = () => {
-  io = new SocketioServer(process.env.VITE_SOCKET_PORT ? +process.env.VITE_SOCKET_PORT : 4001, {
+export const initSocketio = (server) => {
+  io = new SocketioServer(server, {
     cors: {
       origin: process.env.VITE_SITE_URL,
       methods: ['GET', 'POST'],

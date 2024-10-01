@@ -16,8 +16,7 @@ import { Minyan, MinyanApi } from '@/types/minyanim';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
-
-const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
+import { API_BASE_URL } from '@/consts/api';
 
 const columns: ColumnDef<Minyan>[] = [
   {
