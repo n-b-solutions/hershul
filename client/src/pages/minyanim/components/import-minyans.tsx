@@ -10,7 +10,6 @@ import {
 import { setSettingTimes } from '@/state/setting-times/setting-times-slice';
 import { RootState } from '@/state/store';
 import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typography } from '@mui/material';
-import { isEmptyObject } from '@tiptap/react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -25,8 +24,8 @@ export interface CountMinyanOfDate {
 }
 
 export function ImportMinyans(): React.JSX.Element {
-  const [datetype, setDatetype] = useState<eDateType | string>(EMPTY_STRING);
-  const [datetypeArray, setDatetypeArray] = useState<CountMinyanOfDate[]>([]);
+  const [dateType, setDateType] = useState<eDateType | string>(EMPTY_STRING);
+  const [dateTypeArray, setDateTypeArray] = useState<CountMinyanOfDate[]>([]);
   const [countMinyan, setCountMinyan] = useState<number | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const currentDateType = useSelector((state: RootState) => state.settingTimes.dateType);
@@ -43,15 +42,15 @@ export function ImportMinyans(): React.JSX.Element {
           .catch((err: any) => console.log('Error fetching data: ', err));
       })
     ).then((res: any) => {
-      setDatetypeArray(
+      setDateTypeArray(
         res?.filter((dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.DEFAULT)
       );
     });
   }, []);
 
   const handleChange = (e: SelectChangeEvent<any>) => {
-    setDatetype(e.target.value);
-    const countMinyan: CountMinyanOfDate | undefined = datetypeArray.find(
+    setDateType(e.target.value);
+    const countMinyan: CountMinyanOfDate | undefined = dateTypeArray.find(
       (f: CountMinyanOfDate) => f.category.value === e.target.value
     );
     countMinyan && setCountMinyan(countMinyan.count);
@@ -59,7 +58,7 @@ export function ImportMinyans(): React.JSX.Element {
 
   const handleImport = () => {
     axios
-      .post(`${API_BASE_URL}/minyan/import/${datetype}`, { currentDateType })
+      .post(`${API_BASE_URL}/minyan/import/${dateType}`, { currentDateType })
       .then((res) => {
         dispatch(
           setSettingTimes({
@@ -72,7 +71,7 @@ export function ImportMinyans(): React.JSX.Element {
 
   const handleClose = () => {
     setOpen(false);
-    setDatetype(EMPTY_STRING);
+    setDateType(EMPTY_STRING);
     setCountMinyan(null);
   };
 
@@ -117,17 +116,17 @@ export function ImportMinyans(): React.JSX.Element {
             </Stack>
             <Box sx={{ justifyContent: 'center' }}>
               <Stack spacing={3} sx={{ alignItems: 'center', justifyContent: 'center', p: 2 }}>
-                <Select fullWidth value={datetype} onChange={handleChange}>
+                <Select fullWidth value={dateType} onChange={handleChange}>
                   <Option value={EMPTY_STRING} disabled>
                     Choose Category
                   </Option>
-                  {datetypeArray?.map((option: CountMinyanOfDate) => (
+                  {dateTypeArray?.map((option: CountMinyanOfDate) => (
                     <Option value={option.category?.value} key={option.category?.value}>
                       {option.category?.label}
                     </Option>
                   ))}
                 </Select>
-                <Select fullWidth disabled={datetype !== eDateType.DEFAULT} value={EMPTY_STRING}>
+                <Select fullWidth disabled={dateType !== eDateType.DEFAULT} value={EMPTY_STRING}>
                   <Option value={EMPTY_STRING} disabled>
                     Select Date
                   </Option>
