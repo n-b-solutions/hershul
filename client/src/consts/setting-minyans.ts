@@ -3,7 +3,7 @@ export const enum eLocationClick {
   bottom = 'bottom',
 }
 
-export const ONE_MINUTE = 1;
+export const GENERATE_TIME = 10;
 
 export const enum eFieldName {
   room = 'room',
@@ -14,7 +14,7 @@ export const enum eFieldName {
   endDateTime = 'endDate.time',
   startDateTime = 'startDate.time',
   blinkSecondsNum = 'blink.secondsNum',
-  isEdited='isEdited'
+  isEdited = 'isEdited',
 }
 
 export const SECONDS_NUM = 'secondsNum';
