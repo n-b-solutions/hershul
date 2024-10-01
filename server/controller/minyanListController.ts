@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import dayjs from "dayjs";
 import MinyanListModel from "../models/minyanListModel";
 import { io } from "../socketio";
 import axios from "axios";
@@ -64,7 +65,7 @@ const MinyanListController = {
 
   getById: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id!)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).send("Invalid ID format");
       return;
     }
@@ -137,7 +138,6 @@ const MinyanListController = {
               break;
             case 6: //shabat
               queryDateType = eDateType.SATURDAY;
-              break;
             default:
               queryDateType = eDateType.DEFAULT; // Fallback default value
           }
