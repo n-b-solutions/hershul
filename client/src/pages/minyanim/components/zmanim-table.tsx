@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { API_BASE_URL } from '@/consts/api';
 import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
@@ -24,8 +22,9 @@ import { DataTable } from '@/components/core/data-table';
 
 import { getMinyansColumns } from '../config/minyanim-columns.config';
 import { Calendar } from './calendar';
+import { eDateType } from '../../../../../bin/types/minyan.type';
 
-export function ZmanimTable({ dateType }: { dateType: string }): React.JSX.Element {
+export function SettingMinyansTable({ dateType }: { dateType: string }): React.JSX.Element {
   const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
@@ -214,10 +213,9 @@ export function ZmanimTable({ dateType }: { dateType: string }): React.JSX.Eleme
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
       <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }} onScroll={() => setIsScroll(true)}>
-        {dateType === 'calendar' ? (
+        {dateType === eDateType.CALENDAR ? (
           <Calendar
             handlePlusClick={(index: number, location?: eLocationClick) => handlePlusClick(index, location, true)} // כאן אנו מוודאים ש-isCalendar נשלח כ-TRUE
-            // handleBlurInput={handleBlurInput}
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             rooms={rooms}

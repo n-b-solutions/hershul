@@ -4,5 +4,6 @@ export enum eDateType {
   FRIDAY = "friday",
   SATURDAY = "saturday",
   ROSH_HODESH = "roshHodesh",
+  CALENDAR = "calendar",
   DEFAULT = "default",
 }

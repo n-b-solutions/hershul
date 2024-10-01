@@ -11,7 +11,7 @@ import { TypeOfDate } from '@/types/minyanim';
 
 import { eDateType } from '../../../../bin/types/minyan.type';
 import { TypeOfDateComponent } from './components/type-of-date/type-of-date';
-import { ZmanimTable } from './components/zmanim-table';
+import { SettingMinyansTable } from './components/zmanim-table';
 
 const metadata: Metadata = { title: 'Setting' };
 
@@ -36,7 +36,7 @@ export function Page(): React.JSX.Element {
           </Tabs>
         </Grid>
         <Grid item xs={12} sx={{ height: 'calc(100% - 48px)', overflowY: 'auto' }}>
-          <ZmanimTable dateType={currentType} />
+          <SettingMinyansTable dateType={currentType} />
         </Grid>
       </Grid>
     </>

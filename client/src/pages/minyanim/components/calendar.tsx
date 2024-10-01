@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { API_BASE_URL } from '@/consts/api';
 import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
@@ -26,22 +24,6 @@ import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
 import { getMinyansColumns } from '../config/minyanim-columns.config';
-
-const styleTypography = {
-  display: 'grid',
-  justifyItems: 'center',
-  alignItems: 'center',
-  whiteSpace: 'nowrap',
-  height: '54px',
-};
-
-const getFormat = (value: number | string): React.JSX.Element => {
-  return (
-    <Typography component="span" position="relative" sx={{ ...styleTypography }} variant="inherit">
-      {value}
-    </Typography>
-  );
-};
 
 const isRoutineColumn: ColumnDef<LineItemTable> = {
   typeEditinput: 'switch',
