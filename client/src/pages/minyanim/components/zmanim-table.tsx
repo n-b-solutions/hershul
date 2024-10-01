@@ -147,29 +147,41 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
   const [isScroll, setIsScroll] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(true);
   const dateType = props.typeDate;
+
   React.useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/minyan/getMinyanimByDateType`, {
-        params: { dateType },
-      })
-      .then((res) =>
-        dispatch(
-          setSettingTimes({
-            setting: res.data.map((minyan: GetNewMinyan) => {
-              return {
-                ...minyan,
-                blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
-                startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
-                endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
-                isEdited: false,
-              };
-            }),
-          })
-        )
-      )
-      .then(() => dispatch(sortSettingTimesItem()))
-      .catch((err) => console.log('Error fetching data:', err));
+    setLoading(true);
+    const fetchData = async () => {
+      await axios
+        .get(`${API_BASE_URL}/minyan/getMinyanimByDateType`, {
+          params: { dateType },
+        })
+        .then((res) => {
+          dispatch(
+            setSettingTimes({
+              setting: res.data.map((minyan: GetNewMinyan) => {
+                return {
+                  ...minyan,
+                  blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
+                  startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
+                  endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
+                  isEdited: false,
+                };
+              }),
+            })
+          );
+        })
+        .then(() => {
+          dispatch(sortSettingTimesItem());
+        })
+        .catch((err) => console.log('Error fetching data:', err))
+        .finally(() => {
+          setLoading(false);
+        });
+    };
+
+    fetchData();
   }, [dateType]);
 
   React.useEffect(() => {
@@ -290,17 +302,23 @@ export function ZmanimTable(props: { typeDate: string }): React.JSX.Element {
       <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }} onScroll={() => setIsScroll(true)}>
         {' '}
         {/* הגדרה של גובה מקסימלי */}
-        <DataTable<LineItemTable>
-          columns={columns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
-          edited
-          onAddRowClick={handlePlusClick}
-          onChangeInput={handleChange}
-          onBlurInput={handleBlurInput}
-          onDeleteClick={handleDelete}
-          rows={settingTimesItem}
-          stickyHeader
-          scrollAction={{ isScroll, setIsScroll }}
-        />
+        {loading ? (
+          <Typography textAlign="center" variant="h6">
+            Loading...
+          </Typography>
+        ) : (
+          <DataTable<LineItemTable>
+            columns={columns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
+            edited
+            onAddRowClick={handlePlusClick}
+            onChangeInput={handleChange}
+            onBlurInput={handleBlurInput}
+            onDeleteClick={handleDelete}
+            rows={settingTimesItem}
+            stickyHeader
+            scrollAction={{ isScroll, setIsScroll }}
+          />
+        )}
       </Box>
     </Box>
   );
