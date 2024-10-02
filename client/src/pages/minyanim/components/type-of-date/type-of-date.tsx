@@ -3,14 +3,15 @@ import Tab from '@mui/material/Tab/Tab';
 import Tabs from '@mui/material/Tabs';
 
 import type { TypeOfDate } from '@/types/minyanim';
+import { eDateType } from '../../../../../../bin/types/minyan.type';
 
 const typesOfDates: TypeOfDate[] = [
-  { value: 'sunday', label: 'Sunday & Tuesday & Wednesday' },
-  { value: 'monday', label: 'Monday & Thursday' },
-  { value: 'friday', label: 'Friday' },
-  { value: 'saturday', label: 'Saturday' },
-  { value: 'roshHodesh', label: 'Rosh Hodesh' },
-  { value: 'calendar', label: 'Calendar' },
+  { value: eDateType.SUNDAY, label: 'Sunday & Tuesday & Wednesday' },
+  { value: eDateType.MONDAY, label: 'Monday & Thursday' },
+  { value: eDateType.FRIDAY, label: 'Friday' },
+  { value: eDateType.SATURDAY, label: 'Saturday' },
+  { value: eDateType.ROSH_HODESH, label: 'Rosh Hodesh' },
+  { value: eDateType.CALENDAR, label: 'Calendar' },
 ];
 
 export function TypeOfDateComponent(

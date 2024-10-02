@@ -4,6 +4,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "build": "npm install && vite build && npm run migrate-up",
+    "start": "node dist/app.mjs",
     "migrate-up": "migrate-mongo up",
     "migrate-down": "migrate-mongo down",
     "test": "echo \"Error: no test specified\" && exit 1"
