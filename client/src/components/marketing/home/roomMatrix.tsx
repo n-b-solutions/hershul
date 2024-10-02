@@ -19,9 +19,7 @@ export function RoomMatrix(): React.JSX.Element {
 
   React.useEffect(() => {
     const getRooms = async () => {
-      if (!rooms) {
-        await dispatch(fetchRooms());
-      }
+      await dispatch(fetchRooms());
     };
     getRooms();
 
