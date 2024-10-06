@@ -15,8 +15,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { Option } from '@/components/core/option';
 
-import { eDateType } from '../../../../../lib/types/minyan.type';
 import { SelectOption } from '@/types/metadata.type';
+import { eDateType } from '../../../../../../lib/types/minyan.type';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;

@@ -14,11 +14,11 @@ import { ArrowArcLeft, PlusCircle, Trash } from '@phosphor-icons/react';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
 import { typeForEdit } from '@/types/minyans.type';
-import { ImportMinyans } from '@/pages/minyanim/components/ImportMinyans';
 
 import { EditTableCellInputs } from './edit-table-cell-inputs';
 import { eLocationClick } from '@/types/enums';
 import { SelectOption } from '@/types/metadata.type';
+import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
 
 export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
@@ -371,6 +371,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                   {plusMode.index === -1 && <PlusCircle size={32} />}
                 </Grid>
                 <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
+               {/* TODO: Move it out from the component */}
                 <ImportMinyans />
               </Grid>
             </TableCell>

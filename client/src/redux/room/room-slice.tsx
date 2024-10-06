@@ -2,6 +2,7 @@ import { API_BASE_URL } from '@/const/api.const';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+import { SelectOption } from '@/types/metadata.type';
 import { Room } from '@/types/room.type';
 
 import { RootState } from '../store';
@@ -9,6 +10,7 @@ import { RootState } from '../store';
 // Async thunk to fetch room statuses
 interface RoomsState {
   rooms: Room[];
+  roomsAsSelectOptions: SelectOption<string>[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
@@ -43,6 +45,7 @@ export const updateRoomStatus = createAsyncThunk<
 // Define initial state
 const initialState: RoomsState = {
   rooms: [],
+  roomsAsSelectOptions: [],
   status: 'idle',
   error: null,
 };
@@ -68,6 +71,10 @@ const roomsSlice = createSlice({
       .addCase(fetchRooms.fulfilled, (state, action: PayloadAction<Room[]>) => {
         state.status = 'succeeded';
         state.rooms = action.payload;
+        state.roomsAsSelectOptions = action.payload.map((option: { nameRoom: string; id: string }) => ({
+          label: option.nameRoom,
+          value: option.id,
+        }));
       })
       .addCase(fetchRooms.rejected, (state, action: PayloadAction<string | undefined>) => {
         state.status = 'failed';

@@ -6,7 +6,7 @@ import {  MinyanDetails, tFieldMinyanTable } from '@/types/minyans.type';
 import { Room } from '@/types/room.type';
 import { ColumnDef } from '@/components/core/data-table';
 
-import { ActionsMessage } from '../components/ActionsMessage';
+import { ActionsMessage } from '../components/minyans-settings/ActionsMessage';
 import { SelectOption } from '@/types/metadata.type';
 
 const getFormat = (props: {

@@ -2,12 +2,14 @@ import * as React from 'react';
 import { API_BASE_URL } from '@/const/api.const';
 import { isDateInactive } from '@/helpers/time.helper';
 import {
+  addSettingTimes,
   deleteMinyan,
   setSettingTimes,
   sortSettingTimesItem,
   updateSettingTimesValue,
 } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
+import { getNewMinyanObj } from '@/services/minyans.service';
 import { DatePicker } from '@mui/x-date-pickers';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
@@ -15,12 +17,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick } from '@/types/enums';
 import { SelectOption } from '@/types/metadata.type';
-import type { MinyanDetails, SpecificDate, typeForEdit } from '@/types/minyans.type';
+import type { GetNewMinyan, MinyanDetails, NewMinyan, SpecificDate, typeForEdit } from '@/types/minyans.type';
 import { Room } from '@/types/room.type';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
-import { getMinyansColumns } from '../config/minyanim-columns.config';
+import { eDateType } from '../../../../../../lib/types/minyan.type';
+import { getMinyansSettingsColumns } from '../../config/minyans-settings.config';
 
 const isRoutineColumn: ColumnDef<MinyanDetails> = {
   editInputType: 'switch',
@@ -33,16 +36,14 @@ const isRoutineColumn: ColumnDef<MinyanDetails> = {
   editable: true,
 };
 
-export function Calendar(props: {
-  handlePlusClick: (index: number, location?: eLocationClick) => void; // Updated signature
-  selectedDate: Dayjs;
-  setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs>>;
-  rooms: Room[];
-  roomsOption: SelectOption<string>[];
+export function Calendar({
+  scrollAction,
+}: {
+  scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
 }): React.JSX.Element {
-  const { handlePlusClick, selectedDate, setSelectedDate, rooms, roomsOption } = props;
-
+  const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
   const settingTimesItem = useSelector((state: RootState) => state.minyans.settingTimesItem);
+  const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const dispatch = useDispatch();
 
   React.useEffect(() => {
@@ -201,6 +202,67 @@ export function Calendar(props: {
       setSelectedDate(newDate);
     }
   };
+
+  const handlePlusClick = async (index: number, location?: eLocationClick, isCalendar = false): Promise<any> => {
+    const newRow: NewMinyan = {
+      ...getNewMinyanObj(settingTimesItem, eDateType.calendar, rooms[0].id, index, location),
+      specificDate: {
+        date: selectedDate.toDate(),
+        isRoutine: false,
+      },
+    };
+    try {
+      await axios
+        .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
+        .then((res) => {
+          const currentRoom = rooms.find((m) => m.id === res.data.roomId);
+          const { roomId: room, ...data } = res.data;
+          // Prepare the newRow object with or without specificDate based on isCalendar
+          const dispatchData: MinyanDetails = {
+            blink: data.blink,
+            endDate: data.endDate,
+            startDate: data.startDate,
+            room: currentRoom!,
+            id: data.id,
+            isEdited: true,
+            dateType: data.dateType,
+            inactiveDates: data.inactiveDates || [],
+            specificDate: {
+              date: selectedDate.toISOString(), // Convert to ISO string
+              isRoutine: false,
+            },
+            isRoutine: false,
+          };
+
+          dispatch(
+            addSettingTimes({
+              newRow: dispatchData,
+            })
+          );
+        })
+        .then(async () => {
+          dispatch(await sortSettingTimesItem());
+        })
+        .then(() => {
+          setTimeout(() => {
+            setFalseEdited();
+            dispatch(
+              updateSettingTimesValue({ index: settingTimesItem.length, field: eFieldName.isEdited, value: false })
+            );
+          }, 1000);
+        });
+    } catch (err) {
+      console.log('Error fetching data:', err);
+    }
+  };
+
+  // TODO: remove duplicate code
+  const setFalseEdited = () => {
+    settingTimesItem.map((_, index) => {
+      dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: false }));
+    });
+  };
+
   const getRowProps = (row: MinyanDetails): { sx: React.CSSProperties; type: string } => {
     const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
 
@@ -225,12 +287,16 @@ export function Calendar(props: {
       />
       <DataTable<MinyanDetails>
         type="calendar"
-        columns={[...getMinyansColumns({ roomArray: rooms, roomsOptionsArray: roomsOption }), isRoutineColumn]}
+        columns={[
+          ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
+          isRoutineColumn,
+        ]}
         edited
         onAddRowClick={handlePlusClick}
         onChangeInput={handleChange}
         onBlurInput={handleBlurInput}
         onDeleteClick={handleDelete}
+        scrollAction={scrollAction}
         rows={settingTimesItem}
         rowProps={(row) => getRowProps(row)} // Call getRowProps for each row
       />
