@@ -1,35 +1,32 @@
 import * as React from 'react';
-import { API_BASE_URL } from '@/consts/api';
-import { eFieldName, eLocationClick } from '@/consts/setting-minyans';
-import { isDateInactive } from '@/helpers/functions-times';
+import { API_BASE_URL } from '@/const/api.const';
+import { isDateInactive } from '@/helpers/time.helper';
 import {
   deleteMinyan,
   setSettingTimes,
   sortSettingTimesItem,
   updateSettingTimesValue,
-} from '@/state/setting-times/setting-times-slice';
-import type { RootState } from '@/state/store';
-import { Typography } from '@mui/material';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Divider from '@mui/material/Divider';
+} from '@/redux/minyans/setting-times-slice';
+import { RootState } from '@/redux/store';
 import { DatePicker } from '@mui/x-date-pickers';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { LineItemTable, SpecificDate, typeForEdit } from '@/types/minyanim';
-import { Room, SelectOption } from '@/types/room';
+import { eFieldName, eLocationClick } from '@/types/enums';
+import { SelectOption } from '@/types/metadata.type';
+import type { MinyanDetails, SpecificDate, typeForEdit } from '@/types/minyans.type';
+import { Room } from '@/types/room.type';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
 import { getMinyansColumns } from '../config/minyanim-columns.config';
 
-const isRoutineColumn: ColumnDef<LineItemTable> = {
-  typeEditinput: 'switch',
+const isRoutineColumn: ColumnDef<MinyanDetails> = {
+  editInputType: 'switch',
   valueForEdit: (row) => row.isRoutine,
   name: 'Is Routine',
-  width: '150px',
+  width: '100px',
   padding: 'none',
   align: 'center',
   field: 'isRoutine',
@@ -41,11 +38,11 @@ export function Calendar(props: {
   selectedDate: Dayjs;
   setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs>>;
   rooms: Room[];
-  roomsOption: SelectOption[];
+  roomsOption: SelectOption<string>[];
 }): React.JSX.Element {
   const { handlePlusClick, selectedDate, setSelectedDate, rooms, roomsOption } = props;
 
-  const settingTimesItem = useSelector((state: RootState) => state.settingTimes.settingTimesItem);
+  const settingTimesItem = useSelector((state: RootState) => state.minyans.settingTimesItem);
   const dispatch = useDispatch();
 
   React.useEffect(() => {
@@ -86,7 +83,7 @@ export function Calendar(props: {
     if (settingTimesItem[index].dateType === 'calendar') {
       // Deleting Minyan
       axios
-        .delete<{ deletedMinyan: LineItemTable }>(`${API_BASE_URL}/minyan/${settingTimesItem[index].id}`)
+        .delete<{ deletedMinyan: MinyanDetails }>(`${API_BASE_URL}/minyan/${settingTimesItem[index].id}`)
         .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
         .catch((err) => console.log('Error fetching data:', err));
     } else {
@@ -165,7 +162,7 @@ export function Calendar(props: {
   const handleBlurInput = (
     value: typeForEdit, // Align this to the expected type
     index: number,
-    field: keyof LineItemTable,
+    field: keyof MinyanDetails,
     internalField?: string
   ): void => {
     const updateId = settingTimesItem[index].id;
@@ -196,7 +193,7 @@ export function Calendar(props: {
         .catch((err) => console.log('Error fetching data:', err));
     }
   };
-  const handleChange = (value: typeForEdit, index: number, field: keyof LineItemTable): void => {
+  const handleChange = (value: typeForEdit, index: number, field: keyof MinyanDetails): void => {
     value != undefined && dispatch(updateSettingTimesValue({ index, field, value }));
   };
   const handleDateChange = (newDate: Dayjs | null) => {
@@ -204,7 +201,7 @@ export function Calendar(props: {
       setSelectedDate(newDate);
     }
   };
-  const getRowProps = (row: LineItemTable): { sx: React.CSSProperties; type: string } => {
+  const getRowProps = (row: MinyanDetails): { sx: React.CSSProperties; type: string } => {
     const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
 
     const rowType = isInactiveDate ? 'disable' : row.dateType === 'calendar' || !row.dateType ? 'calendar' : 'other';
@@ -226,7 +223,7 @@ export function Calendar(props: {
         minDate={dayjs()}
         onChange={handleDateChange}
       />
-      <DataTable<LineItemTable>
+      <DataTable<MinyanDetails>
         type="calendar"
         columns={[...getMinyansColumns({ roomArray: rooms, roomsOptionsArray: roomsOption }), isRoutineColumn]}
         edited
