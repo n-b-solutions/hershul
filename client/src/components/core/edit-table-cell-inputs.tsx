@@ -1,11 +1,11 @@
 import React, { Ref, useState } from 'react';
-import { SECONDS_NUM, TIME } from '@/consts/setting-minyans';
+import { SECONDS_NUM, TIME } from '@/const/minyans.const';
 import { OutlinedInput, Select, SelectChangeEvent, Switch, TextField } from '@mui/material';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';
 
-import { typeForEdit } from '@/types/minyanim';
-import { SelectOption } from '@/types/room';
+import { SelectOption } from '@/types/metadata.type';
+import { typeForEdit } from '@/types/minyans.type';
 import { Option } from '@/components/core/option';
 
 export function EditTableCellInputs<TRowModel extends object>(props: {
@@ -22,7 +22,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
     internalField?: string
   ) => void;
   editType?: string;
-  selectOptions?: SelectOption[];
+  selectOptions?: SelectOption<string>[];
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
   const [select, setSelect] = useState(props.value);
@@ -91,7 +91,7 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
             e.key === 'Enter' && handleBlurInput(props.value as typeForEdit, e);
           }}
         >
-          {props.selectOptions.map((option: SelectOption) => (
+          {props.selectOptions.map((option: SelectOption<string>) => (
             <Option key={option.value} value={option.value}>
               {option.label}
             </Option>

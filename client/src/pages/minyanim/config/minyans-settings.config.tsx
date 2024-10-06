@@ -1,13 +1,13 @@
 import { Grid, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 
-import { ColumnDef } from '@/components/core/data-table';
-import { MinyanDetails, tFieldMinyanTable } from '@/types/minyans.type';
-import { SelectOption } from '@/types/metadata.type';
-import { Room } from '@/types/room.type';
 import { MessageTab } from '@/types/message.type';
-import { ActionsMessage } from '../components/ActionsMessage';
+import {  MinyanDetails, tFieldMinyanTable } from '@/types/minyans.type';
+import { Room } from '@/types/room.type';
+import { ColumnDef } from '@/components/core/data-table';
 
+import { ActionsMessage } from '../components/ActionsMessage';
+import { SelectOption } from '@/types/metadata.type';
 
 const getFormat = (props: {
   value: number | string;
@@ -16,7 +16,7 @@ const getFormat = (props: {
   id?: string;
   field?: tFieldMinyanTable;
   index?: number;
-}): React.JSX.Element => {
+}) => {
   return (
     <Grid container direction="row" justifyContent="center" spacing={2}>
       <Grid item>
@@ -49,13 +49,13 @@ const styleTypography = {
   height: '54px',
 };
 
-export const getMinyansColumns = ({
+export const getMinyansSettingsColumns = ({
   roomArray,
   roomsOptionsArray,
 }: {
   roomArray: Room[];
-  roomsOptionsArray: SelectOption<string>[];
-}): ColumnDef<MinyanDetails>[] =>
+  roomsOptionsArray: SelectOption<string>[]
+}) =>
   [
     {
       formatter: (row, index): React.JSX.Element =>

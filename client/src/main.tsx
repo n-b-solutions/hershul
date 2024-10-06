@@ -4,10 +4,10 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 
-import { routes } from '@/routes';
+import { routes } from '@/routes/index.route';
 import { ScrollRestoration } from '@/components/core/scroll-restoration';
 
-import { store } from './state/store';
+import { store } from './redux/store';
 
 const root = createRoot(document.getElementById('root')!);
 document.title = import.meta.env.VITE_NAME || 'Default Title';

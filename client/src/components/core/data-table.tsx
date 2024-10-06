@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { eLocationClick, NO_DATA } from '@/consts/setting-minyans';
+import { NO_DATA } from '@/const/minyans.const';
 import { Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Table from '@mui/material/Table';
@@ -13,11 +13,12 @@ import TableRow from '@mui/material/TableRow';
 import { ArrowArcLeft, PlusCircle, Trash } from '@phosphor-icons/react';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
-import { typeForEdit } from '@/types/minyanim';
-import { SelectOption } from '@/types/room';
-import { ImportMinyans } from '@/pages/minyanim/components/import-minyans';
+import { typeForEdit } from '@/types/minyans.type';
+import { ImportMinyans } from '@/pages/minyanim/components/ImportMinyans';
 
 import { EditTableCellInputs } from './edit-table-cell-inputs';
+import { eLocationClick } from '@/types/enums';
+import { SelectOption } from '@/types/metadata.type';
 
 export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
@@ -26,13 +27,13 @@ export interface ColumnDef<TRowModel> {
   valueForEdit?: (row: TRowModel) => any;
   valueForField?: (row: TRowModel) => any;
   valueOption?: any & { id: string }[];
-  typeEditinput?: string;
+  editInputType?: string;
   hideName?: boolean;
   name: string;
   width?: number | string;
   padding?: Padding;
   tooltip?: string;
-  selectOptions?: SelectOption[];
+  selectOptions?: SelectOption<string>[];
   editable?: boolean;
 }
 type Padding = 'normal' | 'checkbox' | 'none';
@@ -297,7 +298,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                         handleBlur={handleBlurInput}
                         value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
                         handleChangeInput={onChangeInput}
-                        editType={column.typeEditinput}
+                        editType={column.editInputType}
                         valueOption={column.valueOption && column.valueOption}
                         selectOptions={column.selectOptions && column.selectOptions}
                       />

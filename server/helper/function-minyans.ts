@@ -1,5 +1,5 @@
 import axios from "axios";
-import { eDateType } from "../../bin/types/minyan.type";
+import { eDateType } from "../../lib/types/minyan.type";
 
 // Function to determine if today is Rosh Chodesh
 export const isRoshChodesh = async (): Promise<boolean> => {
@@ -23,42 +23,36 @@ export const isRoshChodesh = async (): Promise<boolean> => {
 
 export async function getQueryDateType(date?: Date): Promise<string> {
   let queryDateType: string;
-  console.log("date", date);
-
   let dayOfWeek;
   if (date) {
-    console.log("date");
-
     dayOfWeek = date.getDay();
   } else {
     const today = new Date();
-    dayOfWeek = today.getDay(); // במקרה ואין תאריך, מציג את היום הנוכחי
+    dayOfWeek = today.getDay();
   }
-  console.log(dayOfWeek);
-
   const roshChodesh = await isRoshChodesh();
 
   if (roshChodesh) {
-    queryDateType = eDateType.ROSH_HODESH;
+    queryDateType = eDateType.roshHodesh;
   } else {
     switch (dayOfWeek) {
       case 0: // Sunday
       case 2: // Tuesday
       case 3: // Thursday
-        queryDateType = eDateType.SUNDAY;
+        queryDateType = eDateType.sunday;
         break;
       case 1: // Monday
       case 4: // Wednesday
-        queryDateType = eDateType.MONDAY;
+        queryDateType = eDateType.monday;
         break;
       case 5: // Friday
-        queryDateType = eDateType.FRIDAY;
+        queryDateType = eDateType.friday;
         break;
       case 6: // Saturday (Shabbat)
-        queryDateType = eDateType.SATURDAY;
+        queryDateType = eDateType.saturday;
         break;
       default:
-        queryDateType = eDateType.DEFAULT; // Fallback default value
+        queryDateType = eDateType.calendar; // Fallback default value
     }
   }
 

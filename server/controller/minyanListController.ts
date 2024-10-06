@@ -4,7 +4,7 @@ import MinyanListModel from "../models/minyanListModel";
 import { io } from "../socketio";
 import mongoose from "mongoose";
 import { getQueryDateType, isRoshChodesh } from "../helper/function-minyans";
-import { eDateType } from "../../bin/types/minyan.type";
+import { eDateType } from "../../lib/types/minyan.type";
 
 const MinyanListController = {
   // Get all minyanim
