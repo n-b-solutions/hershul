@@ -7,7 +7,6 @@ import { Helmet } from 'react-helmet-async';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { Metadata } from '@/types/metadata.type';
-import { TypeOfDate } from '@/types/minyans.type';
 
 import { eDateType } from '../../../../lib/types/minyan.type';
 import { MinyansSettings } from './components/MinyansSettings';

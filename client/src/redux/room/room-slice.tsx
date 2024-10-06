@@ -54,7 +54,7 @@ const roomsSlice = createSlice({
   reducers: {
     updateRoomState: (state, action: PayloadAction<{ nameRoom: string; newStatus: 'on' | 'off' | 'blink' }>) => {
       const { nameRoom, newStatus } = action.payload;
-      state.rooms = state.rooms.map((room) => (room.roomName === nameRoom ? { ...room, status: newStatus } : room));
+      state.rooms = state.rooms.map((room) => (room.nameRoom === nameRoom ? { ...room, status: newStatus } : room));
     },
     setRoomStatusFromSocket: (state, action: PayloadAction<Room[]>) => {
       state.rooms = action.payload;

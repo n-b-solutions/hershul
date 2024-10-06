@@ -2,11 +2,12 @@ import { Grid, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 
 import { MessageTab } from '@/types/message.type';
-import { LineItemTable, tFieldMinyanTable } from '@/types/minyans.type';
-import { Room, SelectOption } from '@/types/room.type';
+import {  MinyanDetails, tFieldMinyanTable } from '@/types/minyans.type';
+import { Room } from '@/types/room.type';
 import { ColumnDef } from '@/components/core/data-table';
 
 import { ActionsMessage } from '../components/ActionsMessage';
+import { SelectOption } from '@/types/metadata.type';
 
 const getFormat = (props: {
   value: number | string;
@@ -53,7 +54,7 @@ export const getMinyansSettingsColumns = ({
   roomsOptionsArray,
 }: {
   roomArray: Room[];
-  roomsOptionsArray: SelectOption[];
+  roomsOptionsArray: SelectOption<string>[]
 }) =>
   [
     {
@@ -125,4 +126,4 @@ export const getMinyansSettingsColumns = ({
       field: 'room',
       align: 'center',
     },
-  ] satisfies ColumnDef<LineItemTable>[];
+  ] satisfies ColumnDef<MinyanDetails>[];

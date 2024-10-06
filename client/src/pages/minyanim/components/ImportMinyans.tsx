@@ -13,13 +13,13 @@ import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typograph
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { TypeOfDate } from '@/types/minyans.type';
 import { Option } from '@/components/core/option';
 
 import { eDateType } from '../../../../../lib/types/minyan.type';
+import { SelectOption } from '@/types/metadata.type';
 
 export interface CountMinyanOfDate {
-  category: TypeOfDate;
+  category: SelectOption<eDateType>;
   count: number;
 }
 
@@ -33,9 +33,9 @@ export function ImportMinyans(): React.JSX.Element {
 
   useEffect(() => {
     Promise.all(
-      typesOfDates.map(async (type: TypeOfDate) => {
+      typesOfDates.map(async (type: SelectOption<eDateType>) => {
         return await axios
-          .get(`${API_BASE_URL}/minyan/import/count/${type.value}`)
+          .get(`${API_BASE_URL}/minyan/import/count/${type}`)
           .then<CountMinyanOfDate>((res: { data: number }) => {
             return { category: type, count: res.data };
           })

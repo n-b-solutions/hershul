@@ -1,4 +1,4 @@
-import { TypeOfDate } from '@/types/minyans.type';
+import { SelectOption } from '@/types/metadata.type';
 
 import { eDateType } from '../../../lib/types/minyan.type';
 
@@ -26,6 +26,6 @@ export const typesOfDates = [
   { value: eDateType.saturday, label: 'Saturday Night' },
   { value: eDateType.roshHodesh, label: 'Rosh Hodesh' },
   { value: eDateType.calendar, label: 'Calendar' },
-] satisfies TypeOfDate[];
+] satisfies SelectOption<eDateType>[];
 
 export const EMPTY_STRING = '';

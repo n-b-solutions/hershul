@@ -19,19 +19,20 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick } from '@/types/enums';
 import { MessageTab } from '@/types/message.type';
-import type { GetNewMinyan, LineItemTable, NewMinyan, tFieldMinyanTable, typeForEdit } from '@/types/minyans.type';
-import { Room, SelectOption } from '@/types/room.type';
+import type { GetNewMinyan, MinyanDetails, NewMinyan, tFieldMinyanTable, typeForEdit } from '@/types/minyans.type';
+import { Room } from '@/types/room.type';
 import { DataTable } from '@/components/core/data-table';
 import type { ColumnDef } from '@/components/core/data-table';
 
 import { getMinyansSettingsColumns } from '../config/minyans-settings.config';
 import { ActionsMessage } from './ActionsMessage';
+import { SelectOption } from '@/types/metadata.type';
 
 export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.Element => {
   const settingTimesItem = useSelector((state: RootState) => state.minyans.settingTimesItem);
   const dispatch = useDispatch();
   const [rooms, setRooms] = React.useState<Room[]>([]);
-  const [roomsOption, setRoomsOption] = React.useState<SelectOption[]>([]);
+  const [roomsOption, setRoomsOption] = React.useState<SelectOption<string>[]>([]);
   const [isScroll, setIsScroll] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(true);
 
@@ -142,7 +143,7 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
   const handleChange = (
     value: typeForEdit,
     index: number,
-    field: keyof LineItemTable,
+    field: keyof MinyanDetails,
     internalField?: string
   ): void => {
     value && dispatch(updateSettingTimesValue({ index, field, value, internalField }));
@@ -151,7 +152,7 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
   const handleDelete = (index: number) => {
     const minyanId = settingTimesItem[index].id;
     axios
-      .delete<{ deletedMinyan: LineItemTable }>(`${API_BASE_URL}/minyan/${minyanId}`)
+      .delete<{ deletedMinyan: MinyanDetails }>(`${API_BASE_URL}/minyan/${minyanId}`)
       .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
       .catch((err) => console.log('Error fetching data:', err));
   };
@@ -159,7 +160,7 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
   const handleBlurInput = (
     value: typeForEdit,
     index: number,
-    field: keyof LineItemTable,
+    field: keyof MinyanDetails,
     internalField?: string
   ): void => {
     const updateId = settingTimesItem[index].id;
@@ -192,7 +193,7 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
             Loading...
           </Typography>
         ) : (
-          <DataTable<LineItemTable>
+          <DataTable<MinyanDetails>
             columns={getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
             edited
             onAddRowClick={handlePlusClick}

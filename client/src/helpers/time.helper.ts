@@ -1,10 +1,9 @@
 import { GENERATE_TIME } from '@/const/minyans.const';
+import { MinyanDetails } from '@/types/minyans.type';
 import dayjs from 'dayjs';
 
-import { LineItemTable } from '@/types/minyans.type';
-
 export const sortByTime = (array: any): any => {
-  const sortArray = array.sort((a: LineItemTable, b: LineItemTable) => {
+  const sortArray = array.sort((a: MinyanDetails, b: MinyanDetails) => {
     const timeStartA = dayjs()
       .hour(dayjs(a.startDate?.time).get('hour'))
       .minute(dayjs(a.startDate?.time).get('minute'));

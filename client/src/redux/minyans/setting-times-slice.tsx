@@ -2,12 +2,12 @@ import { sortByTime } from '@/helpers/time.helper';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-import type { LineItemTable, typeForEdit } from '@/types/minyans.type';
+import type {  MinyanDetails, typeForEdit } from '@/types/minyans.type';
 
 import { eDateType } from '../../../../lib/types/minyan.type';
 
 export interface Istate {
-  settingTimesItem: LineItemTable[];
+  settingTimesItem: MinyanDetails[];
   dateType: eDateType;
 }
 const initialState: Istate = {
@@ -19,7 +19,7 @@ const settingTimesSlice = createSlice({
   name: 'settingTimes',
   initialState,
   reducers: {
-    addSettingTimes: (state: Istate, action: PayloadAction<{ newRow: LineItemTable }>) => {
+    addSettingTimes: (state: Istate, action: PayloadAction<{ newRow: MinyanDetails }>) => {
       state.settingTimesItem.push(action.payload.newRow);
     },
     updateSettingTimesValue: (
@@ -27,12 +27,12 @@ const settingTimesSlice = createSlice({
       action: PayloadAction<{
         index: number;
         value: typeForEdit;
-        field: keyof LineItemTable;
+        field: keyof MinyanDetails;
         internalField?: string;
       }>
     ) => {
-      const update = state.settingTimesItem[action.payload.index] as LineItemTable;
-      const newUpdate: LineItemTable = {
+      const update = state.settingTimesItem[action.payload.index] as MinyanDetails;
+      const newUpdate: MinyanDetails = {
         ...update,
         [action.payload.field]: action.payload.internalField
           ? { ...(update[action.payload.field] as {}), [action.payload.internalField]: action.payload.value }
@@ -40,7 +40,7 @@ const settingTimesSlice = createSlice({
       };
       [...state.settingTimesItem, (state.settingTimesItem[action.payload.index] = newUpdate)];
     },
-    setSettingTimes: (state: Istate, action: PayloadAction<{ setting: LineItemTable[] }>) => {
+    setSettingTimes: (state: Istate, action: PayloadAction<{ setting: MinyanDetails[] }>) => {
       state.settingTimesItem = action.payload.setting;
     },
     deleteMinyan: (state: Istate, action: PayloadAction<{ minyanId: string }>) => {
