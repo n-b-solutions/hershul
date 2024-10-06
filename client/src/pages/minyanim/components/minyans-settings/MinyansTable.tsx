@@ -24,7 +24,6 @@ import { DataTable } from '@/components/core/data-table';
 
 import { eDateType } from '../../../../../../lib/types/minyan.type';
 import { getMinyansSettingsColumns } from '../../config/minyans-settings.config';
-import { Calendar } from './Calendar';
 
 export const MinyansTable = ({
   dateType,
