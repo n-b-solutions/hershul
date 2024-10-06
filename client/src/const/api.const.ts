@@ -1,1 +1,2 @@
-export const API_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL + ':' + import.meta.env.VITE_SERVER_PORT;
+const { VITE_SERVER_PROTOCOL, VITE_SERVER_DOMAIN, VITE_SERVER_PORT } = import.meta.env;
+export const API_BASE_URL = `${VITE_SERVER_PROTOCOL}://${VITE_SERVER_DOMAIN}${VITE_SERVER_PORT ? `:${VITE_SERVER_PORT}` : ''}`;
