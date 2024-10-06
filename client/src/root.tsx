@@ -1,18 +1,9 @@
-'use client';
-
 import * as React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
-// import '@/styles/global.css';
-
-import type { Metadata } from '@/types/metadata';
+import type { Metadata } from '@/types/metadata.type';
 import { config } from '@/config';
-import { applyDefaultSettings } from '@/lib/settings/apply-default-settings';
-import { getSettings as getPersistedSettings } from '@/lib/settings/get-settings';
-import { UserProvider } from '@/contexts/auth/user-context';
-import { SettingsProvider } from '@/contexts/settings';
 import { Analytics } from '@/components/core/analytics';
-import { I18nProvider } from '@/components/core/i18n-provider';
 import { LocalizationProvider } from '@/components/core/localization-provider';
 import { ThemeProvider } from '@/components/core/theme-provider/theme-provider';
 import { Toaster } from '@/components/core/toaster';
@@ -24,8 +15,6 @@ interface RootProps {
 }
 
 export function Root({ children }: RootProps): React.JSX.Element {
-  const settings = React.useRef(applyDefaultSettings(getPersistedSettings()));
-
   return (
     <HelmetProvider>
       <Helmet>
@@ -34,16 +23,10 @@ export function Root({ children }: RootProps): React.JSX.Element {
       </Helmet>
       <Analytics>
         <LocalizationProvider>
-          <UserProvider>
-            <SettingsProvider settings={settings.current}>
-              <I18nProvider language="en">
-                <ThemeProvider>
-                  {children}
-                  <Toaster position="bottom-right" />
-                </ThemeProvider>
-              </I18nProvider>
-            </SettingsProvider>
-          </UserProvider>
+          <ThemeProvider>
+            {children}
+            <Toaster position="bottom-right" />
+          </ThemeProvider>
         </LocalizationProvider>
       </Analytics>
     </HelmetProvider>

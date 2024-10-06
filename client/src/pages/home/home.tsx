@@ -3,14 +3,15 @@ import { CardActions, Grid, IconButton, Typography } from '@mui/material';
 import { Gear as SettingsIcon } from '@phosphor-icons/react/dist/ssr/Gear';
 import { Helmet } from 'react-helmet-async';
 
-import type { Metadata } from '@/types/metadata';
+import type { Metadata } from '@/types/metadata.type';
 import { config } from '@/config';
-import { ListMinyan } from '@/components/marketing/home/listMinyan';
-import { RoomMatrix } from '@/components/marketing/home/roomMatrix';
+
+import { Rooms } from './components/Rooms';
+import { Schedule } from './components/Schedule';
 
 const metadata = { title: config.site.name, description: config.site.description } satisfies Metadata;
 
-export function Page(): React.JSX.Element {
+export function Home(): React.JSX.Element {
   return (
     <React.Fragment>
       <Helmet>
@@ -25,13 +26,14 @@ export function Page(): React.JSX.Element {
           height: '100%',
         }}
       >
+        {/* TODO: check if this Grid is needed */}
         <Grid container></Grid>
         <Grid container spacing={2}>
           <Grid item xs={6}>
-            <RoomMatrix />
+            <Rooms />
           </Grid>
           <Grid item xs={6}>
-            <ListMinyan />
+            <Schedule />
           </Grid>
         </Grid>
       </main>

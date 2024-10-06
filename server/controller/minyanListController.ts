@@ -4,7 +4,7 @@ import MinyanListModel from "../models/minyanListModel";
 import { io } from "../socketio";
 import axios from "axios";
 import mongoose from "mongoose";
-import { eDateType } from "../../bin/types/minyan.type";
+import { eDateType } from "../../lib/types/minyan.type";
 
 // Function to determine if today is Rosh Chodesh
 const isRoshChodesh = async (): Promise<boolean> => {
@@ -117,29 +117,29 @@ const MinyanListController = {
       if (req.query.dateType) queryDateType = req.query.dateType.toString();
       else {
         // Check if today is Rosh Chodesh
-        const roshChodesh = await isRoshChodesh();
+        const roshHodesh = await isRoshChodesh();
 
-        if (roshChodesh) {
-          queryDateType = eDateType.ROSH_HODESH;
+        if (roshHodesh) {
+          queryDateType = eDateType.roshHodesh;
         } else {
           // Determine default dateType based on the day of the week
           switch (dayOfWeek) {
             case 0: // Sunday
             case 2: // Tuesday
             case 3: // Thursday
-              queryDateType = eDateType.SUNDAY;
+              queryDateType = eDateType.sunday;
               break;
             case 1: // Monday
             case 4: // Wednesday
-              queryDateType = eDateType.MONDAY;
+              queryDateType = eDateType.monday;
               break;
             case 5: // Friday
-              queryDateType = eDateType.FRIDAY;
+              queryDateType = eDateType.friday;
               break;
             case 6: //shabat
-              queryDateType = eDateType.SATURDAY;
+              queryDateType = eDateType.saturday;
             default:
-              queryDateType = eDateType.DEFAULT; // Fallback default value
+              queryDateType = eDateType.calendar; // Fallback default value
           }
         }
       }

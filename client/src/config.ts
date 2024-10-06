@@ -1,8 +1,8 @@
-import { AuthStrategy } from '@/lib/auth/strategy';
 import { getSiteURL } from '@/lib/get-site-url';
 import { LogLevel } from '@/lib/logger';
 import type { ColorScheme, PrimaryColor } from '@/styles/theme/types';
 
+// TODO: Delete unused & Update according to the .env file
 export interface Config {
   site: {
     name: string;
@@ -14,7 +14,6 @@ export interface Config {
     version: string;
   };
   logLevel: keyof typeof LogLevel;
-  auth: { strategy: keyof typeof AuthStrategy };
   auth0: { domain?: string; clientId?: string };
   cognito: { identityPoolId?: string; userPoolClientId?: string; userPoolId?: string };
   firebase: {
@@ -41,7 +40,6 @@ export const config = {
     version: import.meta.env.VITE_SITE_VERSION || '0.0.0',
   },
   logLevel: (import.meta.env.VITE_LOG_LEVEL as keyof typeof LogLevel) || LogLevel.ALL,
-  auth: { strategy: (import.meta.env.VITE_AUTH_STRATEGY as keyof typeof AuthStrategy) || AuthStrategy.CUSTOM },
   auth0: { domain: import.meta.env.VITE_AUTH0_DOMAIN, clientId: import.meta.env.VITE_AUTH0_CLIENT_ID },
   cognito: {
     identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID,
