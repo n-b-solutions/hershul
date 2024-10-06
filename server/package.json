@@ -4,10 +4,10 @@
   "main": "app.ts",
   "scripts": {
     "watch": "tsc --watch",
-    "start": "node --watch dist/app.mjs",
-    "dev": "concurrently \"npm run watch\" \"npm run start\"",
-    "build": "npm install && vite build && npm run migrate-up",
-    "start": "node dist/app.mjs",
+    "backend": "node --watch build/server/app.js",
+    "dev": "concurrently \"npm run watch\" \"npm run backend\"",
+    "build": "npm install && tsc && npm run migrate-up",
+    "start": "node build/server/app.js",
     "migrate-up": "migrate-mongo up",
     "migrate-down": "migrate-mongo down",
     "test": "echo \"Error: no test specified\" && exit 1"
