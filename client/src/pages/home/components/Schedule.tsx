@@ -12,9 +12,9 @@ import axios from 'axios';
 
 import { Minyan, MinyanApi } from '@/types/minyans.type';
 import { dayjs } from '@/lib/dayjs';
-import { DataTable } from '@/components/core/data-table';
-import type { ColumnDef } from '@/components/core/data-table';
+import { DataTable } from '@/components/core/DataTable';
 import { API_BASE_URL } from '@/const/api.const';
+import { ColumnDef } from '@/types/table.type';
 
 const columns: ColumnDef<Minyan>[] = [
   {

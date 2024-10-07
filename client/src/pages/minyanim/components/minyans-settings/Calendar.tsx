@@ -11,16 +11,15 @@ import {
 import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
 import { DatePicker } from '@mui/x-date-pickers';
+import { ArrowArcLeft } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { eFieldName, eLocationClick } from '@/types/enums';
-import { SelectOption } from '@/types/metadata.type';
-import type { GetNewMinyan, MinyanDetails, NewMinyan, SpecificDate, typeForEdit } from '@/types/minyans.type';
-import { Room } from '@/types/room.type';
-import { DataTable } from '@/components/core/data-table';
-import type { ColumnDef } from '@/components/core/data-table';
+import { eFieldName, eLocationClick, eRowEditMode } from '@/types/enums';
+import type { MinyanApi, MinyanDetails, NewMinyan, SpecificDate, typeForEdit } from '@/types/minyans.type';
+import { ColumnDef, RowProps } from '@/types/table.type';
+import { DataTable } from '@/components/core/DataTable';
 
 import { eDateType } from '../../../../../../lib/types/minyan.type';
 import { getMinyansSettingsColumns } from '../../config/minyans-settings.config';
@@ -79,9 +78,7 @@ export function Calendar({
     fetchMinyanim();
   }, [dispatch, selectedDate]);
   const handleDelete = async (index: number) => {
-    console.log(settingTimesItem[index].dateType);
-
-    if (settingTimesItem[index].dateType === 'calendar') {
+    if (settingTimesItem[index].dateType === eDateType.calendar) {
       // Deleting Minyan
       axios
         .delete<{ deletedMinyan: MinyanDetails }>(`${API_BASE_URL}/minyan/${settingTimesItem[index].id}`)
@@ -213,7 +210,7 @@ export function Calendar({
     };
     try {
       await axios
-        .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
+        .post<MinyanApi>(`${API_BASE_URL}/minyan`, { ...newRow })
         .then((res) => {
           const currentRoom = rooms.find((m) => m.id === res.data.roomId);
           const { roomId: room, ...data } = res.data;
@@ -263,16 +260,27 @@ export function Calendar({
     });
   };
 
-  const getRowProps = (row: MinyanDetails): { sx: React.CSSProperties; type: string } => {
+  const getRowProps = (
+    row: MinyanDetails
+  ): RowProps => {
     const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
 
-    const rowType = isInactiveDate ? 'disable' : row.dateType === 'calendar' || !row.dateType ? 'calendar' : 'other';
+    const editMode = isInactiveDate
+      ? eRowEditMode.partiallyEnabled
+      : row.dateType === eDateType.calendar || !row.dateType
+        ? eRowEditMode.enabled
+        : eRowEditMode.disabled;
 
     return {
       sx: {
-        backgroundColor: isInactiveDate ? 'lightgray' : row.dateType !== 'calendar' && row.dateType ? 'lightgreen' : '',
+        backgroundColor: isInactiveDate
+          ? 'lightgray'
+          : row.dateType !== eDateType.calendar && row.dateType
+            ? 'lightgreen'
+            : '',
       },
-      type: rowType,
+      editMode,
+      deleteIcon: isInactiveDate ? <ArrowArcLeft size={24} /> : undefined,
     };
   };
 
@@ -286,7 +294,6 @@ export function Calendar({
         onChange={handleDateChange}
       />
       <DataTable<MinyanDetails>
-        type="calendar"
         columns={[
           ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
           isRoutineColumn,
@@ -298,7 +305,7 @@ export function Calendar({
         onDeleteClick={handleDelete}
         scrollAction={scrollAction}
         rows={settingTimesItem}
-        rowProps={(row) => getRowProps(row)} // Call getRowProps for each row
+        getRowProps={getRowProps} // Call getRowProps for each row
       />
     </>
   );

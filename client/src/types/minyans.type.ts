@@ -6,7 +6,6 @@ import { Room } from './room.type';
 
 export type tFieldMinyanTable = 'blink' | 'startDate' | 'endDate' | 'room';
 
-
 export interface MinyanDetails {
   id: string;
   blink?: BlinkAlertTypeName;
@@ -14,7 +13,7 @@ export interface MinyanDetails {
   endDate: AlertTypeName;
   room: Room;
   isRoutine?: boolean;
-  dateType: string;
+  dateType: eDateType;
   specificDate?: SpecificDate;
   inactiveDates: SpecificDate[];
   isEdited?: boolean;
@@ -23,11 +22,11 @@ export interface SpecificDate {
   date: Date | string;
   isRoutine: boolean;
 }
-export interface GetNewMinyan {
+export interface MinyanApi {
   startDate: AlertType;
   endDate: AlertType;
   roomId: string;
-  dateType: string;
+  dateType: eDateType;
   steadyFlag: boolean;
   blink?: BlinkAlertType;
   id: string;
@@ -35,12 +34,11 @@ export interface GetNewMinyan {
   inactiveDates?: SpecificDate[];
 }
 
-// הגדרה חדשה ל-NewMinyan כולל specificDate
 export type NewMinyan = {
   startDate: Date;
   endDate: Date;
   roomId: string;
-  dateType: string;
+  dateType: eDateType;
   steadyFlag: boolean;
   blink?: number;
   specificDate?: SpecificDate;
@@ -86,4 +84,14 @@ export interface MinyanApi {
   blink?: BlinkAlertType;
 }
 
-export type typeForEdit = string | Date | Room | number | boolean | SpecificDate[] | SpecificDate | BlinkAlertTypeName | AlertTypeName |undefined;
+export type typeForEdit =
+  | string
+  | Date
+  | Room
+  | number
+  | boolean
+  | SpecificDate[]
+  | SpecificDate
+  | BlinkAlertTypeName
+  | AlertTypeName
+  | undefined;
