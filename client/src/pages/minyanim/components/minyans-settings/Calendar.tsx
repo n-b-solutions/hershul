@@ -28,7 +28,7 @@ const isRoutineColumn: ColumnDef<MinyanDetails> = {
   editInputType: 'switch',
   valueForEdit: (row) => row.isRoutine,
   name: 'Is Routine',
-  width: '100px',
+  width: '8px',
   padding: 'none',
   align: 'center',
   field: 'isRoutine',
@@ -260,9 +260,7 @@ export function Calendar({
     });
   };
 
-  const getRowProps = (
-    row: MinyanDetails
-  ): RowProps => {
+  const getRowProps = (row: MinyanDetails): RowProps => {
     const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
 
     const editMode = isInactiveDate
