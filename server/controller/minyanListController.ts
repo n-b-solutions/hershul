@@ -1,29 +1,9 @@
 import { Request, Response } from "express";
 import MinyanListModel from "../models/minyanListModel";
 import { io } from "../socketio";
-import axios from "axios";
 import mongoose from "mongoose";
+import { getQueryDateType, isRoshChodesh } from "../helper/function-minyans";
 import { eDateType } from "../../lib/types/minyan.type";
-
-// Function to determine if today is Rosh Chodesh
-const isRoshChodesh = async (): Promise<boolean> => {
-  const now = new Date();
-  const hebcalRes = await axios.get(
-    `https://www.hebcal.com/converter?cfg=json&gy=${now.getFullYear()}&gm=${
-      now.getMonth() + 1
-    }&gd=${now.getDate()}&g2h=1`
-  );
-  const data = hebcalRes.data;
-
-  if (
-    data.events &&
-    data.events.some((event: string | string[]) =>
-      event.includes("Rosh Chodesh")
-    )
-  )
-    return true;
-  return false;
-};
 
 const MinyanListController = {
   // Get all minyanim
@@ -53,6 +33,7 @@ const MinyanListController = {
         dateType: minyan.dateType,
         room: minyan.roomId,
         steadyFlag: minyan.steadyFlag,
+        inactiveDates: minyan.inactiveDates, // Include inactiveDates here
       }));
 
       res.status(200).json(fullMinyanList);
@@ -98,6 +79,7 @@ const MinyanListController = {
         dateType: minyan.dateType,
         room: minyan.roomId,
         steadyFlag: minyan.steadyFlag,
+        inactiveDates: minyan.inactiveDates, // Include inactiveDates here
       };
 
       res.status(200).json(fullMinyan);
@@ -106,43 +88,80 @@ const MinyanListController = {
       res.status(500).send("Internal Server Error");
     }
   },
+  getCalendar: async (req: Request, res: Response): Promise<void> => {
+    const { date } = req.params;
 
+    try {
+      const queryDateType = await getQueryDateType(new Date(date));
+
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0); // תחילת היום
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999); // סוף היום
+
+      const minyanListByDate = await MinyanListModel.find({
+        dateType: "calendar",
+        "specificDate.date": {
+          $gte: startOfDay,
+          $lt: endOfDay,
+        },
+      })
+        .populate("roomId")
+        .populate("startDate.messageId")
+        .populate("endDate.messageId")
+        .populate("blink.messageId");
+
+      const minyanListByQueryDateType = await MinyanListModel.find({
+        dateType: queryDateType,
+      })
+        .populate("roomId")
+        .populate("startDate.messageId")
+        .populate("endDate.messageId")
+        .populate("blink.messageId");
+      const combinedMinyanList = [
+        ...minyanListByDate,
+        ...minyanListByQueryDateType,
+      ];
+
+      const fullMinyanList = combinedMinyanList.map((minyan) => ({
+        startDate: {
+          time: minyan.startDate.time,
+          message: minyan.startDate.messageId, // populated message details
+        },
+        endDate: {
+          time: minyan.endDate.time,
+          message: minyan.endDate.messageId, // populated message details
+        },
+        blink: minyan.blink
+          ? {
+              secondsNum: minyan.blink.secondsNum,
+              message: minyan.blink.messageId, // populated message details
+            }
+          : null,
+        dateType: minyan.dateType,
+        room: minyan.roomId,
+        id: minyan.id,
+        specificDate: minyan.specificDate
+          ? {
+              date: minyan.specificDate.date,
+              isRoutine: minyan.specificDate.isRoutine,
+            }
+          : null,
+        inactiveDates: minyan.inactiveDates, // Include inactiveDates here
+      }));
+
+      res.status(200).json(fullMinyanList);
+    } catch (error) {
+      res.status(500).json({ message: "Error retrieving data", error });
+    }
+  },
   getByDateType: async (req: Request, res: Response): Promise<void> => {
     let queryDateType: string;
-
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
     try {
       if (req.query.dateType) queryDateType = req.query.dateType.toString();
-      else {
-        // Check if today is Rosh Chodesh
-        const roshHodesh = await isRoshChodesh();
+      else queryDateType = await getQueryDateType();
 
-        if (roshHodesh) {
-          queryDateType = eDateType.roshHodesh;
-        } else {
-          // Determine default dateType based on the day of the week
-          switch (dayOfWeek) {
-            case 0: // Sunday
-            case 2: // Tuesday
-            case 3: // Thursday
-              queryDateType = eDateType.sunday;
-              break;
-            case 1: // Monday
-            case 4: // Wednesday
-              queryDateType = eDateType.monday;
-              break;
-            case 5: // Friday
-              queryDateType = eDateType.friday;
-              break;
-            case 6: //shabat
-              queryDateType = eDateType.saturday;
-              break;
-            default:
-              queryDateType = eDateType.calendar; // Fallback default value
-          }
-        }
-      }
       const minyanList = await MinyanListModel.find({
         dateType: queryDateType,
       })
@@ -150,7 +169,6 @@ const MinyanListController = {
         .populate("startDate.messageId")
         .populate("endDate.messageId")
         .populate("blink.messageId");
-
       const filteredMinyanList = minyanList.map((minyan) => ({
         startDate: {
           time: minyan.startDate.time,
@@ -169,6 +187,13 @@ const MinyanListController = {
         dateType: minyan.dateType,
         room: minyan.roomId,
         id: minyan.id,
+        specificDate: minyan.specificDate
+          ? {
+              date: minyan.specificDate.date,
+              isRoutine: minyan.specificDate.isRoutine,
+            }
+          : null,
+        inactiveDates: minyan.inactiveDates, // Include inactiveDates here
       }));
 
       res.status(200).json(filteredMinyanList);
@@ -194,8 +219,17 @@ const MinyanListController = {
   },
   post: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { roomId, startDate, endDate, dateType, blink, steadyFlag } =
-        req.body;
+      const {
+        roomId,
+        startDate,
+        endDate,
+        dateType,
+        blink,
+        steadyFlag,
+        specificDate,
+        inactiveDates,
+      } = req.body;
+
       const newMinyan = new MinyanListModel({
         roomId,
         startDate: { time: startDate, message: null },
@@ -203,6 +237,8 @@ const MinyanListController = {
         blink: { secondsNum: blink, message: null },
         dateType,
         steadyFlag,
+        specificDate,
+        inactiveDates,
       });
       await newMinyan.save();
 
@@ -256,17 +292,131 @@ const MinyanListController = {
       res.status(500).send("Internal Server Error");
     }
   },
+  addInactiveDates: async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const data = req.body;
+
+    try {
+      // שליפת המניין לפי ID
+      const minyan = await MinyanListModel.findById(id);
+      if (!minyan) {
+        res.status(404).send("Minyan not found");
+        return;
+      }
+
+      // וידוא שהמערך קיים, ואם לא, יצירה שלו
+      if (!minyan.inactiveDates) {
+        minyan.inactiveDates = [];
+      }
+
+      // הוספת האובייקט החדש למערך inactiveDates
+      minyan.inactiveDates.push(data);
+
+      // שמירת הדוקומנט המעודכן
+      await minyan.save();
+      console.log(minyan);
+
+      res.status(200).json(minyan.inactiveDates);
+    } catch (error) {
+      console.error("Error adding inactive date:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  },
+
+  removeInactiveDates: async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const data = req.body;
+
+    try {
+      const minyan = await MinyanListModel.findById(id);
+      if (!minyan) {
+        res.status(404).send("Minyan not found");
+        return;
+      }
+
+      if (!minyan.inactiveDates) {
+        res.status(400).send("No inactive dates found");
+        return;
+      }
+      const startOfDay = new Date(data.date);
+      startOfDay.setHours(0, 0, 0, 0); // תחילת היום
+
+      const endOfDay = new Date(data.date);
+      endOfDay.setHours(23, 59, 59, 999); // סוף היום
+
+      minyan.inactiveDates = minyan.inactiveDates.filter(
+        (inactiveDate) =>
+          !(
+            new Date(inactiveDate.date) >= startOfDay &&
+            new Date(inactiveDate.date) <= endOfDay
+          )
+      );
+
+      await minyan.save();
+
+      res.status(200).json(minyan.inactiveDates);
+    } catch (error) {
+      console.error("Error removing inactive date:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  },
+
+  updateInactiveDate: async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const data = req.body;
+    console.log(data);
+
+    try {
+      const minyan = await MinyanListModel.findById(id);
+      if (!minyan) {
+        res.status(404).send("Minyan not found");
+        return;
+      }
+
+      if (!minyan.inactiveDates) {
+        res.status(400).send("No inactive dates found");
+        return;
+      }
+
+      const targetDate = new Date(data.date).getTime();
+      console.log("targetDate ", targetDate);
+      const startOfDay = new Date(data.date);
+      startOfDay.setHours(0, 0, 0, 0); // תחילת היום
+
+      const endOfDay = new Date(data.date);
+      endOfDay.setHours(23, 59, 59, 999); // סוף היום
+
+      const inactiveDate = minyan.inactiveDates.find(
+        (item) =>
+          new Date(item.date) >= startOfDay && new Date(item.date) <= endOfDay
+      );
+
+      if (!inactiveDate) {
+        res.status(404).send("Inactive date not found");
+        return;
+      }
+
+      inactiveDate.isRoutine = data.isRoutine;
+
+      await minyan.save();
+
+      res.status(200).json(minyan.inactiveDates);
+    } catch (error) {
+      console.error("Error updating inactive date:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  },
 
   put: async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { field, value, internalField } = req.body;
-    const fieldForEdit = internalField ? `${field}.${internalField}` : field;
+    const fieldForEdit = internalField ? `${field}.${internalField}` : field;    
     try {
       const updatedMinyan = await MinyanListModel.findByIdAndUpdate(
         id,
         { [fieldForEdit]: value },
         { new: true, runValidators: true }
-      ).populate(`${field}.${internalField}`);
+      )
       if (!updatedMinyan) {
         res.status(404).send("Minyan not found");
         return;

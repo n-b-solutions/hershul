@@ -6,34 +6,44 @@ import { Room } from './room.type';
 
 export type tFieldMinyanTable = 'blink' | 'startDate' | 'endDate' | 'room';
 
-
 export interface MinyanDetails {
   id: string;
   blink?: BlinkAlertTypeName;
   startDate: AlertTypeName;
   endDate: AlertTypeName;
   room: Room;
+  isRoutine?: boolean;
+  dateType: eDateType;
+  specificDate?: SpecificDate;
+  inactiveDates: SpecificDate[];
   isEdited?: boolean;
 }
-
-export interface GetNewMinyan {
+export interface SpecificDate {
+  date: Date | string;
+  isRoutine: boolean;
+}
+export interface MinyanApi {
   startDate: AlertType;
   endDate: AlertType;
   roomId: string;
-  dateType: string;
+  dateType: eDateType;
   steadyFlag: boolean;
   blink?: BlinkAlertType;
   id: string;
+  specificDate?: SpecificDate;
+  inactiveDates?: SpecificDate[];
 }
 
-export interface NewMinyan {
+export type NewMinyan = {
   startDate: Date;
   endDate: Date;
   roomId: string;
-  dateType: string;
+  dateType: eDateType;
   steadyFlag: boolean;
   blink?: number;
-}
+  specificDate?: SpecificDate;
+  isRoutine?: boolean;
+};
 
 export interface NewMinyan1 {
   startDate: Date;
@@ -74,4 +84,14 @@ export interface MinyanApi {
   blink?: BlinkAlertType;
 }
 
-export type typeForEdit = string | Date | Room | number | boolean;
+export type typeForEdit =
+  | string
+  | Date
+  | Room
+  | number
+  | boolean
+  | SpecificDate[]
+  | SpecificDate
+  | BlinkAlertTypeName
+  | AlertTypeName
+  | undefined;
