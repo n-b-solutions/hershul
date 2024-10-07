@@ -50,7 +50,7 @@ const ScheduleController = {
     const rooms = await RoomStatusModel.find();
 
     for (const room of rooms) {
-      const currentStatus = roomStatusMap.get(room?._id?.toString());
+      const currentStatus = roomStatusMap.get(room?._id?.toString() || '');
       if (currentStatus && room.status !== currentStatus) {
         room.status = currentStatus;
         await RoomStatusModel.findByIdAndUpdate(room._id, {
