@@ -2,12 +2,12 @@ import { Grid, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 
 import { MessageTab } from '@/types/message.type';
-import {  MinyanDetails, tFieldMinyanTable } from '@/types/minyans.type';
+import { SelectOption } from '@/types/metadata.type';
+import { MinyanDetails, tFieldMinyanTable } from '@/types/minyans.type';
 import { Room } from '@/types/room.type';
-import { ColumnDef } from '@/components/core/data-table';
+import { ColumnDef } from '@/types/table.type';
 
 import { ActionsMessage } from '../components/minyans-settings/ActionsMessage';
-import { SelectOption } from '@/types/metadata.type';
 
 const getFormat = (props: {
   value: number | string;
@@ -54,76 +54,75 @@ export const getMinyansSettingsColumns = ({
   roomsOptionsArray,
 }: {
   roomArray: Room[];
-  roomsOptionsArray: SelectOption<string>[]
-}) =>
-  [
-    {
-      formatter: (row, index): React.JSX.Element =>
-        getFormat({
-          value: row.blink?.secondsNum || '',
-          roomName: row.room?.nameRoom,
-          message: row.blink?.message,
-          id: row?.id,
-          field: 'blink',
-          index,
-        }),
-      valueForEdit: (row) => row.blink?.secondsNum,
-      editInputType: 'number',
-      name: 'Blink',
-      width: '250px',
-      field: 'blink',
-      padding: 'none',
-      align: 'center',
-      tooltip: 'Time to start Blink before lights on',
-    },
-    {
-      formatter: (row, index): React.JSX.Element =>
-        getFormat({
-          value: dayjs(row.startDate?.time).format('hh:mm A'),
-          roomName: row.room?.nameRoom,
-          message: row.startDate?.message,
-          id: row?.id,
-          field: 'startDate',
-          index,
-        }),
-      editInputType: 'time',
-      padding: 'none',
-      name: 'Start Time',
-      width: '250px',
-      field: 'startDate',
-      align: 'center',
-      tooltip: 'Lights On',
-      valueForEdit: (row) => dayjs(row.startDate?.time),
-    },
-    {
-      formatter: (row, index): React.JSX.Element =>
-        getFormat({
-          value: dayjs(row.endDate?.time).format('hh:mm A'),
-          roomName: row.room?.nameRoom,
-          message: row.endDate?.message,
-          id: row?.id,
-          field: 'endDate',
-          index: index,
-        }),
-      editInputType: 'time',
-      padding: 'none',
-      name: 'End Time',
-      width: '250px',
-      field: 'endDate',
-      align: 'center',
-      tooltip: 'Lights Off',
-      valueForEdit: (row) => dayjs(row.endDate?.time),
-    },
-    {
-      formatter: (row): React.JSX.Element => getFormat({ value: row.room?.nameRoom }),
-      editInputType: 'select',
-      valueForEdit: (row) => row.room?.id,
-      selectOptions: roomsOptionsArray,
-      valueOption: roomArray,
-      padding: 'none',
-      name: 'Room',
-      width: '250px',
-      field: 'room',
-      align: 'center',
-    },
-  ] satisfies ColumnDef<MinyanDetails>[];
+  roomsOptionsArray: SelectOption<string>[];
+}): ColumnDef<MinyanDetails>[] => [
+  {
+    formatter: (row, index): React.JSX.Element =>
+      getFormat({
+        value: row.blink?.secondsNum || '',
+        roomName: row.room?.nameRoom,
+        message: row.blink?.message,
+        id: row?.id,
+        field: 'blink',
+        index,
+      }),
+    valueForEdit: (row) => row.blink?.secondsNum,
+    editInputType: 'number',
+    name: 'Blink',
+    width: '250px',
+    field: 'blink',
+    padding: 'none',
+    align: 'center',
+    tooltip: 'Time to start Blink before lights on',
+  },
+  {
+    formatter: (row, index): React.JSX.Element =>
+      getFormat({
+        value: dayjs(row.startDate?.time).format('hh:mm A'),
+        roomName: row.room?.nameRoom,
+        message: row.startDate?.message,
+        id: row?.id,
+        field: 'startDate',
+        index,
+      }),
+    editInputType: 'time',
+    padding: 'none',
+    name: 'Start Time',
+    width: '250px',
+    field: 'startDate',
+    align: 'center',
+    tooltip: 'Lights On',
+    valueForEdit: (row) => dayjs(row.startDate?.time),
+  },
+  {
+    formatter: (row, index): React.JSX.Element =>
+      getFormat({
+        value: dayjs(row.endDate?.time).format('hh:mm A'),
+        roomName: row.room?.nameRoom,
+        message: row.endDate?.message,
+        id: row?.id,
+        field: 'endDate',
+        index: index,
+      }),
+    editInputType: 'time',
+    padding: 'none',
+    name: 'End Time',
+    width: '250px',
+    field: 'endDate',
+    align: 'center',
+    tooltip: 'Lights Off',
+    valueForEdit: (row) => dayjs(row.endDate?.time),
+  },
+  {
+    formatter: (row): React.JSX.Element => getFormat({ value: row.room?.nameRoom }),
+    editInputType: 'select',
+    valueForEdit: (row) => row.room?.id,
+    selectOptions: roomsOptionsArray,
+    valueOption: roomArray,
+    padding: 'none',
+    name: 'Room',
+    width: '250px',
+    field: 'room',
+    align: 'center',
+  },
+];

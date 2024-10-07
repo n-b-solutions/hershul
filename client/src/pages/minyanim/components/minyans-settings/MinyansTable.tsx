@@ -20,7 +20,7 @@ import { eFieldName, eLocationClick } from '@/types/enums';
 import { SelectOption } from '@/types/metadata.type';
 import type { GetNewMinyan, MinyanDetails, NewMinyan, typeForEdit } from '@/types/minyans.type';
 import { Room } from '@/types/room.type';
-import { DataTable } from '@/components/core/data-table';
+import { DataTable } from '@/components/core/DataTable';
 
 import { eDateType } from '../../../../../../lib/types/minyan.type';
 import { getMinyansSettingsColumns } from '../../config/minyans-settings.config';

@@ -16,3 +16,9 @@ export const enum eFieldName {
   isRoutine = 'specificDate.isRoutine',
   isEdited = 'isEdited',
 }
+
+export const enum eRowEditMode {
+  enabled = 'enabled',
+  disabled = 'disabled',
+  partiallyEnabled = 'partiallyEnabled',
+}
