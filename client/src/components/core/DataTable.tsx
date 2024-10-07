@@ -13,7 +13,7 @@ import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/War
 
 import { eLocationClick, eRowEditMode } from '@/types/enums';
 import { typeForEdit } from '@/types/minyans.type';
-import { ColumnDef } from '@/types/table.type';
+import { ColumnDef, RowProps } from '@/types/table.type';
 import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
 
 import { EditTableCellInputs } from './edit-table-cell-inputs';
@@ -38,11 +38,7 @@ interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   onBlurInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onDeleteClick?: (index: number) => void;
   scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
-  getRowProps?: (row: TRowModel) => {
-    editMode: eRowEditMode;
-    sx: React.CSSProperties;
-    deleteIcon?: JSX.Element;
-  };
+  getRowProps?: (row: TRowModel) => RowProps;
 }
 
 export function DataTable<TRowModel extends object & { id?: RowId | null; dateType?: string; isEdited?: boolean }>({

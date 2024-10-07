@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick } from '@/types/enums';
 import { SelectOption } from '@/types/metadata.type';
-import type { GetNewMinyan, MinyanDetails, NewMinyan, typeForEdit } from '@/types/minyans.type';
+import type { MinyanApi, MinyanDetails, NewMinyan, typeForEdit } from '@/types/minyans.type';
 import { Room } from '@/types/room.type';
 import { DataTable } from '@/components/core/DataTable';
 
@@ -47,7 +47,7 @@ export const MinyansTable = ({
         .then((res) => {
           dispatch(
             setSettingTimes({
-              setting: res.data.map((minyan: GetNewMinyan) => {
+              setting: res.data.map((minyan: MinyanApi) => {
                 return {
                   ...minyan,
                   blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
@@ -75,7 +75,7 @@ export const MinyansTable = ({
   const handlePlusClick = async (index: number, location?: eLocationClick): Promise<any> => {
     const newRow: NewMinyan = getNewMinyanObj(settingTimesItem, dateType, rooms[0].id, index, location);
     await axios
-      .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
+      .post<MinyanApi>(`${API_BASE_URL}/minyan`, { ...newRow })
       .then(async (res) => {
         const currentRoom = rooms.find((m) => m.id === res.data.roomId);
         const { roomId: room, ...data } = res.data;

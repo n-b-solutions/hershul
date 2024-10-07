@@ -22,11 +22,11 @@ export interface SpecificDate {
   date: Date | string;
   isRoutine: boolean;
 }
-export interface GetNewMinyan {
+export interface MinyanApi {
   startDate: AlertType;
   endDate: AlertType;
   roomId: string;
-  dateType: string;
+  dateType: eDateType;
   steadyFlag: boolean;
   blink?: BlinkAlertType;
   id: string;

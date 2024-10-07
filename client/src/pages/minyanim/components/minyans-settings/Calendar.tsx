@@ -17,8 +17,8 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick, eRowEditMode } from '@/types/enums';
-import type { GetNewMinyan, MinyanDetails, NewMinyan, SpecificDate, typeForEdit } from '@/types/minyans.type';
-import { ColumnDef } from '@/types/table.type';
+import type { MinyanApi, MinyanDetails, NewMinyan, SpecificDate, typeForEdit } from '@/types/minyans.type';
+import { ColumnDef, RowProps } from '@/types/table.type';
 import { DataTable } from '@/components/core/DataTable';
 
 import { eDateType } from '../../../../../../lib/types/minyan.type';
@@ -210,7 +210,7 @@ export function Calendar({
     };
     try {
       await axios
-        .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
+        .post<MinyanApi>(`${API_BASE_URL}/minyan`, { ...newRow })
         .then((res) => {
           const currentRoom = rooms.find((m) => m.id === res.data.roomId);
           const { roomId: room, ...data } = res.data;
@@ -262,7 +262,7 @@ export function Calendar({
 
   const getRowProps = (
     row: MinyanDetails
-  ): { editMode: eRowEditMode; sx: React.CSSProperties; deleteIcon?: JSX.Element } => {
+  ): RowProps => {
     const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
 
     const editMode = isInactiveDate
@@ -305,7 +305,7 @@ export function Calendar({
         onDeleteClick={handleDelete}
         scrollAction={scrollAction}
         rows={settingTimesItem}
-        getRowProps={(row) => getRowProps(row)} // Call getRowProps for each row
+        getRowProps={getRowProps} // Call getRowProps for each row
       />
     </>
   );
