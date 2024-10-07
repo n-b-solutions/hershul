@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import MinyanListController from "../controller/minyanListController";
+import MinyanListController from "../controllers/minyan.controller";
 const MinyanListRouter = express.Router();
 
 MinyanListRouter.get("/", (req: Request, res: Response) => {

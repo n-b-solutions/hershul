@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import RoomStatusController from "../controller/roomStatusController";
+import RoomStatusController from "../controllers/room.controller";
 
 const RoomStatusRouter = express.Router();
 

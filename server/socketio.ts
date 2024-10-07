@@ -1,7 +1,7 @@
 import { Server as SocketioServer } from 'socket.io';
 import { CronJob } from 'cron';
 
-import ScheduleController from './controller/scheduleController';
+import ScheduleController from './controllers/schedule.controller';
 
 let io: SocketioServer;
 

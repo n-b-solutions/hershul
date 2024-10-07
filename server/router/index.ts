@@ -1,15 +1,15 @@
 import { Router } from "express";
 
-import MinyanListRouter from "./minyanListRouter";
-import RoomStatusRouter from "./roomStatusRouter";
-import MessageRoomRouter from "./messageRoomRouter";
+import MinyanListRouter from "./minyan.router";
+import RoomStatusRouter from "./room.router";
+import MessageRouter from "./message.router";
 
 export const router = Router();
 
 const defaultRoutes = [
   { path: "/minyan", route: MinyanListRouter },
   { path: "/roomStatus", route: RoomStatusRouter },
-  { path: "/message", route: MessageRoomRouter },
+  { path: "/message", route: MessageRouter },
 ];
 
 defaultRoutes.forEach((route) => {

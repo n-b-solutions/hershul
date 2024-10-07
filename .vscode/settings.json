@@ -4,6 +4,7 @@
         "reduxjs",
         "rosh",
         "Shkiah",
-        "Socketio"
+        "Socketio",
+        "virtuals"
     ]
 }
