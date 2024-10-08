@@ -11,7 +11,7 @@ import {
 import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
 import { DatePicker } from '@mui/x-date-pickers';
-import { ArrowArcLeft } from '@phosphor-icons/react';
+import { ArrowArcLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -33,6 +33,10 @@ const isRoutineColumn: ColumnDef<MinyanDetails> = {
   align: 'center',
   field: 'isRoutine',
   editable: true,
+  formatter: (row) => {
+    if (row.isRoutine === undefined) return <></>;
+    return row.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
+  },
 };
 
 export function Calendar(): React.JSX.Element {
