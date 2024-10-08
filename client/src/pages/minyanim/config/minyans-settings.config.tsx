@@ -61,7 +61,7 @@ export const getMinyansSettingsColumns = ({
       formatter: (row, index): React.JSX.Element =>
         getFormat({
           value: row.blink?.secondsNum || '',
-          roomName: row.room?.nameRoom,
+          roomName: row.room?.name,
           message: row.blink?.message,
           id: row?.id,
           field: 'blink',
@@ -80,7 +80,7 @@ export const getMinyansSettingsColumns = ({
       formatter: (row, index): React.JSX.Element =>
         getFormat({
           value: dayjs(row.startDate?.time).format('hh:mm A'),
-          roomName: row.room?.nameRoom,
+          roomName: row.room?.name,
           message: row.startDate?.message,
           id: row?.id,
           field: 'startDate',
@@ -99,7 +99,7 @@ export const getMinyansSettingsColumns = ({
       formatter: (row, index): React.JSX.Element =>
         getFormat({
           value: dayjs(row.endDate?.time).format('hh:mm A'),
-          roomName: row.room?.nameRoom,
+          roomName: row.room?.name,
           message: row.endDate?.message,
           id: row?.id,
           field: 'endDate',
@@ -115,7 +115,7 @@ export const getMinyansSettingsColumns = ({
       valueForEdit: (row) => dayjs(row.endDate?.time),
     },
     {
-      formatter: (row): React.JSX.Element => getFormat({ value: row.room?.nameRoom }),
+      formatter: (row): React.JSX.Element => getFormat({ value: row.room?.name }),
       editInputType: 'select',
       valueForEdit: (row) => row.room?.id,
       selectOptions: roomsOptionsArray,

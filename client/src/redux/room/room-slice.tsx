@@ -18,7 +18,7 @@ export const fetchRooms = createAsyncThunk<Room[], void, { rejectValue: string }
   'rooms/fetchRooms',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/roomStatus`);
+      const response = await axios.get(`${API_BASE_URL}/room`);
       return response.data as Room[];
     } catch (error: any) {
       return rejectWithValue(error.response.data || 'Failed to fetch rooms');
@@ -26,17 +26,17 @@ export const fetchRooms = createAsyncThunk<Room[], void, { rejectValue: string }
   }
 );
 
-// Async thunk to update room status
+// Async thunk to update room bulbStatus
 export const updateRoomStatus = createAsyncThunk<
   { id: string; newStatus: 'on' | 'off' | 'blink' },
   { id: string; newStatus: 'on' | 'off' | 'blink' },
   { rejectValue: string }
 >('rooms/updateRoomStatus', async ({ id, newStatus }, { rejectWithValue }) => {
   try {
-    await axios.put(`${API_BASE_URL}/roomStatus/${id}`, { status: newStatus });
+    await axios.put(`${API_BASE_URL}/room/${id}`, { bulbStatus: newStatus });
     return { id, newStatus };
   } catch (error: any) {
-    return rejectWithValue(error.response.data || 'Failed to update room status');
+    return rejectWithValue(error.response.data || 'Failed to update room bulbStatus');
   }
 });
 
@@ -52,9 +52,9 @@ const roomsSlice = createSlice({
   name: 'rooms',
   initialState,
   reducers: {
-    updateRoomState: (state, action: PayloadAction<{ nameRoom: string; newStatus: 'on' | 'off' | 'blink' }>) => {
-      const { nameRoom, newStatus } = action.payload;
-      state.rooms = state.rooms.map((room) => (room.nameRoom === nameRoom ? { ...room, status: newStatus } : room));
+    updateRoomState: (state, action: PayloadAction<{ roomName: string; newStatus: 'on' | 'off' | 'blink' }>) => {
+      const { roomName, newStatus } = action.payload;
+      state.rooms = state.rooms.map((room) => (room.name === roomName ? { ...room, status: newStatus } : room));
     },
     setRoomStatusFromSocket: (state, action: PayloadAction<Room[]>) => {
       state.rooms = action.payload;
@@ -79,7 +79,7 @@ const roomsSlice = createSlice({
           const { id, newStatus } = action.payload;
           const room = state.rooms.find((room) => room.id === id);
           if (room) {
-            room.status = newStatus;
+            room.bulbStatus = newStatus;
           }
         }
       );

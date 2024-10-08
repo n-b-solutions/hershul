@@ -7,8 +7,6 @@ const MessageService = {
   // Get all messages
   get: async (): Promise<IMessage[] | ApiError> => {
     try {
-        console.log('service');
-        
       const messages = await MessageModel.find();
       return messages;
     } catch (error) {

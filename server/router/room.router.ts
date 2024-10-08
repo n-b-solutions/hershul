@@ -1,25 +1,25 @@
 import express, { Request, Response } from "express";
-import RoomStatusController from "../controllers/room.controller";
+import RoomController from "../controllers/room.controller";
 
-const RoomStatusRouter = express.Router();
+const RoomRouter = express.Router();
 
-RoomStatusRouter.get("/", (req: Request, res: Response) => {
-  RoomStatusController.get(req, res);
+RoomRouter.get("/", (req: Request, res: Response) => {
+  RoomController.get(req, res);
 });
-RoomStatusRouter.get('/:id', (req: Request, res: Response) => {
-    RoomStatusController.getById(req, res);
+RoomRouter.get('/:id', (req: Request, res: Response) => {
+    RoomController.getById(req, res);
   });
   
-  RoomStatusRouter.post('/', (req: Request, res: Response) => {
-    RoomStatusController.post(req, res);
+  RoomRouter.post('/', (req: Request, res: Response) => {
+    RoomController.post(req, res);
   });
   
-  RoomStatusRouter.put('/:id', (req: Request, res: Response) => {
-    RoomStatusController.put(req, res);
+  RoomRouter.put('/:id', (req: Request, res: Response) => {
+    RoomController.put(req, res);
   });
   
-  RoomStatusRouter.delete('/:id', (req: Request, res: Response) => {
-    RoomStatusController.delete(req, res);
+  RoomRouter.delete('/:id', (req: Request, res: Response) => {
+    RoomController.delete(req, res);
   });
   
-export default RoomStatusRouter;
+export default RoomRouter;

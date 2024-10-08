@@ -1,5 +1,6 @@
+import { eBulbStatus } from "../../lib/types/room.type";
 import MinyanListModel from "../models/minyanListModel";
-import RoomStatusModel from "../models/roomStatusModel";
+import RoomModel from "../models/room.model";
 import {
   GeoLocation,
   Zmanim,
@@ -9,8 +10,8 @@ import {
 } from "@hebcal/core";
 
 interface Room {
-  nameRoom: string;
-  status: string;
+  name: string;
+  bulbStatus: eBulbStatus;
 }
 
 const ScheduleController = {
@@ -19,7 +20,7 @@ const ScheduleController = {
     const updates: Room[] = [];
 
     const minyans = await MinyanListModel.find();
-    const roomStatusMap = new Map<string, "on" | "off" | "blink">();
+    const roomStatusMap = new Map<string, eBulbStatus>();
 
     for (const minyan of minyans) {
       const roomId = minyan.roomId.toString();
@@ -32,29 +33,29 @@ const ScheduleController = {
 
       if (now >= blurStartTime && now < startDate) {
         if (!minyan.steadyFlag) {
-          roomStatusMap.set(roomId, "blink");
+          roomStatusMap.set(roomId, eBulbStatus.blink);
         }
       } else if (now >= startDate && now <= endDate) {
         if (!minyan.steadyFlag) {
-          roomStatusMap.set(roomId, "on");
+          roomStatusMap.set(roomId, eBulbStatus.on);
         }
       } else {
         if (minyan.steadyFlag) {
           minyan.steadyFlag = false;
-          roomStatusMap.set(roomId, "off");
+          roomStatusMap.set(roomId, eBulbStatus.off);
           await minyan.save();
         }
       }
     }
 
-    const rooms = await RoomStatusModel.find();
+    const rooms = await RoomModel.find();
 
     for (const room of rooms) {
-      const currentStatus = roomStatusMap.get(room?._id?.toString() || '');
-      if (currentStatus && room.status !== currentStatus) {
-        room.status = currentStatus;
-        await RoomStatusModel.findByIdAndUpdate(room._id, {
-          $set: { status: currentStatus },
+      const currentStatus = roomStatusMap.get(room?._id?.toString() || "");
+      if (currentStatus && room.bulbStatus !== currentStatus) {
+        room.bulbStatus = currentStatus;
+        await RoomModel.findByIdAndUpdate(room._id, {
+          $set: { bulbStatus: currentStatus },
         });
       }
       updates.push(room);
@@ -86,10 +87,10 @@ const ScheduleController = {
       const shkiahMinus30 = new Date(shkiah.getTime() - 30 * 60000);
 
       if (now >= shkiahMinus30 && now <= shkiah) {
-        const rooms = await RoomStatusModel.find();
+        const rooms = await RoomModel.find();
         for (const room of rooms) {
-          if (room.status !== "off") {
-            room.status = "off";
+          if (room.bulbStatus !== eBulbStatus.off) {
+            room.bulbStatus = eBulbStatus.off;
             await room.save();
           }
         }
@@ -136,10 +137,10 @@ const ScheduleController = {
       const havdalahTime = convertHDateToDate(havdalahTimeLocal);
 
       if (now > havdalahTime) {
-        const rooms = await RoomStatusModel.find();
+        const rooms = await RoomModel.find();
         for (const room of rooms) {
-          if (room.status !== "off") {
-            room.status = "off";
+          if (room.bulbStatus !== eBulbStatus.off) {
+            room.bulbStatus = eBulbStatus.off;
             await room.save();
           }
         }

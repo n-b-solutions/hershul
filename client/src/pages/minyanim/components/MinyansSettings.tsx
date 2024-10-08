@@ -72,10 +72,10 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
 
   React.useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/roomStatus`)
+      .get(`${API_BASE_URL}/room`)
       .then((res) => {
         setRoomsOption(
-          res.data.map((option: { nameRoom: string; id: string }) => ({ label: option.nameRoom, value: option.id }))
+          res.data.map((option: { name: string; id: string }) => ({ label: option.name, value: option.id }))
         );
         setRooms(res.data);
       })

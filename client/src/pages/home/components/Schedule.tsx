@@ -81,7 +81,7 @@ export function Schedule(): React.JSX.Element {
 
   const processMinyanData = (data: MinyanApi[]) => {
     return data.reduce<Minyan[]>((acc, minyan) => {
-      const roomName = minyan.room.nameRoom;
+      const roomName = minyan.room.name;
       const startDate = new Date(minyan.startDate.time);
       const endDate = new Date(minyan.endDate.time);
       const onAction = {

@@ -2,7 +2,7 @@ import mongoose, {
   Schema,
   SchemaTypes,
 } from "mongoose";
-import { MinyanDocument } from "../types/minyan";
+import { MinyanDocument } from "../types/minyan.type";
 
 
 const MinyanSchema: Schema<MinyanDocument> = new Schema({
