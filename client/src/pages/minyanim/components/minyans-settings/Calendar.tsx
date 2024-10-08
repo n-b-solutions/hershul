@@ -35,15 +35,12 @@ const isRoutineColumn: ColumnDef<MinyanDetails> = {
   editable: true,
 };
 
-export function Calendar({
-  scrollAction,
-}: {
-  scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
-}): React.JSX.Element {
+export function Calendar(): React.JSX.Element {
   const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
   const settingTimesItem = useSelector((state: RootState) => state.minyans.settingTimesItem);
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const dispatch = useDispatch();
+  const tableRef = React.useRef<HTMLDivElement>(null); // Ref for the scrollable container
 
   React.useEffect(() => {
     const fetchMinyanim = async () => {
@@ -291,6 +288,7 @@ export function Calendar({
         minDate={dayjs()}
         onChange={handleDateChange}
       />
+            <div ref={tableRef} style={{ height: '500px', overflowY: 'auto' }}>
       <DataTable<MinyanDetails>
         columns={[
           ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
@@ -301,10 +299,10 @@ export function Calendar({
         onChangeInput={handleChange}
         onBlurInput={handleBlurInput}
         onDeleteClick={handleDelete}
-        scrollAction={scrollAction}
         rows={settingTimesItem}
         getRowProps={getRowProps} // Call getRowProps for each row
       />
+      </div>
     </>
   );
 }
