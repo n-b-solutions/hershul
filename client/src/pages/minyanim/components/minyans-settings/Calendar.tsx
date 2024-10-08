@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { API_BASE_URL } from '@/const/api.const';
-import { isDateInactive } from '@/helpers/time.helper';
+import { isMinyanInactiveForSelectedDate } from '@/helpers/time.helper';
 import {
   addSettingTimes,
   deleteMinyan,
@@ -50,7 +50,7 @@ export function Calendar(): React.JSX.Element {
         const calendarRes = await axios.get(`${API_BASE_URL}/minyan/getCalendar/${date}`);
         const minyanim = calendarRes.data.map((minyan: any) => {
           let isRoutine = minyan.specificDate?.isRoutine;
-          if (!isRoutine && isDateInactive(selectedDate.toDate(), minyan.inactiveDates)) {
+          if (!isRoutine && isMinyanInactiveForSelectedDate(selectedDate.toDate(), minyan.inactiveDates)) {
             const inactiveDate = minyan.inactiveDates.find(
               (item: any) =>
                 new Date(item.date).toISOString().split('T')[0] === selectedDate.toISOString().split('T')[0]
@@ -165,7 +165,10 @@ export function Calendar(): React.JSX.Element {
     // Synchronous dispatch update
     dispatch(updateSettingTimesValue({ index, field, value, internalField }));
     // Async API call can be handled here, but avoid returning Promise<void>
-    const isInactiveDate = isDateInactive(selectedDate.toDate(), settingTimesItem[index].inactiveDates);
+    const isInactiveDate = isMinyanInactiveForSelectedDate(
+      selectedDate.toDate(),
+      settingTimesItem[index].inactiveDates
+    );
     if (isInactiveDate) {
       axios.put(`${API_BASE_URL}/minyan/updateInactiveDate/${updateId}`, {
         date: selectedDate.toISOString(),
@@ -258,8 +261,7 @@ export function Calendar(): React.JSX.Element {
   };
 
   const getRowProps = (row: MinyanDetails): RowProps => {
-    const isInactiveDate = isDateInactive(selectedDate.toDate(), row.inactiveDates);
-
+    const isInactiveDate = isMinyanInactiveForSelectedDate(selectedDate.toDate(), row.inactiveDates);
     const editMode = isInactiveDate
       ? eRowEditMode.partiallyEnabled
       : row.dateType === eDateType.calendar || !row.dateType
@@ -288,20 +290,20 @@ export function Calendar(): React.JSX.Element {
         minDate={dayjs()}
         onChange={handleDateChange}
       />
-            <div ref={tableRef} style={{ height: '500px', overflowY: 'auto' }}>
-      <DataTable<MinyanDetails>
-        columns={[
-          ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
-          isRoutineColumn,
-        ]}
-        edited
-        onAddRowClick={handlePlusClick}
-        onChangeInput={handleChange}
-        onBlurInput={handleBlurInput}
-        onDeleteClick={handleDelete}
-        rows={settingTimesItem}
-        getRowProps={getRowProps} // Call getRowProps for each row
-      />
+      <div ref={tableRef} style={{ height: '500px', overflowY: 'auto' }}>
+        <DataTable<MinyanDetails>
+          columns={[
+            ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
+            isRoutineColumn,
+          ]}
+          edited
+          onAddRowClick={handlePlusClick}
+          onChangeInput={handleChange}
+          onBlurInput={handleBlurInput}
+          onDeleteClick={handleDelete}
+          rows={settingTimesItem}
+          getRowProps={getRowProps} // Call getRowProps for each row
+        />
       </div>
     </>
   );

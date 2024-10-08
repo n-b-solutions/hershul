@@ -274,7 +274,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; dateTy
                       />
                     ) : (
                       ((column.formatter
-                        ? column.formatter(row, index)
+                        ? column.formatter(
+                            row,
+                            index,
+                            !(rowProps?.editMode === eRowEditMode.enabled || !rowProps?.editMode)
+                          )
                         : column.field
                           ? row[column.field as keyof TRowModel]
                           : null) as React.ReactNode)

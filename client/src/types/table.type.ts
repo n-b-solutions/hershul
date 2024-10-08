@@ -6,7 +6,7 @@ type Padding = 'normal' | 'checkbox' | 'none';
 export interface ColumnDef<TRowModel> {
   align?: 'left' | 'right' | 'center';
   field?: keyof TRowModel; // Ensure it's a key of TRowModel
-  formatter?: (row: TRowModel, index: number) => React.ReactNode;
+  formatter?: (row: TRowModel, index: number, disabledEdit?: boolean) => React.ReactNode;
   valueForEdit?: (row: TRowModel) => any;
   valueOption?: any & { id: string }[];
   editInputType?: string;

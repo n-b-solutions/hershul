@@ -9,13 +9,14 @@ import { ColumnDef } from '@/types/table.type';
 
 import { ActionsMessage } from '../components/minyans-settings/ActionsMessage';
 
-const getFormat = (props: {
+const getFormatWithActionsMessage = (props: {
   value: number | string;
   roomName?: string;
   message?: MessageTab;
   id?: string;
   field?: tFieldMinyanTable;
   index?: number;
+  disabledEdit?: boolean;
 }) => {
   return (
     <Grid container direction="row" justifyContent="center" spacing={2}>
@@ -33,6 +34,7 @@ const getFormat = (props: {
               message={props.message}
               minyanId={props.id}
               index={props?.index ?? 0}
+              disabledEdit={props?.disabledEdit ?? false}
             />
           )}
         </Grid>
@@ -57,14 +59,15 @@ export const getMinyansSettingsColumns = ({
   roomsOptionsArray: SelectOption<string>[];
 }): ColumnDef<MinyanDetails>[] => [
   {
-    formatter: (row, index): React.JSX.Element =>
-      getFormat({
+    formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
+      getFormatWithActionsMessage({
         value: row.blink?.secondsNum || '',
         roomName: row.room?.nameRoom,
         message: row.blink?.message,
         id: row?.id,
         field: 'blink',
         index,
+        disabledEdit: disabledEdit,
       }),
     valueForEdit: (row) => row.blink?.secondsNum,
     editInputType: 'number',
@@ -76,14 +79,15 @@ export const getMinyansSettingsColumns = ({
     tooltip: 'Time to start Blink before lights on',
   },
   {
-    formatter: (row, index): React.JSX.Element =>
-      getFormat({
+    formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
+      getFormatWithActionsMessage({
         value: dayjs(row.startDate?.time).format('hh:mm A'),
         roomName: row.room?.nameRoom,
         message: row.startDate?.message,
         id: row?.id,
         field: 'startDate',
         index,
+        disabledEdit: disabledEdit,
       }),
     editInputType: 'time',
     padding: 'none',
@@ -95,14 +99,15 @@ export const getMinyansSettingsColumns = ({
     valueForEdit: (row) => dayjs(row.startDate?.time),
   },
   {
-    formatter: (row, index): React.JSX.Element =>
-      getFormat({
+    formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
+      getFormatWithActionsMessage({
         value: dayjs(row.endDate?.time).format('hh:mm A'),
         roomName: row.room?.nameRoom,
         message: row.endDate?.message,
         id: row?.id,
         field: 'endDate',
         index: index,
+        disabledEdit: disabledEdit,
       }),
     editInputType: 'time',
     padding: 'none',
@@ -114,7 +119,7 @@ export const getMinyansSettingsColumns = ({
     valueForEdit: (row) => dayjs(row.endDate?.time),
   },
   {
-    formatter: (row): React.JSX.Element => getFormat({ value: row.room?.nameRoom }),
+    formatter: (row): React.JSX.Element => getFormatWithActionsMessage({ value: row.room?.nameRoom }),
     editInputType: 'select',
     valueForEdit: (row) => row.room?.id,
     selectOptions: roomsOptionsArray,
