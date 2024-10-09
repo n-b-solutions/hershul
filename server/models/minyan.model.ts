@@ -1,0 +1,36 @@
+import mongoose, { Schema, SchemaTypes } from "mongoose";
+
+import {
+  AlertTypeDocument,
+  BlinkAlertTypeDocument,
+  MinyanDocument,
+} from "../types/minyan.type";
+
+const alertSchema: Schema<AlertTypeDocument> = new Schema(
+  {
+    time: { type: Date, required: true },
+    messageId: { type: SchemaTypes.ObjectId, ref: "messages" },
+  },
+  { _id: false }
+);
+
+const blinkAlertSchema: Schema<BlinkAlertTypeDocument> = new Schema(
+  {
+    secondsNum: { type: Number },
+    messageId: { type: SchemaTypes.ObjectId, ref: "messages" },
+  },
+  { _id: false }
+);
+
+const MinyanSchema: Schema<MinyanDocument> = new Schema({
+  roomId: { type: SchemaTypes.ObjectId, required: true, ref: "rooms" },
+  startDate: { type: alertSchema, required: true },
+  endDate: { type: alertSchema, required: true },
+  blink: { type: blinkAlertSchema },
+  steadyFlag: { type: Boolean },
+  dateType: { type: String, required: true },
+});
+
+const MinyanModel = mongoose.model<MinyanDocument>("minyans", MinyanSchema);
+
+export default MinyanModel;

@@ -1,5 +1,5 @@
 import { eBulbStatus } from "../../lib/types/room.type";
-import MinyanListModel from "../models/minyanListModel";
+import MinyanModel from "../models/minyan.model";
 import RoomModel from "../models/room.model";
 import {
   GeoLocation,
@@ -19,7 +19,7 @@ const ScheduleController = {
     const now = new Date();
     const updates: Room[] = [];
 
-    const minyans = await MinyanListModel.find();
+    const minyans = await MinyanModel.find();
     const roomStatusMap = new Map<string, eBulbStatus>();
 
     for (const minyan of minyans) {

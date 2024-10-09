@@ -17,5 +17,5 @@ export interface MinyanDocument {
   endDate: AlertTypeDocument;
   dateType: eDateType;
   blink?: BlinkAlertTypeDocument;
-  steadyFlag: boolean;
+  steadyFlag?: boolean;
 }

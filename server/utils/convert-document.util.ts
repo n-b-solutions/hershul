@@ -2,14 +2,22 @@ import { MinyanType } from "../../lib/types/minyan.type";
 import { RoomType } from "../../lib/types/room.type";
 import { MinyanDocument } from "../types/minyan.type";
 import { RoomDocument } from "../types/room.type";
-import { convertObjectIdTostring } from "./consert-object-id.util";
+import { convertObjectIdTostring } from "./convert-object-id.util";
+import { convertIdsKeys } from "./convert-keys.util";
+import { MessageDocument } from "../types/message.type";
+import { MessageType } from "../../lib/types/message.type";
 
-export const convertMinyanDocument = (minyanDocument: MinyanDocument): MinyanType => {
-    const {_id, ...minyan} = convertObjectIdTostring(minyanDocument, {});
-    return {...minyan, id: _id}
+export const convertDocument = <TDocument, T>(document: TDocument): T =>
+  convertObjectIdTostring(convertIdsKeys(document));
 
-}
-export const convertRoomDocument = (roomDocument: RoomDocument): RoomType => {
-    const {_id, ...room} = convertObjectIdTostring(roomDocument, {});
-    return {...room, id: _id}
-}
+export const convertMinyanDocument = (
+  minyanDocument: MinyanDocument
+): MinyanType => convertDocument<MinyanDocument, MinyanType>(minyanDocument);
+
+export const convertRoomDocument = (roomDocument: RoomDocument): RoomType =>
+  convertDocument<RoomDocument, RoomType>(roomDocument);
+
+export const convertMessageDocument = (
+  messageDocument: MessageDocument
+): MessageType =>
+  convertDocument<MessageDocument, MessageType>(messageDocument);

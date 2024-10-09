@@ -13,10 +13,11 @@ import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typograph
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { SelectOption } from '@/types/metadata.type';
 import { Option } from '@/components/core/option';
 
 import { eDateType } from '../../../../../lib/types/minyan.type';
-import { SelectOption } from '@/types/metadata.type';
+import { CountType } from '../../../../../lib/types/metadata.type';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
@@ -33,17 +34,15 @@ export function ImportMinyans(): React.JSX.Element {
 
   useEffect(() => {
     Promise.all(
-      typesOfDates.map(async (type: SelectOption<eDateType>) => {
-        return await axios
-          .get(`${API_BASE_URL}/minyan/import/count/${type}`)
-          .then<CountMinyanOfDate>((res: { data: number }) => {
-            return { category: type, count: res.data };
-          })
-          .catch((err: any) => console.log('Error fetching data: ', err));
+      typesOfDates.map(async ({ value: type }: SelectOption<eDateType>) => {
+        const res = await axios.get<CountType>(`${API_BASE_URL}/minyan/import/count/${type}`);
+        return { category: type, ...res.data };
       })
     ).then((res: any) => {
       setDateTypeArray(
-        res?.filter((dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.calendar)
+        res?.filter(
+          (dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.calendar
+        )
       );
     });
   }, []);

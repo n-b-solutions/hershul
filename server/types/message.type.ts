@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 
-export interface IMessage extends Document {
+export interface MessageDocument extends Document {
     name: string;
     audioUrl: string;
     selectedRoom:string;

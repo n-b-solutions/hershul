@@ -1,11 +1,11 @@
 import MessageModel from "../models/messageModel";
-import { IMessage } from "../types/message";
+import { MessageDocument } from "../types/message.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 import path from "path";
 
 const MessageService = {
   // Get all messages
-  get: async (): Promise<IMessage[] | ApiError> => {
+  get: async (): Promise<MessageDocument[] | ApiError> => {
     try {
       const messages = await MessageModel.find();
       return messages;
@@ -14,7 +14,7 @@ const MessageService = {
     }
   },
   // Get a specific message by its ID
-  getById: async (id?: string): Promise<IMessage | ApiError> => {
+  getById: async (id?: string): Promise<MessageDocument | ApiError> => {
     try {
       if (!id) {
         return new ApiError(404, "Not Found");
@@ -33,7 +33,7 @@ const MessageService = {
     selectedRoom: string,
     name: string,
     file?: Express.Multer.File
-  ): Promise<IMessage | ApiError> => {
+  ): Promise<MessageDocument | ApiError> => {
     if (!file) {
       return new ApiError(400, "No file uploaded.");
     }

@@ -1,5 +1,5 @@
 import RoomModel from "../models/room.model";
-import MinyanListModel from "../models/minyanListModel";
+import MinyanModel from "../models/minyan.model";
 import { eBulbStatus, RoomType } from "../../lib/types/room.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { getActiveMinyans } from "../helpers/minyan.helper";
@@ -47,12 +47,12 @@ const RoomService = {
       if (!id) {
         return new ApiError(404, "Not Found");
       }
-      const minyansInRoom = await MinyanListModel.find({ roomId: id });
+      const minyansInRoom = await MinyanModel.find({ roomId: id });
 
       const activeMinyansInRoomIds = getActiveMinyans(minyansInRoom).map(
         (minyan) => minyan.id
       );
-      await MinyanListModel.updateMany(
+      await MinyanModel.updateMany(
         { _id: { $in: activeMinyansInRoomIds } },
         { $set: { steadyFlag: true } }
       );
