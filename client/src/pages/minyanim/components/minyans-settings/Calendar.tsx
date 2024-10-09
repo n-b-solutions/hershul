@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick, eRowEditMode } from '@/types/enums';
 import type { MinyanApi, MinyanDetails, NewMinyan, SpecificDate, typeForEdit } from '@/types/minyans.type';
+import { Room } from '@/types/room.type';
 import { ColumnDef, RowProps } from '@/types/table.type';
 import { DataTable } from '@/components/core/DataTable';
 
@@ -163,15 +164,15 @@ export function Calendar({
       }
     }
   };
+
   const handleBlurInput = (
-    value: typeForEdit, // Align this to the expected type
+    value: typeForEdit,
     index: number,
     field: keyof MinyanDetails,
     internalField?: string
   ): void => {
     const updateId = settingTimesItem[index].id;
-    const fieldForEditDB = field === eFieldName.room ? eFieldName.roomId : field;
-    // Synchronous dispatch update
+    const fieldForEditDB = field === eFieldName.room ? eFieldName.roomId : field; // Synchronous dispatch update
     dispatch(updateSettingTimesValue({ index, field, value, internalField }));
     // Async API call can be handled here, but avoid returning Promise<void>
     const isInactiveDate = isMinyanInactiveForSelectedDate(
@@ -194,7 +195,11 @@ export function Calendar({
           const editValue = rooms?.find((room) => room.id === res.data) || value;
           if (editValue) {
             dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
-            dispatch(sortSettingTimesItem());
+            dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: true }));
+            setTimeout(() => {
+              setFalseEdited();
+            }, 1000);
+            if (field === eFieldName.endDate || field === eFieldName.startDate) dispatch(sortSettingTimesItem());
           }
         })
         .catch((err) => console.log('Error fetching data:', err));
