@@ -117,6 +117,9 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
           onBlur={(e) => {
             handleBlurInput(props.value as TRowModel[keyof TRowModel] as typeForEdit, e);
           }}
+          onKeyDownCapture={(e) => {
+            e.key === 'Enter' && handleBlurInput(props.value as typeForEdit, e);
+          }}
         />
       );
 
