@@ -1,3 +1,5 @@
+import { log } from 'console';
+
 import * as React from 'react';
 import { API_BASE_URL } from '@/const/api.const';
 import { isMinyanInactiveForSelectedDate } from '@/helpers/time.helper';
@@ -10,6 +12,7 @@ import {
 } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
+import { Typography } from '@mui/material';
 import { Box, height } from '@mui/system';
 import { DatePicker } from '@mui/x-date-pickers';
 import { ArrowArcLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
@@ -51,8 +54,10 @@ export function Calendar({
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const dispatch = useDispatch();
   const tableRef = React.useRef<HTMLDivElement>(null); // Ref for the scrollable container
+  const [loading, setLoading] = React.useState<boolean>(true);
 
   React.useEffect(() => {
+    setLoading(true);
     const fetchMinyanim = async () => {
       try {
         // First fetch: get the default calendar minyanim
@@ -77,8 +82,11 @@ export function Calendar({
 
         // Dispatch to Redux store
         dispatch(setSettingTimes({ setting: minyanim }));
+        dispatch(sortSettingTimesItem());
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -309,22 +317,28 @@ export function Calendar({
         minDate={dayjs()}
         onChange={handleDateChange}
       />
-      <Box ref={tableRef} style={{ height: 'calc(100% - 68px)', overflowY: 'auto' }}>
-        <DataTable<MinyanDetails>
-          columns={[
-            ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
-            isRoutineColumn,
-          ]}
-          edited
-          onAddRowClick={handlePlusClick}
-          onChangeInput={handleChange}
-          onBlurInput={handleBlurInput}
-          onDeleteClick={handleDelete}
-          scrollAction={scrollAction}
-          rows={settingTimesItem}
-          getRowProps={getRowProps} // Call getRowProps for each row
-        />
-      </Box>
+      {loading ? (
+        <Typography textAlign="center" variant="h6">
+          Loading...
+        </Typography>
+      ) : (
+        <Box ref={tableRef} style={{ height: 'calc(100% - 68px)', overflowY: 'auto' }}>
+          <DataTable<MinyanDetails>
+            columns={[
+              ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
+              isRoutineColumn,
+            ]}
+            edited
+            onAddRowClick={handlePlusClick}
+            onChangeInput={handleChange}
+            onBlurInput={handleBlurInput}
+            onDeleteClick={handleDelete}
+            scrollAction={scrollAction}
+            rows={settingTimesItem}
+            getRowProps={getRowProps} // Call getRowProps for each row
+          />
+        </Box>
+      )}
     </>
   );
 }
