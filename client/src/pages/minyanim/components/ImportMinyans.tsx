@@ -34,11 +34,11 @@ export function ImportMinyans(): React.JSX.Element {
 
   useEffect(() => {
     Promise.all(
-      typesOfDates.map(async ({ value: type }: SelectOption<eDateType>) => {
-        const res = await axios.get<CountType>(`${API_BASE_URL}/minyan/import/count/${type}`);
-        return { category: type, ...res.data };
+      typesOfDates.map(async (option: SelectOption<eDateType>) => {
+        const res = await axios.get<CountType>(`${API_BASE_URL}/minyan/import/count/${option.value}`);
+        return { category: option, ...res.data };
       })
-    ).then((res: any) => {
+    ).then((res: CountMinyanOfDate[]) => {
       setDateTypeArray(
         res?.filter(
           (dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.calendar
