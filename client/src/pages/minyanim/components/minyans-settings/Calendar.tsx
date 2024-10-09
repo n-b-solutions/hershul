@@ -34,7 +34,7 @@ const isRoutineColumn: ColumnDef<MinyanDetails> = {
   valueForEdit: (row) => row.isRoutine,
   name: 'Is Routine',
   width: '8px',
-  padding: 'none',
+  padding: 'normal',
   align: 'center',
   field: 'isRoutine',
   editable: true,
