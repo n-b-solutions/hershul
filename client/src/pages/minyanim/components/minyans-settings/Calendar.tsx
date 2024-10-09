@@ -10,6 +10,7 @@ import {
 } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
+import { Box, height } from '@mui/system';
 import { DatePicker } from '@mui/x-date-pickers';
 import { ArrowArcLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
@@ -39,7 +40,11 @@ const isRoutineColumn: ColumnDef<MinyanDetails> = {
   },
 };
 
-export function Calendar(): React.JSX.Element {
+export function Calendar({
+  scrollAction,
+}: {
+  scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
+}): React.JSX.Element {
   const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
   const settingTimesItem = useSelector((state: RootState) => state.minyans.settingTimesItem);
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
@@ -299,7 +304,7 @@ export function Calendar(): React.JSX.Element {
         minDate={dayjs()}
         onChange={handleDateChange}
       />
-      <div ref={tableRef} style={{ height: '500px', overflowY: 'auto' }}>
+      <Box ref={tableRef} style={{ height: 'calc(100% - 68px)', overflowY: 'auto' }}>
         <DataTable<MinyanDetails>
           columns={[
             ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
@@ -310,10 +315,11 @@ export function Calendar(): React.JSX.Element {
           onChangeInput={handleChange}
           onBlurInput={handleBlurInput}
           onDeleteClick={handleDelete}
+          scrollAction={scrollAction}
           rows={settingTimesItem}
           getRowProps={getRowProps} // Call getRowProps for each row
         />
-      </div>
+      </Box>
     </>
   );
 }
