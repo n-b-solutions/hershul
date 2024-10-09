@@ -39,7 +39,7 @@
     "@mui/material": "^5.15.11",
     "@mui/system": "5.15.11",
     "@mui/utils": "5.15.11",
-    "@mui/x-date-pickers": "6.19.5",
+    "@mui/x-date-pickers": "^6.19.6",
     "@phosphor-icons/react": "2.0.15",
     "@react-pdf/renderer": "3.3.8",
     "@reduxjs/toolkit": "^2.2.7",

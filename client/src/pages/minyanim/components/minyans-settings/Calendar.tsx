@@ -12,6 +12,7 @@ import {
 } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
+import { WEEK_DAYS } from '@/utils/AdapterHebDate';
 import { Typography } from '@mui/material';
 import { Box, height } from '@mui/system';
 import { DatePicker } from '@mui/x-date-pickers';
@@ -316,6 +317,16 @@ export function Calendar({
         value={selectedDate}
         minDate={dayjs()}
         onChange={handleDateChange}
+        dayOfWeekFormatter={(date, dayJs: Dayjs) => WEEK_DAYS[dayJs.day()]}
+        slotProps={{
+          layout: {
+            sx: {
+              '.MuiDayCalendar-root': {
+                direction: 'rtl',
+              },
+            },
+          },
+        }}
       />
       {loading ? (
         <Typography textAlign="center" variant="h6">
