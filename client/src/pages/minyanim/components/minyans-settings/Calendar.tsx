@@ -195,8 +195,13 @@ export function Calendar(): React.JSX.Element {
         .catch((err) => console.log('Error fetching data:', err));
     }
   };
-  const handleChange = (value: typeForEdit, index: number, field: keyof MinyanDetails): void => {
-    value != undefined && dispatch(updateSettingTimesValue({ index, field, value }));
+  const handleChange = (
+    value: typeForEdit,
+    index: number,
+    field: keyof MinyanDetails,
+    internalField?: string
+  ): void => {
+    value && dispatch(updateSettingTimesValue({ index, field, value, internalField }));
   };
   const handleDateChange = (newDate: Dayjs | null) => {
     if (newDate) {
