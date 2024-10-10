@@ -69,11 +69,12 @@ export interface BlinkAlertTypeName {
   secondsNum: number;
   message?: MessageTab;
 }
-export interface Minyan {
+export interface ScheduleActionType {
+  minyanId: string;
   roomName: string;
-  messages?: string;
-  startDate: Date;
+  time: Date;
   action: string;
+  message?: string;
 }
 
 export interface MinyanApi {

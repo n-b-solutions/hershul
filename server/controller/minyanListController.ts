@@ -2,8 +2,7 @@ import { Request, Response } from "express";
 import MinyanListModel from "../models/minyanListModel";
 import { io } from "../socketio";
 import mongoose from "mongoose";
-import { getQueryDateType, isRoshChodesh } from "../helper/function-minyans";
-import { eDateType } from "../../lib/types/minyan.type";
+import { getQueryDateType } from "../helper/function-minyans";
 
 const MinyanListController = {
   // Get all minyanim
@@ -89,7 +88,7 @@ const MinyanListController = {
     }
   },
   getCalendar: async (req: Request, res: Response): Promise<void> => {
-    const { date } = req.params;
+    const date = new Date(req.params.date|| new Date()) ;
 
     try {
       const queryDateType = await getQueryDateType(new Date(date));
