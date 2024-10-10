@@ -327,6 +327,7 @@ export function Calendar({
             },
           },
         }}
+        sx={{ paddingBottom: '2%', paddingLeft: '1%' }}
       />
       {loading ? (
         <Typography textAlign="center" variant="h6">
