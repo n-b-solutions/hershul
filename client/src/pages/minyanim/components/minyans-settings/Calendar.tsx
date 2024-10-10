@@ -1,5 +1,3 @@
-import { log } from 'console';
-
 import * as React from 'react';
 import { API_BASE_URL } from '@/const/api.const';
 import { isMinyanInactiveForSelectedDate } from '@/helpers/time.helper';
@@ -13,7 +11,8 @@ import {
 import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
 import { WEEK_DAYS } from '@/utils/AdapterHebDate';
-import { Typography } from '@mui/material';
+import { HDate } from '@hebcal/core';
+import { TextField, TextFieldProps, Typography } from '@mui/material';
 import { Box, height } from '@mui/system';
 import { DatePicker } from '@mui/x-date-pickers';
 import { ArrowArcLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
@@ -56,6 +55,7 @@ export function Calendar({
   const dispatch = useDispatch();
   const tableRef = React.useRef<HTMLDivElement>(null); // Ref for the scrollable container
   const [loading, setLoading] = React.useState<boolean>(true);
+  const hebrewDate = new HDate(selectedDate.toDate()).renderGematriya(); // Get date as string in Hebrew
 
   React.useEffect(() => {
     setLoading(true);
@@ -309,6 +309,19 @@ export function Calendar({
     };
   };
 
+  function CustomTextField(params: TextFieldProps) {
+    return (
+      <TextField
+        size="small"
+        {...params}
+        value={hebrewDate}
+        InputProps={{
+          ...params.InputProps,
+          readOnly: true,
+        }}
+      />
+    );
+  }
   return (
     <>
       <DatePicker
@@ -327,6 +340,7 @@ export function Calendar({
             },
           },
         }}
+        slots={{ textField: CustomTextField }}
         sx={{ paddingBottom: '2%', paddingLeft: '1%' }}
       />
       {loading ? (
