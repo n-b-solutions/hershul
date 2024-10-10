@@ -15,6 +15,10 @@ interface BlinkAlertType {
   secondsNum: number;
   messageId?: ObjectId;
 }
+interface SpecificDate{
+  date: Date;
+  isRoutine: boolean;
+}
 export interface MinyanDocument extends Document {
   roomId: ObjectId;
   startDate: AlertType;
@@ -22,4 +26,6 @@ export interface MinyanDocument extends Document {
   dateType: DateTypes;
   blink?: BlinkAlertType;
   steadyFlag: Boolean;
+  specificDate?:SpecificDate;
+    inactiveDates?:SpecificDate[];
 }

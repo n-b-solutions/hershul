@@ -1,6 +1,6 @@
 import React, { Ref, useState } from 'react';
 import { SECONDS_NUM, TIME } from '@/const/minyans.const';
-import { OutlinedInput, Select, SelectChangeEvent } from '@mui/material';
+import { OutlinedInput, Select, SelectChangeEvent, Switch, TextField } from '@mui/material';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';
 
@@ -26,7 +26,6 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
   valueOption?: any & { id: string }[];
 }): React.JSX.Element {
   const [select, setSelect] = useState(props.value);
-
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
     const editValue = props.valueOption?.find((value: any) => value.id === event.target.value);
@@ -101,6 +100,29 @@ export function EditTableCellInputs<TRowModel extends object>(props: {
       ) : (
         <></>
       );
+    case 'switch':
+      const [isChecked, setIsChecked] = useState(!!props.value);
+
+      React.useEffect(() => {
+        setIsChecked(!!props.value);
+      }, [props.value]);
+
+      return (
+        <Switch
+          checked={isChecked}
+          onChange={(e) => {
+            setIsChecked(e.target.checked);
+            handle(e.target.checked as TRowModel[keyof TRowModel] as typeForEdit);
+          }}
+          onBlur={(e) => {
+            handleBlurInput(props.value as TRowModel[keyof TRowModel] as typeForEdit, e);
+          }}
+          onKeyDownCapture={(e) => {
+            e.key === 'Enter' && handleBlurInput(props.value as typeForEdit, e);
+          }}
+        />
+      );
+
     default:
       return <></>;
   }

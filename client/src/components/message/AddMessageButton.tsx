@@ -1,20 +1,21 @@
 import React, { useEffect } from 'react';
+import { messages } from '@/redux/message/messageSlice';
 import { CardActions, IconButton } from '@mui/material';
 import { Plus } from '@phosphor-icons/react';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import { useSelector } from 'react-redux';
 
-import { messages } from '@/redux/message/messageSlice';
 import { MessagesPopup } from './MessagesPopup';
 
 export function AddMessageButton(props: {
   roomName: string;
   isSettingPage?: boolean;
   onClick?: (messageId?: string) => void;
+  disabledEdit?: boolean;
 }): React.JSX.Element {
-  const { roomName, isSettingPage, onClick } = props;
+  const { roomName, isSettingPage, onClick, disabledEdit } = props;
   const messagesSlice = useSelector(messages);
-  const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({}); 
+  const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({});
 
   const handleMessageClick = (roomName: string) => {
     setDisplayMessages((prevState) => ({
@@ -41,6 +42,7 @@ export function AddMessageButton(props: {
             event.stopPropagation();
             handleMessageClick(roomName);
           }}
+          disabled={disabledEdit}
         >
           <Plus size={10} />
         </IconButton>
