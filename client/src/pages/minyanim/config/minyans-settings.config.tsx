@@ -92,7 +92,7 @@ export const getMinyansSettingsColumns = ({
     editInputType: 'time',
     padding: 'none',
     name: 'Start Time',
-    width: '150px',
+    width: '50px',
     field: 'startDate',
     align: 'center',
     tooltip: 'Lights On',
