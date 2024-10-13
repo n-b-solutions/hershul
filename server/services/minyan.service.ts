@@ -169,10 +169,18 @@ const MinyanService = {
         specificDate,
       };
       const minyanRecord = await MinyanModel.create(newMinyan);
+
+      const newMinyanDocument = await MinyanModel.findById(minyanRecord.id)
+        .populate("roomId")
+        .populate("startDate.messageId")
+        .populate("endDate.messageId")
+        .populate("blink.messageId")
+        .lean(true);
+        
       // TODO: fix to send the new minyan only
       io.emit("minyanUpdated", await MinyanModel.find());
 
-      return convertMinyanDocument({ ...newMinyan, id: minyanRecord.id });
+      return convertMinyanDocument(newMinyanDocument!);
     } catch (error) {
       console.error("Error creating minyan:", error);
       return new ApiError(500, error);
