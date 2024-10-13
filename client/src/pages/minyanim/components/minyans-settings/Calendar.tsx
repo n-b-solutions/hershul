@@ -10,11 +10,9 @@ import {
 } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
-import { WEEK_DAYS } from '@/utils/AdapterHebDate';
 import { HDate } from '@hebcal/core';
 import { TextField, TextFieldProps, Typography } from '@mui/material';
-import { Box, height } from '@mui/system';
-import { DatePicker } from '@mui/x-date-pickers';
+import { Box } from '@mui/system';
 import { ArrowArcLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
@@ -25,6 +23,7 @@ import type { MinyanApi, MinyanDetails, NewMinyan, SpecificDate, typeForEdit } f
 import { Room } from '@/types/room.type';
 import { ColumnDef, RowProps } from '@/types/table.type';
 import { DataTable } from '@/components/core/DataTable';
+import JewishDatePicker from '@/components/core/jewish-datepicker';
 
 import { eDateType } from '../../../../../../lib/types/minyan.type';
 import { getMinyansSettingsColumns } from '../../config/minyans-settings.config';
@@ -309,38 +308,12 @@ export function Calendar({
     };
   };
 
-  function CustomTextField(params: TextFieldProps) {
-    return (
-      <TextField
-        size="small"
-        {...params}
-        value={hebrewDate}
-        InputProps={{
-          ...params.InputProps,
-          readOnly: true,
-        }}
-      />
-    );
-  }
   return (
     <>
-      <DatePicker
-        format="MMM D, YYYY"
+      <JewishDatePicker
         label="Specific Date"
-        value={selectedDate}
-        minDate={dayjs()}
-        onChange={handleDateChange}
-        dayOfWeekFormatter={(date, dayJs: Dayjs) => WEEK_DAYS[dayJs.day()]}
-        slotProps={{
-          layout: {
-            sx: {
-              '.MuiDayCalendar-root': {
-                direction: 'rtl',
-              },
-            },
-          },
-        }}
-        slots={{ textField: CustomTextField }}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
         sx={{ paddingBottom: '2%', paddingLeft: '1%' }}
       />
       {loading ? (
