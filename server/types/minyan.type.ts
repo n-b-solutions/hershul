@@ -1,6 +1,6 @@
-import { ObjectId } from "mongoose";
+import { ObjectId } from "mongodb";
 
-import { eDateType } from "../../lib/types/minyan.type";
+import { eDateType, SpecificDateType } from "../../lib/types/minyan.type";
 
 export interface AlertTypeDocument {
   time: Date;
@@ -10,6 +10,7 @@ export interface BlinkAlertTypeDocument {
   secondsNum: number;
   messageId?: ObjectId;
 }
+
 export interface MinyanDocument {
   id: ObjectId;
   roomId: ObjectId;
@@ -17,5 +18,7 @@ export interface MinyanDocument {
   endDate: AlertTypeDocument;
   dateType: eDateType;
   blink?: BlinkAlertTypeDocument;
+  specificDate?: SpecificDateType;
+  inactiveDates?: SpecificDateType[];
   steadyFlag?: boolean;
 }

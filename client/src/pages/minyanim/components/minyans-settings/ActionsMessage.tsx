@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { MessageTab } from '@/types/message.type';
 import { tFieldMinyanTable } from '@/types/minyans.type';
 import { AddMessageButton } from '@/components/message/AddMessageButton';
+import { EditedType } from '../../../../../../lib/types/minyan.type';
 
 export function ActionsMessage(props: {
   roomName: string;
@@ -18,14 +19,15 @@ export function ActionsMessage(props: {
   minyanId: string;
   field: tFieldMinyanTable;
   index: number;
+  disabledEdit: boolean;
 }): React.JSX.Element {
-  const { roomName, message, minyanId, field, index } = props;
+  const { roomName, message, minyanId, field, index, disabledEdit } = props;
 
   const dispatch = useDispatch<AppDispatch>();
 
   const handleClick = (messageId?: string) => {
     axios
-      .put(`${API_BASE_URL}/minyan/${minyanId}`, {
+      .put<EditedType>(`${API_BASE_URL}/minyan/${minyanId}`, {
         value: messageId ?? null,
         field,
         internalField: MESSAGE_ID,
@@ -35,7 +37,7 @@ export function ActionsMessage(props: {
           updateSettingTimesValue({
             index,
             field,
-            value: res.data ?? undefined,
+            value: res.data.editedValue ?? undefined,
             internalField: 'message',
           })
         );
@@ -62,6 +64,7 @@ export function ActionsMessage(props: {
               event.stopPropagation();
               handleClick();
             }}
+            disabled={disabledEdit}
           >
             <Trash size={10} />
           </IconButton>
@@ -70,6 +73,7 @@ export function ActionsMessage(props: {
             roomName={roomName}
             isSettingPage={true}
             onClick={(messageId?: string) => handleClick(messageId)}
+            disabledEdit={disabledEdit}
           />
         )}
       </Grid>

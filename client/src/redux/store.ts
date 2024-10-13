@@ -10,8 +10,8 @@ export type AppDispatch = typeof store.dispatch;
 export const store = configureStore({
   reducer: {
     message: messageRoomReducer,
-    minyans: settingTimesSliceReducer,
     room: roomsReducer,
+    minyans: settingTimesSliceReducer,
   },
 });
 

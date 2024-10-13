@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { API_BASE_URL } from '@/const/api.const';
 import { getMiddleTime } from '@/helpers/time.helper';
@@ -11,29 +9,33 @@ import {
   updateSettingTimesValue,
 } from '@/redux/minyans/setting-times-slice';
 import type { RootState } from '@/redux/store';
-import { Grid, Typography } from '@mui/material';
+import { getNewMinyanObj } from '@/services/minyans.service';
+import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import axios from 'axios';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick } from '@/types/enums';
-import { MessageTab } from '@/types/message.type';
-import type { GetNewMinyan, MinyanDetails, NewMinyan, tFieldMinyanTable, typeForEdit } from '@/types/minyans.type';
-import { Room } from '@/types/room.type';
-import { DataTable } from '@/components/core/data-table';
-import type { ColumnDef } from '@/components/core/data-table';
-
-import { getMinyansSettingsColumns } from '../config/minyans-settings.config';
-import { ActionsMessage } from './ActionsMessage';
 import { SelectOption } from '@/types/metadata.type';
+import { MinyanRowType } from '@/types/minyans.type';
+import { Room } from '@/types/room.type';
+import { DataTable } from '@/components/core/DataTable';
 
-export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.Element => {
+import { IdType } from '../../../../../../lib/types/metadata.type';
+import { eDateType, EditedType, EditMinyanValueType, MinyanType } from '../../../../../../lib/types/minyan.type';
+import { getMinyansSettingsColumns } from '../../config/minyans-settings.config';
+
+export const MinyansTable = ({
+  dateType,
+  scrollAction,
+}: {
+  dateType: eDateType;
+  scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
+}): React.JSX.Element => {
   const settingTimesItem = useSelector((state: RootState) => state.minyans.settingTimesItem);
   const dispatch = useDispatch();
-  const [rooms, setRooms] = React.useState<Room[]>([]);
-  const [roomsOption, setRoomsOption] = React.useState<SelectOption<string>[]>([]);
-  const [isScroll, setIsScroll] = React.useState<boolean>(false);
+  const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const [loading, setLoading] = React.useState<boolean>(true);
 
   React.useEffect(() => {
@@ -46,12 +48,13 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
         .then((res) => {
           dispatch(
             setSettingTimes({
-              setting: res.data.map((minyan: GetNewMinyan) => {
+              setting: res.data.map((minyan: MinyanRowType) => {
                 return {
                   ...minyan,
                   blink: { secondsNum: minyan.blink?.secondsNum, message: minyan.blink?.message },
                   startDate: { time: minyan.startDate?.time, message: minyan.startDate?.message },
                   endDate: { time: minyan.endDate?.time, message: minyan.endDate?.message },
+                  isRoutine: minyan.specificDate?.isRoutine,
                   isEdited: false,
                 };
               }),
@@ -70,33 +73,15 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
     fetchData();
   }, [dateType]);
 
-  React.useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/room`)
-      .then((res) => {
-        setRoomsOption(
-          res.data.map((option: { name: string; id: string }) => ({ label: option.name, value: option.id }))
-        );
-        setRooms(res.data);
-      })
-      .catch((err) => console.log('Error fetching data:', err));
-  }, []);
-
   const handlePlusClick = async (index: number, location?: eLocationClick): Promise<any> => {
-    const newRow: NewMinyan = getNewMinyan(index, location);
+    const newRow = getNewMinyanObj(settingTimesItem, dateType, rooms[0].id, index, location);
     await axios
-      .post<GetNewMinyan>(`${API_BASE_URL}/minyan`, { ...newRow })
+      .post<MinyanType>(`${API_BASE_URL}/minyan`, { ...newRow })
       .then(async (res) => {
-        const currentRoom = rooms.find((m) => m.id === res.data.roomId);
-        const { roomId: room, ...data } = res.data;
         dispatch(
           await addSettingTimes({
             newRow: {
-              blink: data.blink,
-              endDate: data.endDate,
-              startDate: data.startDate,
-              room: currentRoom!,
-              id: data.id,
+              ...res.data,
               isEdited: true,
             },
           })
@@ -122,28 +107,10 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
     });
   };
 
-  const getNewMinyan = (index: number, location?: eLocationClick) => {
-    const indexBefore = location === eLocationClick.top ? index - 1 : index;
-    const indexAfter = location === eLocationClick.top ? index : index + 1;
-    return {
-      startDate:
-        index === -1
-          ? new Date()
-          : getMiddleTime(settingTimesItem[indexBefore]?.startDate.time, settingTimesItem[indexAfter]?.startDate.time),
-      endDate:
-        index === -1
-          ? new Date()
-          : getMiddleTime(settingTimesItem[indexBefore]?.endDate.time, settingTimesItem[indexAfter]?.endDate.time),
-      roomId: rooms[0].id,
-      dateType: dateType,
-      steadyFlag: false,
-    };
-  };
-
   const handleChange = (
-    value: typeForEdit,
+    value: EditMinyanValueType,
     index: number,
-    field: keyof MinyanDetails,
+    field: keyof MinyanRowType,
     internalField?: string
   ): void => {
     value && dispatch(updateSettingTimesValue({ index, field, value, internalField }));
@@ -152,27 +119,27 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
   const handleDelete = (index: number) => {
     const minyanId = settingTimesItem[index].id;
     axios
-      .delete<{ deletedMinyan: MinyanDetails }>(`${API_BASE_URL}/minyan/${minyanId}`)
-      .then((res) => dispatch(deleteMinyan({ minyanId: res.data.deletedMinyan.id })))
+      .delete<IdType>(`${API_BASE_URL}/minyan/${minyanId}`)
+      .then((res) => dispatch(deleteMinyan({ minyanId: res.data.id })))
       .catch((err) => console.log('Error fetching data:', err));
   };
 
   const handleBlurInput = (
-    value: typeForEdit,
+    value: EditMinyanValueType,
     index: number,
-    field: keyof MinyanDetails,
+    field: keyof MinyanRowType,
     internalField?: string
   ): void => {
     const updateId = settingTimesItem[index].id;
     const fieldForEdit = field === eFieldName.room ? eFieldName.roomId : field;
     axios
-      .put(`${API_BASE_URL}/minyan/${updateId}`, {
+      .put<EditedType>(`${API_BASE_URL}/minyan/${updateId}`, {
         value,
         field: fieldForEdit,
         internalField,
       })
       .then((res) => {
-        const editValue = rooms?.find((value: Room) => value.id === res.data) || value;
+        const editValue = rooms?.find((value: Room) => value.id === res.data.editedValue) || value;
         if (editValue) {
           dispatch(updateSettingTimesValue({ index, field, value: editValue, internalField }));
           dispatch(updateSettingTimesValue({ index, field: eFieldName.isEdited, value: true }));
@@ -186,26 +153,24 @@ export const MinyansSettings = ({ dateType }: { dateType: string }): React.JSX.E
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
-      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }} onScroll={() => setIsScroll(true)}>
-        {loading ? (
-          <Typography textAlign="center" variant="h6">
-            Loading...
-          </Typography>
-        ) : (
-          <DataTable<MinyanDetails>
-            columns={getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsOption })}
-            edited
-            onAddRowClick={handlePlusClick}
-            onChangeInput={handleChange}
-            onBlurInput={handleBlurInput}
-            onDeleteClick={handleDelete}
-            rows={settingTimesItem}
-            stickyHeader
-            scrollAction={{ isScroll, setIsScroll }}
-          />
-        )}
-      </Box>
-    </Box>
+    <>
+      {loading ? (
+        <Typography textAlign="center" variant="h6">
+          Loading...
+        </Typography>
+      ) : (
+        <DataTable<MinyanRowType, EditMinyanValueType>
+          columns={getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions })}
+          edited
+          onAddRowClick={handlePlusClick}
+          onChangeInput={handleChange}
+          onBlurInput={handleBlurInput}
+          onDeleteClick={handleDelete}
+          rows={settingTimesItem}
+          stickyHeader
+          scrollAction={scrollAction}
+        />
+      )}
+    </>
   );
 };

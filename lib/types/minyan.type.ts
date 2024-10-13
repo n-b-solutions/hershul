@@ -11,20 +11,26 @@ export enum eDateType {
 }
 
 export interface AlertType {
-  time: Date;
-  messageId?: string | MessageType;
+  time: Date | string;
+  message?: MessageType;
 }
 export interface BlinkAlertType {
   secondsNum: number;
-  messageId?: string | MessageType;
+  message?: MessageType;
+}
+export interface SpecificDateType {
+  date: Date | string;
+  isRoutine?: boolean;
 }
 export interface MinyanType {
   id: string;
-  roomId: string | RoomType;
+  room: RoomType;
   startDate: AlertType;
   endDate: AlertType;
   dateType: eDateType;
   blink?: BlinkAlertType;
+  specificDate?: SpecificDateType;
+  inactiveDates?: SpecificDateType[];
   steadyFlag?: boolean;
 }
 
@@ -34,6 +40,21 @@ export interface NewMinyanType {
   endTime: Date;
   blinkNum?: number;
   dateType: eDateType;
+  specificDate?: SpecificDateType;
 }
 
-export type EditMinyanValueType = string | Date | RoomType | number | boolean;
+export type EditMinyanValueType =
+  | string
+  | Date
+  | RoomType
+  | number
+  | boolean
+  | SpecificDateType[]
+  | SpecificDateType
+  | BlinkAlertType
+  | AlertType
+  | undefined;
+
+export interface EditedType {
+  editedValue: EditMinyanValueType;
+}

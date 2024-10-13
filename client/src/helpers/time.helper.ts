@@ -1,9 +1,20 @@
 import { GENERATE_TIME } from '@/const/minyans.const';
-import { MinyanDetails } from '@/types/minyans.type';
 import dayjs from 'dayjs';
 
+import { MinyanType } from '../../../lib/types/minyan.type';
+
+export const isMinyanInactiveForSelectedDate = (selectedDate: Date, inactiveDates: any[] = []): boolean => {
+  if (!inactiveDates || !Array.isArray(inactiveDates)) return false;
+
+  return inactiveDates.some((inactiveDate) => {
+    if (!inactiveDate || !inactiveDate.date) return false; // Check for null or undefined
+    const elementDate = new Date(inactiveDate.date).toISOString().split('T')[0];
+    return elementDate === selectedDate.toISOString().split('T')[0];
+  });
+};
+
 export const sortByTime = (array: any): any => {
-  const sortArray = array.sort((a: MinyanDetails, b: MinyanDetails) => {
+  const sortArray = array.sort((a: MinyanType, b: MinyanType) => {
     const timeStartA = dayjs()
       .hour(dayjs(a.startDate?.time).get('hour'))
       .minute(dayjs(a.startDate?.time).get('minute'));
@@ -23,9 +34,9 @@ export const sortByTime = (array: any): any => {
   return sortArray;
 };
 
-export const getMiddleTime = (beforeDate: Date | undefined, afterDate: Date | undefined): Date => {
-  const beforeTime = dayjs(beforeDate);
-  const aftertime = dayjs(afterDate);
+export const getMiddleTime = (beforeDate: Date | string | undefined, afterDate: Date | string | undefined): Date => {
+  const beforeTime = dayjs(beforeDate && new Date(beforeDate));
+  const aftertime = dayjs(afterDate && new Date(afterDate));
   const hourAfter = aftertime.get('hour');
   let hourBefore = beforeTime.get('hour');
   const minuteAfter = aftertime.get('minute');

@@ -1,3 +1,7 @@
 export interface CountType {
-    count: number;
+  count: number;
+}
+
+export interface IdType {
+  id: string;
 }

@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { NO_DATA } from '@/const/minyans.const';
 import { Grid, IconButton, Tooltip, Typography } from '@mui/material';
@@ -10,34 +8,17 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Trash } from '@phosphor-icons/react';
-import { PlusCircle } from '@phosphor-icons/react/dist/ssr';
+import { PlusCircle, Trash } from '@phosphor-icons/react';
 import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/WarningCircle';
 
-import { typeForEdit } from '@/types/minyans.type';
-import { ImportMinyans } from '@/pages/minyanim/components/ImportMinyans';
+import { eLocationClick, eRowEditMode } from '@/types/enums';
+import { ColumnDef, RowProps } from '@/types/table.type';
+import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
 
 import { EditTableCellInputs } from './edit-table-cell-inputs';
-import { eLocationClick } from '@/types/enums';
-import { SelectOption } from '@/types/metadata.type';
 
-export interface ColumnDef<TRowModel> {
-  align?: 'left' | 'right' | 'center';
-  field?: keyof TRowModel;
-  formatter?: (row: TRowModel, index: number) => React.ReactNode;
-  valueForEdit?: (row: TRowModel) => any;
-  valueOption?: any & { id: string }[];
-  editInputType?: string;
-  hideName?: boolean;
-  name: string;
-  width?: number | string;
-  padding?: Padding;
-  tooltip?: string;
-  selectOptions?: SelectOption<string>[];
-}
-type Padding = 'normal' | 'checkbox' | 'none';
 type RowId = number | string;
-export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
+interface DataTableProps<TRowModel, TEdit> extends Omit<TableProps, 'onClick'> {
   columns: ColumnDef<TRowModel>[];
   hideHead?: boolean;
   hover?: boolean;
@@ -52,13 +33,17 @@ export interface DataTableProps<TRowModel> extends Omit<TableProps, 'onClick'> {
   uniqueRowId?: (row: TRowModel) => RowId;
   onAddRowClick?: (index: number, location?: eLocationClick) => void;
   edited?: boolean;
-  onChangeInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
-  onBlurInput?: (value: typeForEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
+  onChangeInput?: (value: TEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
+  onBlurInput?: (value: TEdit, index: number, fieldName: keyof TRowModel, internalField?: string) => void;
   onDeleteClick?: (index: number) => void;
   scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
+  getRowProps?: (row: TRowModel) => RowProps;
 }
 
-export function DataTable<TRowModel extends object & { id?: RowId | null; isEdited?: boolean }>({
+export function DataTable<
+  TRowModel extends object & { id?: RowId | null; dateType?: string; isEdited?: boolean },
+  TEdit = any,
+>({
   columns,
   hideHead,
   hover,
@@ -77,13 +62,17 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   onBlurInput,
   onDeleteClick,
   scrollAction,
+  getRowProps,
   ...props
-}: DataTableProps<TRowModel>): React.JSX.Element {
+}: DataTableProps<TRowModel, TEdit>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
-
-  const [isCellClick, setIsCellClick] = React.useState<{ isclick: boolean; id: string; index?: number }>({
-    isclick: false,
+  const [cellClicked, setCellClicked] = React.useState<{
+    isClicked: boolean;
+    id: string;
+    index?: number;
+  }>({
+    isClicked: false,
     id: '',
   });
   const [plusMode, setPlusMode] = React.useState<{ mode: eLocationClick | null; index?: number; right?: number }>({
@@ -97,27 +86,25 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   const cellRef = React.useRef<HTMLDivElement>(null);
   const rowRef = React.useRef<HTMLTableRowElement>(null);
 
-  React.useEffect(() => {
-    cellRef.current?.focus();
-    rowRef?.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  });
-
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
-    const id = (event.currentTarget as HTMLTextAreaElement).id;
-    setIsCellClick({ isclick: true, id });
+    const { id } = event.currentTarget as HTMLTextAreaElement;
+    setCellClicked({ isClicked: true, id });
     setPlusMode({ mode: null });
   };
 
   const handleBlurInput = (
     event: React.FocusEvent | React.KeyboardEvent,
-    value?: typeForEdit,
+    value?: TEdit,
     index: number = 0,
     fieldName?: keyof TRowModel,
     internalField?: string
   ): void => {
-    onBlurInput && value && fieldName && onBlurInput(value as typeForEdit, index, fieldName, internalField);
+    if (onBlurInput && value != undefined && fieldName) {
+      const editValue: TEdit = value as TEdit;
+      onBlurInput(editValue, index, fieldName, internalField);
+    }
     const id = (event.target as HTMLInputElement).id;
-    setIsCellClick({ isclick: false, id, index });
+    setCellClicked({ isClicked: false, id, index });
     setPlusMode({ mode: null });
   };
 
@@ -149,6 +136,11 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
   React.useEffect(() => {
     scrollAction?.isScroll && onAddRowClick && setPlusMode({ mode: null });
   }, [scrollAction?.isScroll]);
+
+  React.useEffect(() => {
+    cellRef.current?.focus();
+    rowRef?.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
 
   return (
     <Table {...props}>
@@ -202,6 +194,8 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
         {rows.map((row, index): React.JSX.Element => {
           const rowId = row.id ? row.id : uniqueRowId?.(row);
           const rowSelected = rowId ? selected?.has(rowId) : false;
+          const rowProps = getRowProps && getRowProps(row);
+
           return (
             <TableRow
               ref={row.isEdited ? rowRef : null}
@@ -227,6 +221,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                 ...(edited && {
                   bgcolor: row.isEdited ? '#dcdfe4' : 'none',
                 }),
+                ...(rowProps?.sx ? rowProps?.sx : {}),
               }}
             >
               {selectable ? (
@@ -255,16 +250,19 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                     id={column.field && column.field?.toString() + index}
                     key={column.name}
                     onClick={(e) => {
-                      edited && handleClick(e);
+                      edited && rowProps?.editMode !== eRowEditMode.disabled && handleClick(e);
                     }}
                     padding={column?.padding}
                     sx={{ ...(column.align && { textAlign: column.align }) }}
                   >
                     {edited &&
                     column.field &&
-                    isCellClick.isclick &&
+                    cellClicked.isClicked &&
+                    (!rowProps?.editMode ||
+                      rowProps?.editMode === eRowEditMode.enabled ||
+                      (rowProps?.editMode === eRowEditMode.partiallyEnabled && column.editable == true)) &&
                     onChangeInput &&
-                    isCellClick.id === column.field.toString() + index ? (
+                    cellClicked.id === column.field.toString() + index ? (
                       <EditTableCellInputs
                         fieldName={column.field}
                         cellRef={cellRef}
@@ -278,15 +276,19 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                       />
                     ) : (
                       ((column.formatter
-                        ? column.formatter(row, index)
+                        ? column.formatter(
+                            row,
+                            index,
+                            !(rowProps?.editMode === eRowEditMode.enabled || !rowProps?.editMode)
+                          )
                         : column.field
-                          ? row[column.field]
+                          ? row[column.field as keyof TRowModel]
                           : null) as React.ReactNode)
                     )}
                   </TableCell>
                 )
               )}
-              {onAddRowClick && !isCellClick.isclick && plusMode.mode && plusMode.index === index ? (
+              {onAddRowClick && !cellClicked.isClicked && plusMode.mode && plusMode.index === index ? (
                 <TableCell sx={{ padding: '0px', width: '0px', position: 'relative' }}>
                   <Grid
                     onClick={() => onAddRowClick(index, plusMode.mode!)}
@@ -303,7 +305,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                   </Grid>
                 </TableCell>
               ) : null}
-              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index && !isCellClick.isclick ? (
+              {onDeleteClick && isShowDelete.hover && isShowDelete.index === index && !cellClicked.isClicked ? (
                 <TableCell
                   sx={{
                     padding: '0px',
@@ -316,7 +318,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                     onClick={() => onDeleteClick(index)}
                     sx={{ position: 'absolute', right: '20px', top: '9px' }}
                   >
-                    <Trash size={24} />
+                    {rowProps?.deleteIcon || <Trash size={24} />}
                   </IconButton>
                 </TableCell>
               ) : null}
@@ -344,6 +346,7 @@ export function DataTable<TRowModel extends object & { id?: RowId | null; isEdit
                   {plusMode.index === -1 && <PlusCircle size={32} />}
                 </Grid>
                 <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
+                {/* TODO: Move it out from the component */}
                 <ImportMinyans />
               </Grid>
             </TableCell>

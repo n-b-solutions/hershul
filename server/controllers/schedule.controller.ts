@@ -1,3 +1,5 @@
+import { Request, Response } from "express";
+
 import { eBulbStatus } from "../../lib/types/room.type";
 import MinyanModel from "../models/minyan.model";
 import RoomModel from "../models/room.model";
@@ -8,6 +10,7 @@ import {
   HDate,
   Location,
 } from "@hebcal/core";
+import { getQueryDateType } from "../helper/function-minyans";
 
 interface Room {
   name: string;
@@ -15,6 +18,75 @@ interface Room {
 }
 
 const ScheduleController = {
+  get: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const today = new Date();
+      const startOfDay = new Date(today);
+      startOfDay.setHours(0, 0, 0, 0); // start of day
+      const endOfDay = new Date(today);
+      endOfDay.setHours(23, 59, 59, 999); // end of day
+      const calendarCond = {
+        dateType: "calendar",
+        "specificDate.date": {
+          $gte: startOfDay.toISOString(),
+          $lt: endOfDay.toISOString(),
+        },
+      };
+      const dateType = await getQueryDateType(today);
+      const dateTypeCond = {
+        $and: [
+          { dateType },
+          {
+            "inactiveDates.date": {
+              $not: {
+                $gte: startOfDay,
+                $lt: endOfDay,
+              },
+            },
+          },
+        ],
+      };
+      const minyansForSchedule = await MinyanModel.find({
+        $or: [calendarCond, dateTypeCond],
+      })
+        .populate("roomId")
+        .populate("startDate.messageId")
+        .populate("endDate.messageId")
+        .populate("blink.messageId")
+        .lean(true);
+
+      const formattedList = minyansForSchedule.map((minyan) => ({
+        startDate: {
+          time: minyan.startDate.time,
+          message: minyan.startDate.messageId, // populated message details
+        },
+        endDate: {
+          time: minyan.endDate.time,
+          message: minyan.endDate.messageId, // populated message details
+        },
+        blink: minyan.blink
+          ? {
+              secondsNum: minyan.blink.secondsNum,
+              message: minyan.blink.messageId, // populated message details
+            }
+          : null,
+        dateType: minyan.dateType,
+        room: minyan.roomId,
+        id: minyan.id,
+        specificDate: minyan.specificDate
+          ? {
+              date: minyan.specificDate.date,
+              isRoutine: minyan.specificDate.isRoutine,
+            }
+          : null,
+        inactiveDates: minyan.inactiveDates, // Include inactiveDates here
+      }));
+
+      res.status(200).send(formattedList);
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  },
   updateRoomStatuses: async (): Promise<Room[]> => {
     const now = new Date();
     const updates: Room[] = [];

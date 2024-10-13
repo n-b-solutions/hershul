@@ -9,15 +9,21 @@ const MinyanController = {
     res.send(result);
   },
 
-  getById: async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    const result = await MinyanService.getById(id);
+  getCalendar: async (req: Request, res: Response): Promise<void> => {
+    const date = new Date(req.params.date || new Date());
+    const result = await MinyanService.getCalendar(date);
     res.send(result);
   },
 
   getByDateType: async (req: Request, res: Response): Promise<void> => {
     const { dateType } = req.query;
     const result = await MinyanService.getByDateType(dateType as eDateType);
+    res.send(result);
+  },
+
+  getById: async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const result = await MinyanService.getById(id);
     res.send(result);
   },
 
@@ -47,6 +53,27 @@ const MinyanController = {
       category as eDateType,
       currentDateType
     );
+    res.send(result);
+  },
+
+  addInactiveDates: async (req: Request, res: Response): Promise<void> => {
+    const inactiveDate = req.body;
+    const { id } = req.params;
+    const result = await MinyanService.addInactiveDates(inactiveDate, id);
+    res.send(result);
+  },
+
+  removeInactiveDates: async (req: Request, res: Response): Promise<void> => {
+    const { date } = req.body;
+    const { id } = req.params;
+    const result = await MinyanService.removeInactiveDates(date, id);
+    res.send(result);
+  },
+
+  updateInactiveDate: async (req: Request, res: Response): Promise<void> => {
+    const { date, isRoutine } = req.body;
+    const { id } = req.params;
+    const result = await MinyanService.updateInactiveDate(date, isRoutine, id);
     res.send(result);
   },
 
