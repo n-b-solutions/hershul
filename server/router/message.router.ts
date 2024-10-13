@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import MessageController from "../controllers/message.controller";
-import { upload } from "../config/upload.config";
+import { upload } from "../middlewares/upload-audio.middleware";
 
 const MessageRouter = Router();
 
