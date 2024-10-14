@@ -1,26 +1,12 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
 import MessageController from "../controllers/message.controller";
-import { upload } from "../middlewares/upload-audio.middleware";
 
-const MessageRouter = Router();
+const router = Router();
 
-MessageRouter.get("/", async (req: Request, res: Response) => {
-  MessageController.get(req, res);
-});
+router.get("/", MessageController.get);
+router.get("/:id", MessageController.getById);
+router.post("/", MessageController.create);
+router.put("/:id", MessageController.update);
+router.delete("/:id", MessageController.delete);
 
-MessageRouter.get("/:id", (req: Request, res: Response) => {
-  MessageController.getById(req, res);
-});
-
-MessageRouter.post(
-  "/",
-  upload.single("audioBlob"),
-  (req: Request, res: Response) => {
-    MessageController.post(req, res);
-  }
-);
-MessageRouter.delete("/:id", (req: Request, res: Response) => {
-  MessageController.delete(req, res);
-});
-
-export default MessageRouter;
+export default router;

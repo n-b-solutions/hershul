@@ -1,6 +1,5 @@
 import { Types } from "mongoose";
 import { ObjectId } from "mongodb";
-
 import MinyanModel from "../models/minyan.model";
 import { io } from "../socketio";
 import {
@@ -140,7 +139,10 @@ const MinyanService = {
       });
       return { count: countMinyans ?? 0 };
     } catch (error) {
-      console.error(`Error fetching minyan count for date type ${dateType}:`, error);
+      console.error(
+        `Error fetching minyan count for date type ${dateType}:`,
+        error
+      );
       throw new ApiError(500, (error as Error).message);
     }
   },
@@ -188,7 +190,7 @@ const MinyanService = {
       const minyansToDuplicateFrom = await MinyanModel.find({
         dateType: duplicateFromDateType,
       });
-  
+
       const duplicateMinyansToInsert = minyansToDuplicateFrom.map((minyan) => {
         return {
           roomId: minyan.roomId,
@@ -199,9 +201,9 @@ const MinyanService = {
           specificDate: minyan.specificDate,
         };
       });
-  
+
       await MinyanModel.insertMany(duplicateMinyansToInsert);
-  
+
       const duplicateMinyansDocuments = await MinyanModel.find({
         dateType: currentDateType,
       })
@@ -210,13 +212,14 @@ const MinyanService = {
         .populate("endDate.messageId")
         .populate("blink.messageId")
         .lean(true);
-  
-        return duplicateMinyansDocuments.map(convertMinyanDocument);
-      } catch (error) {
-        console.error("Error duplicating minyan:", error);
-        throw new ApiError(500, (error as Error).message);
+
+      return duplicateMinyansDocuments.map(convertMinyanDocument);
+    } catch (error) {
+      console.error("Error duplicating minyan:", error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
+
   addInactiveDates: async (
     inactiveDate: SpecificDateType,
     id?: string

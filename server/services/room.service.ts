@@ -1,86 +1,78 @@
+import { Types } from "mongoose";
 import RoomModel from "../models/room.model";
-import MinyanModel from "../models/minyan.model";
-import { eBulbStatus, RoomType } from "../../lib/types/room.type";
 import { ApiError } from "../../lib/utils/api-error.util";
-import { getActiveMinyans } from "../helpers/minyan.helper";
-import { convertRoomDocument } from "../utils/convert-document.util";
+import { RoomType } from "../../lib/types/room.type";
 
 const RoomService = {
-  get: async (): Promise<RoomType[] | ApiError> => {
+  get: async (): Promise<RoomType[]> => {
     try {
       const rooms = await RoomModel.find();
-      if (!rooms.length) {
-        return new ApiError(404, "Rooms not found");
-      }
       return rooms;
     } catch (error) {
-      return new ApiError(500, error);
+      console.error("Error fetching rooms:", error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
 
-  getById: async (id?: string): Promise<RoomType | ApiError> => {
+  getById: async (id?: string): Promise<RoomType> => {
     try {
+      if (!id || !Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID format");
+      }
       const room = await RoomModel.findById(id);
       if (!room) {
-        return new ApiError(404, "Room not found");
+        throw new ApiError(404, "Room not found");
       }
       return room;
     } catch (error) {
-      return new ApiError(500, error);
+      console.error(`Error fetching room with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
 
-  post: async (newRoom: RoomType): Promise<RoomType | ApiError> => {
+  create: async (roomData: RoomType): Promise<RoomType> => {
     try {
-      const newRoomRecord = await RoomModel.create(newRoom);
-      return { ...newRoom, id: newRoomRecord.id };
+      const newRoom = await RoomModel.create(roomData);
+      return newRoom;
     } catch (error) {
-      return new ApiError(500, error);
+      console.error("Error creating room:", error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
 
-  put: async (
-    bulbStatus: eBulbStatus,
+  update: async (
+    roomData: Partial<RoomType>,
     id?: string
-  ): Promise<RoomType | ApiError> => {
+  ): Promise<RoomType> => {
     try {
-      if (!id) {
-        return new ApiError(404, "Not Found");
+      if (!id || !Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID format");
       }
-      const minyansInRoom = await MinyanModel.find({ roomId: id });
-
-      const activeMinyansInRoomIds = getActiveMinyans(minyansInRoom).map(
-        (minyan) => minyan.id
-      );
-      await MinyanModel.updateMany(
-        { _id: { $in: activeMinyansInRoomIds } },
-        { $set: { steadyFlag: true } }
-      );
-      const updatedRoom = await RoomModel.findByIdAndUpdate(id, {
-        $set: { bulbStatus },
+      const updatedRoom = await RoomModel.findByIdAndUpdate(id, roomData, {
+        new: true,
       });
       if (!updatedRoom) {
-        return new ApiError(404, "Room not found");
+        throw new ApiError(404, "Room not found");
       }
-      return convertRoomDocument(updatedRoom);
+      return updatedRoom;
     } catch (error) {
-      console.error(error);
-      return new ApiError(500, error);
+      console.error(`Error updating room with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
 
-  delete: async (id?: string): Promise<void | ApiError> => {
+  delete: async (id?: string): Promise<void> => {
     try {
-      if (!id) {
-        return new ApiError(404, "Not Found");
+      if (!id || !Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID format");
       }
       const deletedRoom = await RoomModel.findByIdAndDelete(id);
-
       if (!deletedRoom) {
-        return new ApiError(404, "Room not found");
+        throw new ApiError(404, "Room not found");
       }
     } catch (error) {
-      return new ApiError(500, error);
+      console.error(`Error deleting room with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
 };

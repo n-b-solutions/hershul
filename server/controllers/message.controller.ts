@@ -1,33 +1,74 @@
-import { Request, Response } from "express";
-
+import { Request, Response, NextFunction } from "express";
 import MessageService from "../services/message.service";
 
-const MessageRoomController = {
-  // Get all messages
-  get: async (req: Request, res: Response): Promise<void> => {
-    const result = await MessageService.get();
-    res.send(result);
+const MessageController = {
+  get: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const result = await MessageService.get();
+      res.send(result);
+    } catch (error) {
+      next(error);
+    }
   },
-  // Get a specific message by its ID
-  getById: async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    const result = await MessageService.getById(id);
-    res.send(result);
+
+  getById: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const result = await MessageService.getById(id);
+      res.send(result);
+    } catch (error) {
+      next(error);
+    }
   },
-  // Upload an audio file and create a new message
-  post: async (req: Request, res: Response): Promise<void> => {
-    const {
-      file,
-      body: { name, selectedRoom },
-    } = req;
-    const result = await MessageService.post(selectedRoom, name, file);
-    res.send(result);
+
+  create: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const result = await MessageService.create(req.body);
+      res.send(result);
+    } catch (error) {
+      next(error);
+    }
   },
-  delete: async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
-    const result = await MessageService.delete(id);
-    res.send(result);
+
+  update: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const result = await MessageService.update(req.body, id);
+      res.send(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  delete: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+      await MessageService.delete(id);
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
   },
 };
 
-export default MessageRoomController;
+export default MessageController;

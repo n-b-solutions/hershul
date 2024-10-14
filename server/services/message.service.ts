@@ -1,63 +1,82 @@
+import { Types } from "mongoose";
+
+import { MessageType } from "../../lib/types/message.type";
 import MessageModel from "../models/messageModel";
-import { MessageDocument } from "../types/message.type";
 import { ApiError } from "../../lib/utils/api-error.util";
-import path from "path";
+import { convertMessageDocument } from "../utils/convert-document.util";
 
 const MessageService = {
-  // Get all messages
-  get: async (): Promise<MessageDocument[] | ApiError> => {
+  get: async (): Promise<MessageType[]> => {
     try {
       const messages = await MessageModel.find();
-      return messages;
+      return messages.map(convertMessageDocument);
     } catch (error) {
-      return new ApiError(500, error);
+      console.error("Error fetching messages:", error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
-  // Get a specific message by its ID
-  getById: async (id?: string): Promise<MessageDocument | ApiError> => {
+
+  getById: async (id?: string): Promise<MessageType> => {
     try {
-      if (!id) {
-        return new ApiError(404, "Not Found");
+      if (!id || !Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID format");
       }
       const message = await MessageModel.findById(id);
       if (!message) {
-        return new ApiError(404, "Not Found");
+        throw new ApiError(404, "Message not found");
       }
-      return message;
+      return convertMessageDocument(message);
     } catch (error) {
-      return new ApiError(500, error);
+      console.error(`Error fetching message with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
-  // Upload an audio file and create a new message
-  post: async (
-    selectedRoom: string,
-    name: string,
-    file?: Express.Multer.File
-  ): Promise<MessageDocument | ApiError> => {
-    if (!file) {
-      return new ApiError(400, "No file uploaded.");
-    }
-    const filePath = path.join("uploads", "audio", file.filename);
-    const newMessage = new MessageModel({
-      selectedRoom,
-      name,
-      audioUrl: filePath,
-    });
-    await newMessage.save();
-    return newMessage;
-  },
-  delete: async (id?: string): Promise<void | ApiError> => {
+
+  create: async (messageData: MessageType): Promise<MessageType> => {
     try {
-      if (!id) {
-        return new ApiError(404, "Not Found");
+      const newMessage = await MessageModel.create(messageData);
+      return convertMessageDocument(newMessage);
+    } catch (error) {
+      console.error("Error creating message:", error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
+  update: async (
+    messageData: Partial<MessageType>,
+    id?: string
+  ): Promise<MessageType> => {
+    try {
+      if (!id || !Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID format");
+      }
+      const updatedMessage = await MessageModel.findByIdAndUpdate(
+        id,
+        messageData,
+        { new: true }
+      );
+      if (!updatedMessage) {
+        throw new ApiError(404, "Message not found");
+      }
+      return convertMessageDocument(updatedMessage);
+    } catch (error) {
+      console.error(`Error updating message with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
+  delete: async (id?: string): Promise<void> => {
+    try {
+      if (!id || !Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID format");
       }
       const deleteMessage = await MessageModel.findByIdAndDelete(id);
       if (!deleteMessage) {
-        return new ApiError(404, "Message not found");
+        throw new ApiError(404, "Message not found");
       }
     } catch (error) {
-      console.log(error);
-      new ApiError(500, "Internal Server Error");
+      console.error(`Error deleting message with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
 };
