@@ -2,12 +2,12 @@ import { sortByTime } from '@/helpers/time.helper';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-import type {  MinyanDetails, typeForEdit } from '@/types/minyans.type';
+import { MinyanRowType } from '@/types/minyans.type';
 
-import { eDateType } from '../../../../lib/types/minyan.type';
+import { eDateType, EditMinyanValueType, MinyanType } from '../../../../lib/types/minyan.type';
 
 export interface Istate {
-  settingTimesItem: MinyanDetails[];
+  settingTimesItem: MinyanRowType[];
   dateType: eDateType;
 }
 const initialState: Istate = {
@@ -19,20 +19,20 @@ const settingTimesSlice = createSlice({
   name: 'settingTimes',
   initialState,
   reducers: {
-    addSettingTimes: (state: Istate, action: PayloadAction<{ newRow: MinyanDetails }>) => {
+    addSettingTimes: (state: Istate, action: PayloadAction<{ newRow: MinyanRowType }>) => {
       state.settingTimesItem.push(action.payload.newRow);
     },
     updateSettingTimesValue: (
       state,
       action: PayloadAction<{
         index: number;
-        value: typeForEdit;
-        field: keyof MinyanDetails;
+        value: EditMinyanValueType;
+        field: keyof MinyanRowType;
         internalField?: string;
       }>
     ) => {
-      const update = state.settingTimesItem[action.payload.index] as MinyanDetails;
-      const newUpdate: MinyanDetails = {
+      const update = state.settingTimesItem[action.payload.index];
+      const newUpdate = {
         ...update,
         [action.payload.field]: action.payload.internalField
           ? { ...(update[action.payload.field] as {}), [action.payload.internalField]: action.payload.value }
@@ -40,7 +40,7 @@ const settingTimesSlice = createSlice({
       };
       [...state.settingTimesItem, (state.settingTimesItem[action.payload.index] = newUpdate)];
     },
-    setSettingTimes: (state: Istate, action: PayloadAction<{ setting: MinyanDetails[] }>) => {
+    setSettingTimes: (state: Istate, action: PayloadAction<{ setting: MinyanRowType[] }>) => {
       state.settingTimesItem = action.payload.setting;
     },
     deleteMinyan: (state: Istate, action: PayloadAction<{ minyanId: string }>) => {

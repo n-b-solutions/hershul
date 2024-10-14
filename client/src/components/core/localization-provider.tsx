@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { AdapterHebDate } from '@/utils/AdapterHebDate';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider as Provider } from '@mui/x-date-pickers/LocalizationProvider';
 
@@ -9,5 +10,5 @@ export interface LocalizationProviderProps {
 }
 
 export function LocalizationProvider({ children }: LocalizationProviderProps): React.JSX.Element {
-  return <Provider dateAdapter={AdapterDayjs}>{children}</Provider>;
+  return <Provider dateAdapter={AdapterHebDate}>{children}</Provider>;
 }

@@ -93,8 +93,8 @@ export const CreateMessagePopup = ({
                     </MenuItem>
                   ) : (
                     rooms.map((room) => (
-                      <MenuItem key={room.id} value={room.nameRoom}>
-                        {room.nameRoom}
+                      <MenuItem key={room.id} value={room.name}>
+                        {room.name}
                       </MenuItem>
                     ))
                   )}

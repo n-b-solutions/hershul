@@ -9,8 +9,16 @@ export const enum eFieldName {
   startDate = 'startDate',
   blink = 'blink',
   roomId = 'roomId',
+  specificDate = 'isRoutine',
   endDateTime = 'endDate.time',
   startDateTime = 'startDate.time',
   blinkSecondsNum = 'blink.secondsNum',
+  isRoutine = 'specificDate.isRoutine',
   isEdited = 'isEdited',
+}
+
+export const enum eRowEditMode {
+  enabled = 'enabled',
+  disabled = 'disabled',
+  partiallyEnabled = 'partiallyEnabled',
 }

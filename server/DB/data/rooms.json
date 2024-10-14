@@ -1,0 +1,26 @@
+[
+  {
+    "name": "room1",
+    "bulbStatus": "off"
+  },
+  {
+    "name": "room2",
+    "bulbStatus": "off"
+  },
+  {
+    "name": "room3",
+    "bulbStatus": "off"
+  },
+  {
+    "name": "room4",
+    "bulbStatus": "on"
+  },
+  {
+    "name": "room5",
+    "bulbStatus": "on"
+  },
+  {
+    "name": "room6",
+    "bulbStatus": "on"
+  }
+]

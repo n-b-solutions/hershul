@@ -8,10 +8,11 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { socket } from '../../../socket';
+import { AddMessageButton } from '@/components/message/AddMessageButton';
+
 import { fetchRooms, setRoomStatusFromSocket, updateRoomStatus } from '../../../redux/room/room-slice'; // תעדכן את הנתיב
 import { AppDispatch, RootState } from '../../../redux/store';
-import { AddMessageButton } from '@/components/message/AddMessageButton';
+import { socket } from '../../../socket';
 
 export function Rooms(): React.JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,7 +35,7 @@ export function Rooms(): React.JSX.Element {
     };
   }, []);
 
-  const handleStatusChange = (nameRoom: string, newStatus: 'on' | 'off' | 'blink', id: string) => {
+  const handleStatusChange = (newStatus: 'on' | 'off' | 'blink', id: string) => {
     dispatch(updateRoomStatus({ id, newStatus }));
   };
 
@@ -54,34 +55,34 @@ export function Rooms(): React.JSX.Element {
                   }}
                 >
                   <Typography noWrap variant="subtitle2">
-                    {room.nameRoom}
+                    {room.name}
                   </Typography>
                 </Box>
                 <CardContent sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <Button
-                    variant={room.status === 'on' ? 'contained' : 'outlined'}
+                    variant={room.bulbStatus === 'on' ? 'contained' : 'outlined'}
                     sx={{ margin: '5px' }}
-                    onClick={() => handleStatusChange(room.nameRoom, 'on', room.id)}
+                    onClick={() => handleStatusChange('on', room.id)}
                   >
                     ON
                   </Button>
                   <Button
-                    variant={room.status === 'off' ? 'contained' : 'outlined'}
+                    variant={room.bulbStatus === 'off' ? 'contained' : 'outlined'}
                     sx={{ margin: '5px' }}
-                    onClick={() => handleStatusChange(room.nameRoom, 'off', room.id)}
+                    onClick={() => handleStatusChange('off', room.id)}
                   >
                     OFF
                   </Button>
                   <Button
-                    variant={room.status === 'blink' ? 'contained' : 'outlined'}
+                    variant={room.bulbStatus === 'blink' ? 'contained' : 'outlined'}
                     sx={{ margin: '5px' }}
-                    onClick={() => handleStatusChange(room.nameRoom, 'blink', room.id)}
+                    onClick={() => handleStatusChange('blink', room.id)}
                   >
                     BLINK
                   </Button>
                 </CardContent>
                 <Divider />
-                <AddMessageButton roomName={room.nameRoom} />
+                <AddMessageButton roomName={room.name} />
               </Card>
             </Grid>
           ))

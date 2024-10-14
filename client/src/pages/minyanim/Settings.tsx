@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { Metadata } from '@/types/metadata.type';
 
 import { eDateType } from '../../../../lib/types/minyan.type';
-import { MinyansSettings } from './components/MinyansSettings';
+import { MinyansSettings } from './components/minyans-settings/MinyansSettings';
 
 const metadata: Metadata = { title: 'Setting' };
 

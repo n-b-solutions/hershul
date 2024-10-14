@@ -7,6 +7,7 @@ import connectDB from './DB/mongoConnect';
 import { initSocketio } from './socketio';
 import { router } from './router';
 import { config } from 'dotenv';
+import errorHandler from './middlewares/error-handler.middleware';
 
 config();
 const app = express();
@@ -27,6 +28,9 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors());
 
 app.use('/', router);
+
+// Use the error handling middleware
+app.use(errorHandler);
 
 const port = process.env.VITE_PORT ? +process.env.VITE_PORT : 4000;
 server.listen(port, () => {
