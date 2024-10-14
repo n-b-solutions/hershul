@@ -1,5 +1,5 @@
 import React, { Ref, useState } from 'react';
-import { SECONDS_NUM, TIME } from '@/const/minyans.const';
+import { IS_ROUTINE, SECONDS_NUM, TIME } from '@/const/minyans.const';
 import { OutlinedInput, Select, SelectChangeEvent, Switch, TextField } from '@mui/material';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';
@@ -111,10 +111,10 @@ export function EditTableCellInputs<TRowModel extends object, TEdit = any>(props
             handle(e.target.checked as TRowModel[keyof TRowModel] as TEdit);
           }}
           onBlur={(e) => {
-            handleBlurInput(props.value as TRowModel[keyof TRowModel] as TEdit, e);
+            handleBlurInput(props.value as TRowModel[keyof TRowModel] as TEdit, e, IS_ROUTINE);
           }}
           onKeyDownCapture={(e) => {
-            e.key === 'Enter' && handleBlurInput(props.value as TEdit, e);
+            e.key === 'Enter' && handleBlurInput(props.value as TEdit, e, IS_ROUTINE);
           }}
         />
       );

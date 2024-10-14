@@ -36,16 +36,16 @@ import { getMinyansSettingsColumns } from '../../config/minyans-settings.config'
 
 const isRoutineColumn: ColumnDef<CalendarRowType> = {
   editInputType: 'switch',
-  valueForEdit: (row) => row.isRoutine,
+  valueForEdit: (row) => row.specificDate?.isRoutine,
   name: 'Is Routine',
   width: '8px',
   padding: 'normal',
   align: 'center',
-  field: 'isRoutine',
+  field: 'specificDate',
   editable: true,
   formatter: (row) => {
-    if (row.isRoutine === undefined) return <></>;
-    return row.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
+    if (row.specificDate?.isRoutine === undefined) return <></>;
+    return row.specificDate?.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
   },
 };
 
@@ -220,7 +220,7 @@ export function Calendar({
     field: keyof MinyanType,
     internalField?: string
   ): void => {
-    value && dispatch(updateSettingTimesValue({ index, field, value, internalField }));
+    value != null && dispatch(updateSettingTimesValue({ index, field, value, internalField }));
   };
   const handleDateChange = (newDate: Dayjs | null) => {
     if (newDate) {
