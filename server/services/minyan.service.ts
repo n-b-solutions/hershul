@@ -252,15 +252,14 @@ const MinyanService = {
     date: Date,
     id?: string
   ): Promise<SpecificDateType[]> => {
-    if (!id || !Types.ObjectId.isValid(id)) {
-      throw new ApiError(400, "Invalid ID format");
-    }
-
-    if (!date || !(date instanceof Date)) {
-      throw new ApiError(400, "Invalid date format");
-    }
-
     try {
+      if (!id || !Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID format");
+      }
+
+      if (!date || !(new Date(date) instanceof Date)) {
+        throw new ApiError(400, "Invalid date format");
+      }
       const minyan = await MinyanModel.findById(id);
       if (!minyan) {
         throw new ApiError(404, "Minyan not found");

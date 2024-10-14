@@ -119,10 +119,8 @@ export function Calendar({
         if (isDateInInactive) {
           // If the date exists, remove it
           await axios.put(`${API_BASE_URL}/minyan/removeInactiveDates/${minyanId}`, {
-            data: {
-              date: selectedDate.toISOString(), // Keep it as string
-              isRoutine: isRoutine,
-            },
+            date: selectedDate.toISOString(), // Keep it as string
+            isRoutine: isRoutine,
           });
 
           const updatedInactiveDates = currentInactiveDates.filter((inactiveDate) => {
