@@ -176,7 +176,7 @@ const MinyanService = {
         .populate("endDate.messageId")
         .populate("blink.messageId")
         .lean(true);
-        
+
       // TODO: fix to send the new minyan only
       io.emit("minyanUpdated", await MinyanModel.find());
 
@@ -201,7 +201,12 @@ const MinyanService = {
       await MinyanModel.insertMany(duplicateMinyansToInsert);
       const duplicateMinyansDocuments = await MinyanModel.find({
         dateType: currentDateType,
-      }).populate("roomId");
+      })
+        .populate("roomId")
+        .populate("startDate.messageId")
+        .populate("endDate.messageId")
+        .populate("blink.messageId")
+        .lean(true);
       return duplicateMinyansDocuments.map(convertMinyanDocument);
     } catch (error) {
       console.error("Error creating minyan:", error);
