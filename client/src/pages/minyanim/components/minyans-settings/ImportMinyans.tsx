@@ -17,6 +17,7 @@ import { Option } from '@/components/core/option';
 
 import { SelectOption } from '@/types/metadata.type';
 import { eDateType } from '../../../../../../lib/types/minyan.type';
+import { CountType } from '../../../../../../lib/types/metadata.type';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
@@ -35,9 +36,9 @@ export function ImportMinyans(): React.JSX.Element {
     Promise.all(
       typesOfDates.map(async (type: SelectOption<eDateType>) => {
         return await axios
-          .get(`${API_BASE_URL}/minyan/import/count/${type}`)
-          .then<CountMinyanOfDate>((res: { data: number }) => {
-            return { category: type, count: res.data };
+          .get<CountType>(`${API_BASE_URL}/minyan/import/count/${type.value}`)
+          .then((res) => {
+            return { category: type, count: res.data.count };
           })
           .catch((err: any) => console.log('Error fetching data: ', err));
       })
