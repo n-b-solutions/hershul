@@ -16,25 +16,29 @@ module.exports = {
         return messages[randomIndex]?._id || null;
       };
 
-      const minyans = rooms.map((room, index) => ({
-        roomId: room._id,
-        startDate: {
-          time: new Date(new Date().getTime() + index * 24 * 60 * 60 * 1000),
-          messageId: getRandomMessageId(),
-        },
-        endDate: {
-          time: new Date(
-            new Date().getTime() + (index + 1) * 24 * 60 * 60 * 1000
-          ),
-          messageId: getRandomMessageId(),
-        },
-        blink: {
-          secondsNum: 5,
-          messageId: getRandomMessageId(),
-        },
-        steadyFlag: false,
-        dateType: index % 2 === 0 ? "sunday" : "monday",
-      }));
+      const minyans = rooms.map((room) => {
+        const currentDate = new Date();
+        const startDate = new Date(currentDate.getTime() + 60 * 60 * 1000); // 1 hour after the current time
+        const endDate = new Date(startDate.getTime() + 20 * 60 * 1000); // 20 minutes after the start date
+
+        return {
+          roomId: room._id,
+          startDate: {
+            time: startDate,
+            messageId: getRandomMessageId(),
+          },
+          endDate: {
+            time: endDate,
+            messageId: getRandomMessageId(),
+          },
+          blink: {
+            secondsNum: 5,
+            messageId: getRandomMessageId(),
+          },
+          steadyFlag: false,
+          dateType: Math.random() < 0.5 ? "sunday" : "monday", // Randomly assign "sunday" or "monday"
+        };
+      });
 
       await db.collection("minyans").insertMany(minyans);
       console.log("Dummy minyans inserted successfully!");
