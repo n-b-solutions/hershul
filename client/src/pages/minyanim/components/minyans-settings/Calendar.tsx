@@ -52,7 +52,6 @@ export function Calendar({
   const settingTimesItem = useSelector((state: RootState) => state.minyans.settingTimesItem);
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const dispatch = useDispatch();
-  const tableRef = React.useRef<HTMLDivElement>(null); // Ref for the scrollable container
   const [loading, setLoading] = React.useState<boolean>(true);
   const hebrewDate = new HDate(selectedDate.toDate()).renderGematriya(); // Get date as string in Hebrew
 
@@ -321,7 +320,7 @@ export function Calendar({
           Loading...
         </Typography>
       ) : (
-        <Box ref={tableRef} style={{ height: 'calc(100% - 80px)', overflowY: 'auto' }}>
+        <Box style={{ height: 'calc(100% - 80px)', overflowY: 'auto' }}>
           <DataTable<MinyanDetails>
             columns={[
               ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
