@@ -105,6 +105,7 @@ export function EditTableCellInputs<TRowModel extends object, TEdit = any>(props
       return (
         <Switch
           checked={isChecked}
+          inputRef={props.cellRef}
           onChange={(e) => {
             setIsChecked(e.target.checked);
             handle(e.target.checked as TRowModel[keyof TRowModel] as TEdit);
