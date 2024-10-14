@@ -13,6 +13,7 @@ import { AddMessageButton } from '@/components/message/AddMessageButton';
 import { fetchRooms, setRoomStatusFromSocket, updateRoomStatus } from '../../../redux/room/room-slice'; // תעדכן את הנתיב
 import { AppDispatch, RootState } from '../../../redux/store';
 import { socket } from '../../../socket';
+import { eBulbStatus } from '../../../../../lib/types/room.type';
 
 export function Rooms(): React.JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
@@ -35,7 +36,7 @@ export function Rooms(): React.JSX.Element {
     };
   }, []);
 
-  const handleStatusChange = (newStatus: 'on' | 'off' | 'blink', id: string) => {
+  const handleStatusChange = (newStatus: eBulbStatus, id: string) => {
     dispatch(updateRoomStatus({ id, newStatus }));
   };
 
@@ -62,21 +63,21 @@ export function Rooms(): React.JSX.Element {
                   <Button
                     variant={room.bulbStatus === 'on' ? 'contained' : 'outlined'}
                     sx={{ margin: '5px' }}
-                    onClick={() => handleStatusChange('on', room.id)}
+                    onClick={() => handleStatusChange(eBulbStatus.on, room.id)}
                   >
                     ON
                   </Button>
                   <Button
                     variant={room.bulbStatus === 'off' ? 'contained' : 'outlined'}
                     sx={{ margin: '5px' }}
-                    onClick={() => handleStatusChange('off', room.id)}
+                    onClick={() => handleStatusChange(eBulbStatus.off, room.id)}
                   >
                     OFF
                   </Button>
                   <Button
                     variant={room.bulbStatus === 'blink' ? 'contained' : 'outlined'}
                     sx={{ margin: '5px' }}
-                    onClick={() => handleStatusChange('blink', room.id)}
+                    onClick={() => handleStatusChange(eBulbStatus.blink, room.id)}
                   >
                     BLINK
                   </Button>
