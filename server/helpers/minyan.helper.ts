@@ -1,33 +1,12 @@
-import axios from "axios";
-
 import { eDateType, MinyanType } from "../../lib/types/minyan.type";
 import { MinyanDocument } from "../types/minyan.type";
+import { isRoshHodesh } from "./time.helper";
 
 export const getActiveMinyans = (minyans: MinyanType[] | MinyanDocument[]) => {
   const now = new Date();
   return minyans.filter(
     (minyan) => now >= minyan.startDate.time && now <= minyan.endDate.time
   );
-};
-
-// Function to determine if today is Rosh Chodesh
-export const isRoshChodesh = async (): Promise<boolean> => {
-  const now = new Date();
-  const hebcalRes = await axios.get(
-    `https://www.hebcal.com/converter?cfg=json&gy=${now.getFullYear()}&gm=${
-      now.getMonth() + 1
-    }&gd=${now.getDate()}&g2h=1`
-  );
-  const data = hebcalRes.data;
-
-  if (
-    data.events &&
-    data.events.some((event: string | string[]) =>
-      event.includes("Rosh Chodesh")
-    )
-  )
-    return true;
-  return false;
 };
 
 export async function getQueryDateType(date?: Date): Promise<string> {
@@ -39,7 +18,7 @@ export async function getQueryDateType(date?: Date): Promise<string> {
     const today = new Date();
     dayOfWeek = today.getDay();
   }
-  const roshChodesh = await isRoshChodesh();
+  const roshChodesh = await isRoshHodesh();
 
   if (roshChodesh) {
     queryDateType = eDateType.roshHodesh;
