@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { AddMessageButton } from '@/components/message/AddMessageButton';
 
+import { eBulbStatus } from '../../../../../lib/types/room.type';
 import { fetchRooms, setRoomStatusFromSocket, updateRoomStatus } from '../../../redux/room/room-slice'; // תעדכן את הנתיב
 import { AppDispatch, RootState } from '../../../redux/store';
 import { socket } from '../../../socket';
@@ -35,7 +36,7 @@ export function Rooms(): React.JSX.Element {
     };
   }, []);
 
-  const handleStatusChange = (newStatus: 'on' | 'off' | 'blink', id: string) => {
+  const handleStatusChange = (newStatus: eBulbStatus, id: string) => {
     dispatch(updateRoomStatus({ id, newStatus }));
   };
 
@@ -60,23 +61,29 @@ export function Rooms(): React.JSX.Element {
                 </Box>
                 <CardContent sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <Button
-                    variant={room.bulbStatus === 'on' ? 'contained' : 'outlined'}
+                    {...(room.bulbStatus === eBulbStatus.on
+                      ? { variant: 'contained', color: 'success' }
+                      : { variant: 'outlined', color: 'secondary' })}
                     sx={{ margin: '5px' }}
-                    onClick={() => handleStatusChange('on', room.id)}
+                    onClick={() => handleStatusChange(eBulbStatus.on, room.id)}
                   >
                     ON
                   </Button>
                   <Button
-                    variant={room.bulbStatus === 'off' ? 'contained' : 'outlined'}
+                    {...(room.bulbStatus === eBulbStatus.off
+                      ? { variant: 'contained', color: 'error' }
+                      : { variant: 'outlined', color: 'secondary' })}
                     sx={{ margin: '5px' }}
-                    onClick={() => handleStatusChange('off', room.id)}
+                    onClick={() => handleStatusChange(eBulbStatus.off, room.id)}
                   >
                     OFF
                   </Button>
                   <Button
-                    variant={room.bulbStatus === 'blink' ? 'contained' : 'outlined'}
+                    {...(room.bulbStatus === eBulbStatus.blink
+                      ? { variant: 'contained', color: 'warning' }
+                      : { variant: 'outlined', color: 'secondary' })}
                     sx={{ margin: '5px' }}
-                    onClick={() => handleStatusChange('blink', room.id)}
+                    onClick={() => handleStatusChange(eBulbStatus.blink, room.id)}
                   >
                     BLINK
                   </Button>

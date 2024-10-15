@@ -5,7 +5,7 @@ export interface RoomType {
 }
 
 export const enum eBulbStatus {
-  on = "on",
-  off = "off",
-  blink = "blink",
+  on = 'on',
+  off = 'off',
+  blink = 'blink',
 }
