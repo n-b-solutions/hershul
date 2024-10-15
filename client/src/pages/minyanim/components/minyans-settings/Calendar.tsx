@@ -59,7 +59,6 @@ export function Calendar({
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const dispatch = useDispatch();
   const [loading, setLoading] = React.useState<boolean>(true);
-  const hebrewDate = new HDate(selectedDate.toDate()).renderGematriya(); // Get date as string in Hebrew
 
   React.useEffect(() => {
     setLoading(true);
