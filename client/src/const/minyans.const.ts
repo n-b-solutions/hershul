@@ -8,6 +8,7 @@ export const GENERATE_TIME = 10;
 export const SECONDS_NUM = 'secondsNum';
 export const TIME = 'time';
 export const MESSAGE_ID = 'messageId';
+export const IS_ROUTINE = 'isRoutine';
 //#endregion TODO: As to be removed, use keyof instead
 
 export const NO_DATA = 'No minyans have been determined for this category';
