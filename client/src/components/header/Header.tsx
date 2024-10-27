@@ -12,7 +12,7 @@ import { config } from '@/config';
 function Header() {
   const metadata = { title: config.site.name, description: config.site.description } satisfies Metadata;
 
-  const [time, setTime] = useState<string>(format(new Date(), 'HH:mm:ss'));
+  const [time, setTime] = useState<string>(format(new Date(), 'hh:mm:ss a'));
   const [hebrewDate, setHebrewDate] = useState<string>(new HDate(new Date()).toString());
   const [specialDay, setSpecialDay] = useState<string>('');
 
@@ -22,7 +22,7 @@ function Header() {
   useEffect(() => {
     const updateDate = () => {
       const now = new Date();
-      setTime(format(now, 'HH:mm:ss'));
+      setTime(format(now, 'hh:mm:ss a'));
       const newHebrewDate = new HDate(now).toString();
       setHebrewDate(newHebrewDate);
 
