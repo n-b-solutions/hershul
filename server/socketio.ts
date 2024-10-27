@@ -1,7 +1,7 @@
 import { Server as SocketioServer } from 'socket.io';
 import { CronJob } from 'cron';
 
-import ScheduleController from './controllers/schedule.controller';
+import ScheduleService from './services/schedule.service';
 
 let io: SocketioServer;
 
@@ -20,11 +20,12 @@ export const initSocketio = (server) => {
     });
   });
 
+  // TODO: Remove this cron job form here and move it to a separate file
   const job = new CronJob('* * * * *', async () => {
     console.log('Running cron job to update rooms...');
-    const updatedStatuses = await ScheduleController.updateRoomStatuses();
+    const updatedStatuses = await ScheduleService.updateRoomStatuses();
 
-    await ScheduleController.logBeforeShkiah();
+    await ScheduleService.logBeforeShkiah();
     io.emit('roomStatusUpdated', updatedStatuses);
   });
 
