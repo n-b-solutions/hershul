@@ -36,16 +36,16 @@ import { getMinyansSettingsColumns } from '../../config/minyans-settings.config'
 
 const isRoutineColumn: ColumnDef<CalendarRowType> = {
   editInputType: 'switch',
-  valueForEdit: (row) => row.specificDate?.isRoutine,
+  valueForEdit: (row) => row?.isRoutine,
   name: 'Is Routine',
   width: '8px',
   padding: 'normal',
   align: 'center',
-  field: 'specificDate',
+  field: 'isRoutine',
   editable: true,
   formatter: (row) => {
-    if (row.specificDate?.isRoutine === undefined) return <></>;
-    return row.specificDate?.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
+    if (row.isRoutine === undefined) return <></>;
+    return row?.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
   },
 };
 
@@ -180,7 +180,7 @@ export function Calendar({
     internalField?: string
   ): void => {
     const updateId = settingTimesItem[index].id;
-    const fieldForEditDB = field === eFieldName.room ? eFieldName.roomId : field; // Synchronous dispatch update
+    let fieldForEditDB = field === eFieldName.room ? eFieldName.roomId : field; // Synchronous dispatch update
     dispatch(updateSettingTimesValue({ index, field, value, internalField }));
     // Async API call can be handled here, but avoid returning Promise<void>
     const isInactiveDate = isMinyanInactiveForSelectedDate(
@@ -193,11 +193,18 @@ export function Calendar({
         isRoutine: value,
       });
     } else {
+      let internalFieldForEditDB = internalField;
+      if (field === (eFieldName.isRoutine as keyof MinyanRowType)) {
+        //TODO: fix! might cause errors
+        fieldForEditDB = eFieldName.specificDate;
+        internalFieldForEditDB = eFieldName.isRoutine;
+      } // Synchronous dispatch update
+
       axios
         .put<EditedType>(`${API_BASE_URL}/minyan/${updateId}`, {
           value,
           field: fieldForEditDB,
-          internalField,
+          internalField: internalFieldForEditDB,
         })
         .then((res) => {
           const editValue = rooms?.find((room) => room.id === res.data.editedValue) || value;

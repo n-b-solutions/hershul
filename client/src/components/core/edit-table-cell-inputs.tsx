@@ -111,10 +111,10 @@ export function EditTableCellInputs<TRowModel extends object, TEdit = any>(props
             handle(e.target.checked as TRowModel[keyof TRowModel] as TEdit);
           }}
           onBlur={(e) => {
-            handleBlurInput(props.value as TRowModel[keyof TRowModel] as TEdit, e, IS_ROUTINE);
+            handleBlurInput(isChecked as TEdit, e);
           }}
           onKeyDownCapture={(e) => {
-            e.key === 'Enter' && handleBlurInput(props.value as TEdit, e, IS_ROUTINE);
+            e.key === 'Enter' && handleBlurInput(isChecked as TEdit, e);
           }}
         />
       );
