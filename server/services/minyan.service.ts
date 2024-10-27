@@ -14,7 +14,10 @@ import { ApiError } from "../../lib/utils/api-error.util";
 import { convertMinyanDocument } from "../utils/convert-document.util";
 import { MinyanDocument } from "../types/minyan.type";
 import { CountType, IdType } from "../../lib/types/metadata.type";
-import { getQueryDateType } from "../helpers/minyan.helper";
+import {
+  getMongoConditionForActiveMinyansByDate,
+  getQueryDateType,
+} from "../helpers/minyan.helper";
 
 const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
@@ -134,15 +137,10 @@ const MinyanService = {
 
   getCountMinyanByCalendar: async (selectedDate: Date): Promise<CountType> => {
     try {
-      const startOfDay = new Date(selectedDate).setHours(0, 0, 0, 0); // start of day;
-      const endOfDay = new Date(selectedDate).setHours(23, 59, 59, 999); // end of day
-      const countMinyans = await MinyanModel.countDocuments({
-        dateType: eDateType.calendar,
-        "specificDate.date": {
-          $gte: startOfDay,
-          $lt: endOfDay,
-        },
-      });
+      const conditions = await getMongoConditionForActiveMinyansByDate(
+        selectedDate
+      );
+      const countMinyans = await MinyanModel.countDocuments(conditions);
       return { count: countMinyans ?? 0 };
     } catch (error) {
       console.error(

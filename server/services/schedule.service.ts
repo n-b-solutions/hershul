@@ -8,43 +8,17 @@ import {
   HDate,
   Location,
 } from "@hebcal/core";
-import { getQueryDateType } from "../helpers/minyan.helper";
 import { MinyanType } from "../../lib/types/minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { convertMinyanDocument } from "../utils/convert-document.util";
+import { getMongoConditionForActiveMinyansByDate } from "../helpers/minyan.helper";
 
 const ScheduleService = {
   get: async (): Promise<MinyanType[]> => {
     try {
       const today = new Date();
-      const startOfDay = new Date(today);
-      startOfDay.setHours(0, 0, 0, 0); // start of day
-      const endOfDay = new Date(today);
-      endOfDay.setHours(23, 59, 59, 999); // end of day
-      const calendarCond = {
-        dateType: "calendar",
-        "specificDate.date": {
-          $gte: startOfDay.toISOString(),
-          $lt: endOfDay.toISOString(),
-        },
-      };
-      const dateType = await getQueryDateType(today);
-      const dateTypeCond = {
-        $and: [
-          { dateType },
-          {
-            "inactiveDates.date": {
-              $not: {
-                $gte: startOfDay,
-                $lt: endOfDay,
-              },
-            },
-          },
-        ],
-      };
-      const minyansForSchedule = await MinyanModel.find({
-        $or: [calendarCond, dateTypeCond],
-      })
+      const conditions = await getMongoConditionForActiveMinyansByDate(today);
+      const minyansForSchedule = await MinyanModel.find(conditions)
         .populate("roomId")
         .populate("startDate.messageId")
         .populate("endDate.messageId")

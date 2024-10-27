@@ -46,3 +46,38 @@ export async function getQueryDateType(date?: Date): Promise<string> {
 
   return queryDateType;
 }
+
+export const getMongoConditionForActiveMinyansByDate = async (date: Date) => {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0); // start of day
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999); // end of day
+
+  const calendarCond = {
+    dateType: "calendar",
+    "specificDate.date": {
+      $gte: startOfDay.toISOString(),
+      $lt: endOfDay.toISOString(),
+    },
+  };
+
+  const dateType = await getQueryDateType(date);
+  const dateTypeCond = {
+    $and: [
+      { dateType },
+      {
+        "inactiveDates.date": {
+          $not: {
+            $gte: startOfDay,
+            $lt: endOfDay,
+          },
+        },
+      },
+    ],
+  };
+
+  return {
+    $or: [calendarCond, dateTypeCond],
+  };
+};
+
