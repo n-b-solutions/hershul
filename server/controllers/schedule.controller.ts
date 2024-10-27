@@ -10,7 +10,7 @@ import {
   HDate,
   Location,
 } from "@hebcal/core";
-import { getQueryDateType } from "../helper/function-minyans";
+import { getQueryDateType } from "../helpers/minyan.helper";
 
 interface Room {
   name: string;

@@ -14,7 +14,7 @@ import { ApiError } from "../../lib/utils/api-error.util";
 import { convertMinyanDocument } from "../utils/convert-document.util";
 import { MinyanDocument } from "../types/minyan.type";
 import { CountType, IdType } from "../../lib/types/metadata.type";
-import { getQueryDateType } from "../helper/function-minyans";
+import { getQueryDateType } from "../helpers/minyan.helper";
 
 const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
