@@ -11,6 +11,7 @@ interface JewishDatePickerProps {
   label?: string;
   sx?: any;
   format?: string;
+  disabled?: boolean;
 }
 
 const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
@@ -19,6 +20,7 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
   label,
   sx,
   format = 'MMM D, YYYY',
+  disabled = false,
 }) => {
   const hebrewDate = new HDate(selectedDate.toDate()).renderGematriya();
 
@@ -44,6 +46,7 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
 
   return (
     <DatePicker
+      disabled={disabled}
       format={format}
       label={label}
       value={selectedDate}

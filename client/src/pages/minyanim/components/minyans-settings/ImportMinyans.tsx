@@ -11,13 +11,15 @@ import { setSettingTimes } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typography } from '@mui/material';
 import axios from 'axios';
+import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { SelectOption } from '@/types/metadata.type';
+import JewishDatePicker from '@/components/core/jewish-datepicker';
 import { Option } from '@/components/core/option';
 
-import { SelectOption } from '@/types/metadata.type';
-import { eDateType } from '../../../../../../lib/types/minyan.type';
 import { CountType } from '../../../../../../lib/types/metadata.type';
+import { eDateType } from '../../../../../../lib/types/minyan.type';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
@@ -28,6 +30,7 @@ export function ImportMinyans(): React.JSX.Element {
   const [dateType, setDateType] = useState<eDateType | string>(EMPTY_STRING);
   const [dateTypeArray, setDateTypeArray] = useState<CountMinyanOfDate[]>([]);
   const [countMinyan, setCountMinyan] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const [open, setOpen] = useState<boolean>(false);
   const currentDateType = useSelector((state: RootState) => state.minyans.dateType);
   const dispatch = useDispatch();
@@ -44,10 +47,27 @@ export function ImportMinyans(): React.JSX.Element {
       })
     ).then((res: any) => {
       setDateTypeArray(
-        res?.filter((dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.calendar)
+        res?.filter(
+          (dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.calendar
+        )
       );
     });
   }, []);
+
+  useEffect(() => {
+    axios
+      .get<CountType>(`${API_BASE_URL}/minyan/import/count/calendar/${selectedDate}`)
+      .then((res) => {
+        setDateTypeArray((currentDateTypeArray) => {
+          const calendarIndex = currentDateTypeArray.findIndex(
+            (f: CountMinyanOfDate) => f.category.value === eDateType.calendar
+          );
+          currentDateTypeArray[calendarIndex].count = res.data.count;
+          return currentDateTypeArray;
+        });
+      })
+      .catch((err: any) => console.log('Error fetching data: ', err));
+  }, [selectedDate]);
 
   const handleChange = (e: SelectChangeEvent<any>) => {
     setDateType(e.target.value);
@@ -67,7 +87,7 @@ export function ImportMinyans(): React.JSX.Element {
           })
         );
       })
-      .catch((err) => console.log('Error fatching data: ', err));
+      .catch((err) => console.log('Error fetching data: ', err));
   };
 
   const handleClose = () => {
@@ -96,6 +116,7 @@ export function ImportMinyans(): React.JSX.Element {
         open={open}
         onClose={handleClose}
         onClick={(event) => event.stopPropagation()}
+        onMouseOver={(event) => event.stopPropagation()}
       >
         <Box sx={{ bgcolor: 'transparent', p: 3 }}>
           <Paper
@@ -127,12 +148,13 @@ export function ImportMinyans(): React.JSX.Element {
                     </Option>
                   ))}
                 </Select>
-                <Select fullWidth disabled={dateType !== eDateType.calendar} value={EMPTY_STRING}>
-                  <Option value={EMPTY_STRING} disabled>
-                    Select Date
-                  </Option>
-                </Select>
-
+                <JewishDatePicker
+                  disabled={dateType !== eDateType.calendar}
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  label="Select Date"
+                  sx={{ width: '318px', height: '40px' }}
+                />
                 {countMinyan ? (
                   <Typography variant="h6" sx={{ color: 'red', textAlign: 'center' }}>
                     {WARNING_IMPORT_MINYAN(countMinyan)}
@@ -144,7 +166,7 @@ export function ImportMinyans(): React.JSX.Element {
                   <Button onClick={handleClose}>Cancel</Button>
                 </div>
                 <div>
-                  <Button disabled={!countMinyan} onClick={handleImport}>
+                  <Button disabled={!countMinyan || !selectedDate} onClick={handleImport}>
                     Import
                   </Button>
                 </div>

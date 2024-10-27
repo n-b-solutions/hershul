@@ -132,6 +132,27 @@ const MinyanService = {
     }
   },
 
+  getCountMinyanByCalendar: async (selectedDate: Date): Promise<CountType> => {
+    try {
+      const startOfDay = new Date(selectedDate).setHours(0, 0, 0, 0); // start of day;
+      const endOfDay = new Date(selectedDate).setHours(23, 59, 59, 999); // end of day
+      const countMinyans = await MinyanModel.countDocuments({
+        dateType: eDateType.calendar,
+        "specificDate.date": {
+          $gte: startOfDay,
+          $lt: endOfDay,
+        },
+      });
+      return { count: countMinyans ?? 0 };
+    } catch (error) {
+      console.error(
+        `Error fetching minyan count for date type ${selectedDate}:`,
+        error
+      );
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
   getCountMinyanByCategory: async (dateType: eDateType): Promise<CountType> => {
     try {
       const countMinyans = await MinyanModel.countDocuments({

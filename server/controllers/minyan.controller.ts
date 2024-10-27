@@ -51,6 +51,15 @@ const MinyanController = {
       next(error);
     }
   },
+  getCountMinyanByCalendar: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { selectedDate } = req.params;
+    const result = await MinyanService.getCountMinyanByCalendar(new Date(selectedDate || Date.now()));
+    res.send(result);
+  } catch (error) {
+    next(error);
+  }
+},
 
   post: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
