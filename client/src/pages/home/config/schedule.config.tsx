@@ -21,17 +21,15 @@ export const columns: ColumnDef<ScheduleActionType>[] = [
     formatter: (row): React.JSX.Element => (
       <Chip
         label={row.action}
-        sx={{
-          backgroundColor:
-            row.action === 'on'
-              ? 'green'
-              : row.action === 'off'
-                ? 'red'
-                : row.action === 'blink'
-                  ? 'yellow'
-                  : 'default',
-          color: 'white',
-        }}
+        color={
+          row.action === 'on'
+            ? 'success'
+            : row.action === 'off'
+              ? 'error'
+              : row.action === 'blink'
+                ? 'warning'
+                : 'default'
+        }
       />
     ),
     name: 'Action',
