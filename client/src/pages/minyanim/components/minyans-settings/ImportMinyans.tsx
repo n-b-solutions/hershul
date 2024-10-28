@@ -7,7 +7,6 @@ import {
   typesOfDates,
   WARNING_IMPORT_MINYAN,
 } from '@/const/minyans.const';
-import  { Dayjs } from 'dayjs';
 import { setSettingTimes } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typography } from '@mui/material';
@@ -19,8 +18,6 @@ import { Option } from '@/components/core/option';
 import { SelectOption } from '@/types/metadata.type';
 import { eDateType } from '../../../../../../lib/types/minyan.type';
 import { CountType } from '../../../../../../lib/types/metadata.type';
-import JewishDatePicker from '@/components/core/jewish-datepicker';
-import dayjs from 'dayjs';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
@@ -28,7 +25,7 @@ export interface CountMinyanOfDate {
 }
 
 export function ImportMinyans(): React.JSX.Element {
-  const [dateType, setDateType] = useState<eDateType | string|Dayjs>(EMPTY_STRING);
+  const [dateType, setDateType] = useState<eDateType | string>(EMPTY_STRING);
   const [dateTypeArray, setDateTypeArray] = useState<CountMinyanOfDate[]>([]);
   const [countMinyan, setCountMinyan] = useState<number | null>(null);
   const [open, setOpen] = useState<boolean>(false);
@@ -37,7 +34,6 @@ export function ImportMinyans(): React.JSX.Element {
 
   useEffect(() => {
     Promise.all(
-      //מביא את כמות המיינים לפי היום
       typesOfDates.map(async (type: SelectOption<eDateType>) => {
         return await axios
           .get<CountType>(`${API_BASE_URL}/minyan/import/count/${type.value}`)
@@ -125,16 +121,11 @@ export function ImportMinyans(): React.JSX.Element {
                   <Option value={EMPTY_STRING} disabled>
                     Choose Category
                   </Option>
-
-                    {dateTypeArray?.map((option: CountMinyanOfDate) => (
-                    option.category?.value === eDateType.calendar ? (
-                      <JewishDatePicker key={option.category?.value} />
-                    ) : (
-                      <Option value={option.category?.value} key={option.category?.value}>
+                  {dateTypeArray?.map((option: CountMinyanOfDate) => (
+                    <Option value={option.category?.value} key={option.category?.value}>
                       {option.category?.label}
-                      </Option>
-                    )
-                    ))}
+                    </Option>
+                  ))}
                 </Select>
                 <Select fullWidth disabled={dateType !== eDateType.calendar} value={EMPTY_STRING}>
                   <Option value={EMPTY_STRING} disabled>
