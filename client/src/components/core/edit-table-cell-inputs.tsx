@@ -1,5 +1,5 @@
 import React, { Ref, useState } from 'react';
-import { IS_ROUTINE, SECONDS_NUM, TIME } from '@/const/minyans.const';
+import { SECONDS_NUM, TIME } from '@/const/minyans.const';
 import { OutlinedInput, Select, SelectChangeEvent, Switch, TextField } from '@mui/material';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';

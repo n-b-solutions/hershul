@@ -198,8 +198,7 @@ export function Calendar({
         //TODO: fix! might cause errors
         fieldForEditDB = eFieldName.specificDate;
         internalFieldForEditDB = eFieldName.isRoutine;
-      } // Synchronous dispatch update
-
+      }
       axios
         .put<EditedType>(`${API_BASE_URL}/minyan/${updateId}`, {
           value,
