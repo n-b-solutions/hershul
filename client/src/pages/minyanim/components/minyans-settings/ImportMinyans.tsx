@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { API_BASE_URL } from '@/const/api.const';
 import {
@@ -20,7 +21,6 @@ import { Option } from '@/components/core/option';
 
 import { CountType } from '../../../../../../lib/types/metadata.type';
 import { eDateType } from '../../../../../../lib/types/minyan.type';
-import { log } from 'console';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
@@ -65,12 +65,11 @@ export function ImportMinyans(): React.JSX.Element {
             (f: CountMinyanOfDate) => f.category.value === eDateType.calendar
           );
           currentDateTypeArray[calendarIndex].count = res.data.count;
-          setCountMinyan(res.data.count)
+          setCountMinyan(res.data.count);
           return currentDateTypeArray;
         });
       })
       .catch((err: any) => console.log('Error fetching data: ', err));
-      
   }, [selectedDate]);
 
   const handleChange = (e: SelectChangeEvent<any>) => {
@@ -152,13 +151,16 @@ export function ImportMinyans(): React.JSX.Element {
                     </Option>
                   ))}
                 </Select>
-                <JewishDatePicker
-                  disabled={dateType !== eDateType.calendar}
-                  selectedDate={selectedDate}
-                  setSelectedDate={setSelectedDate}
-                  label="Select Date"
-                  sx={{ width: '318px', height: '40px' }}
-                />
+
+                {dateType === eDateType.calendar && (
+                  <JewishDatePicker
+                    selectedDate={selectedDate}
+                    setSelectedDate={setSelectedDate}
+                    label="Select Date"
+                    sx={{ width: '318px', height: '40px' }}
+                  />
+                )}
+                {dateType !== eDateType.calendar && <Box sx={{ width: '318px', height: '40px' }} />}
                 {countMinyan ? (
                   <Typography variant="h6" sx={{ color: 'red', textAlign: 'center' }}>
                     {WARNING_IMPORT_MINYAN(countMinyan)}
