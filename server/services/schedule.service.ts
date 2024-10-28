@@ -8,7 +8,7 @@ import {
   HDate,
   Location,
 } from "@hebcal/core";
-import { getQueryDateType } from "../helpers/minyan.helper";
+import { getQueryDateType, getRoshChodeshCond } from "../helpers/minyan.helper";
 import { MinyanType } from "../../lib/types/minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { convertMinyanDocument } from "../utils/convert-document.util";
@@ -42,9 +42,17 @@ const ScheduleService = {
           },
         ],
       };
-      const minyansForSchedule = await MinyanModel.find({
-        $or: [calendarCond, dateTypeCond],
-      })
+      const roshChodeshCond = await getRoshChodeshCond(dateType, today);
+
+      const query = {
+        $or: [
+          calendarCond, // Assuming calendarCond is always populated
+          dateTypeCond, // Assuming dateTypeCond is always populated
+          ...(Object.keys(roshChodeshCond).length > 0 ? [roshChodeshCond] : []), // Conditional check for roshChodeshCond
+        ],
+      };
+
+      const minyansForSchedule = await MinyanModel.find(query)
         .populate("roomId")
         .populate("startDate.messageId")
         .populate("endDate.messageId")
