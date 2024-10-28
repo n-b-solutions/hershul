@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { TIME_FORMAT } from '@/const/timeFormat.const';
 import { Event, HDate, HebrewCalendar } from '@hebcal/core';
 import { Grid, IconButton, Typography } from '@mui/material';
 import { ArrowLeft as BackIcon, ArrowRight as ForwardIcon, Gear as SettingsIcon } from '@phosphor-icons/react/dist/ssr';
@@ -12,7 +13,7 @@ import { config } from '@/config';
 function Header() {
   const metadata = { title: config.site.name, description: config.site.description } satisfies Metadata;
 
-  const [time, setTime] = useState<string>(format(new Date(), 'hh:mm:ss a'));
+  const [time, setTime] = useState<string>(format(new Date(), TIME_FORMAT));
   const [hebrewDate, setHebrewDate] = useState<string>(new HDate(new Date()).toString());
   const [specialDay, setSpecialDay] = useState<string>('');
 
@@ -22,7 +23,7 @@ function Header() {
   useEffect(() => {
     const updateDate = () => {
       const now = new Date();
-      setTime(format(now, 'hh:mm:ss a'));
+      setTime(format(now, TIME_FORMAT));
       const newHebrewDate = new HDate(now).toString();
       setHebrewDate(newHebrewDate);
 
@@ -47,15 +48,20 @@ function Header() {
   };
 
   return (
-    <Grid container direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{
-      borderBottom: '2px solid #000', 
-      paddingBottom: '8px', 
-      paddingLeft: '16px', 
-    }}>
+    <Grid
+      container
+      direction="row"
+      alignItems="center"
+      justifyContent="space-between"
+      spacing={2}
+      sx={{
+        borderBottom: '2px solid #000',
+        paddingBottom: '8px',
+        paddingLeft: '16px',
+      }}
+    >
       <Grid item xs={6}>
-        <Typography variant="h6">
-          {metadata.description}
-        </Typography>
+        <Typography variant="h6">{metadata.description}</Typography>
       </Grid>
 
       <Grid item xs={6}>

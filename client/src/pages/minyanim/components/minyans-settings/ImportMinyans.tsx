@@ -13,11 +13,11 @@ import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typograph
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { SelectOption } from '@/types/metadata.type';
 import { Option } from '@/components/core/option';
 
-import { SelectOption } from '@/types/metadata.type';
-import { eDateType } from '../../../../../../lib/types/minyan.type';
 import { CountType } from '../../../../../../lib/types/metadata.type';
+import { eDateType } from '../../../../../../lib/types/minyan.type';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
@@ -44,7 +44,9 @@ export function ImportMinyans(): React.JSX.Element {
       })
     ).then((res: any) => {
       setDateTypeArray(
-        res?.filter((dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.calendar)
+        res?.filter(
+          (dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.calendar
+        )
       );
     });
   }, []);
@@ -67,7 +69,7 @@ export function ImportMinyans(): React.JSX.Element {
           })
         );
       })
-      .catch((err) => console.log('Error fatching data: ', err));
+      .catch((err) => console.log('Error fetching data: ', err));
   };
 
   const handleClose = () => {
