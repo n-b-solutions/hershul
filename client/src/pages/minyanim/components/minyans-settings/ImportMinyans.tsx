@@ -20,6 +20,7 @@ import { Option } from '@/components/core/option';
 
 import { CountType } from '../../../../../../lib/types/metadata.type';
 import { eDateType } from '../../../../../../lib/types/minyan.type';
+import { log } from 'console';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
@@ -33,6 +34,7 @@ export function ImportMinyans(): React.JSX.Element {
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const [open, setOpen] = useState<boolean>(false);
   const currentDateType = useSelector((state: RootState) => state.minyans.dateType);
+  console.log('currentDateType', currentDateType);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -63,10 +65,12 @@ export function ImportMinyans(): React.JSX.Element {
             (f: CountMinyanOfDate) => f.category.value === eDateType.calendar
           );
           currentDateTypeArray[calendarIndex].count = res.data.count;
+          setCountMinyan(res.data.count)
           return currentDateTypeArray;
         });
       })
       .catch((err: any) => console.log('Error fetching data: ', err));
+      
   }, [selectedDate]);
 
   const handleChange = (e: SelectChangeEvent<any>) => {
