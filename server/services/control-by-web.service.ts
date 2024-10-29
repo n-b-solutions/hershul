@@ -1,3 +1,5 @@
+import axios from "axios";
+
 import { eBulbColorNum, eBulbStatusNum } from "../types/room.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 
@@ -23,13 +25,7 @@ const ControlByWebService = {
       const bulbStatusNum = eBulbStatusNum[bulbStatus];
       const colorNum = color ? eBulbColorNum[color] : 1;
       const url = `https://${ipAddress}/customState.json?showUnits=1&showColors=1&relay${colorNum}=${bulbStatusNum}`;
-      const response = await fetch(url, {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update bulb status: ${response.statusText}`);
-      }
+      await axios.post(url);
       console.log(
         `Updating bulb status to ${bulbStatusNum} for IP ${ipAddress}`
       );
