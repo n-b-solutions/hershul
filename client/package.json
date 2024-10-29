@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "start": "vite preview",
+    "start-prod": "pm2 serve dist/ 3200 --name hershul --spa",
     "lint": "eslint ./src",
     "lint:fix": "eslint --fix ./src",
     "typecheck": "tsc --noEmit",
