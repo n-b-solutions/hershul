@@ -2,12 +2,13 @@ import { Types } from "mongoose";
 import RoomModel from "../models/room.model";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { RoomType } from "../../lib/types/room.type";
+import { convertRoomDocument } from "../utils/convert-document.util";
 
 const RoomService = {
   get: async (): Promise<RoomType[]> => {
     try {
-      const rooms = await RoomModel.find();
-      return rooms;
+      const rooms = await RoomModel.find().lean(true);
+      return rooms.map(convertRoomDocument);
     } catch (error) {
       console.error("Error fetching rooms:", error);
       throw new ApiError(500, (error as Error).message);
@@ -23,7 +24,7 @@ const RoomService = {
       if (!room) {
         throw new ApiError(404, "Room not found");
       }
-      return room;
+      return convertRoomDocument(room);
     } catch (error) {
       console.error(`Error fetching room with ID ${id}:`, error);
       throw new ApiError(500, (error as Error).message);
@@ -33,7 +34,7 @@ const RoomService = {
   create: async (roomData: RoomType): Promise<RoomType> => {
     try {
       const newRoom = await RoomModel.create(roomData);
-      return newRoom;
+      return convertRoomDocument(newRoom);
     } catch (error) {
       console.error("Error creating room:", error);
       throw new ApiError(500, (error as Error).message);
@@ -54,7 +55,7 @@ const RoomService = {
       if (!updatedRoom) {
         throw new ApiError(404, "Room not found");
       }
-      return updatedRoom;
+      return convertRoomDocument(updatedRoom);
     } catch (error) {
       console.error(`Error updating room with ID ${id}:`, error);
       throw new ApiError(500, (error as Error).message);

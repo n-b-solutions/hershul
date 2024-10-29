@@ -14,8 +14,13 @@ export const convertMinyanDocument = (
   minyanDocument: MinyanDocument
 ): MinyanType => convertDocument<MinyanDocument, MinyanType>(minyanDocument);
 
-export const convertRoomDocument = (roomDocument: RoomDocument): RoomType =>
-  convertDocument<RoomDocument, RoomType>(roomDocument);
+export const convertRoomDocument = (roomDocument: RoomDocument): RoomType => {
+  const room = convertDocument<RoomDocument, RoomType & { ipAddress?: string }>(
+    roomDocument
+  );
+  delete room.ipAddress;
+  return room;
+};
 
 export const convertMessageDocument = (
   messageDocument: MessageDocument
