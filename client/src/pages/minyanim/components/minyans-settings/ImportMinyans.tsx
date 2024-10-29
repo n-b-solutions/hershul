@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { API_BASE_URL } from '@/const/api.const';
 import {
@@ -34,7 +33,7 @@ export function ImportMinyans(): React.JSX.Element {
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const [open, setOpen] = useState<boolean>(false);
   const currentDateType = useSelector((state: RootState) => state.minyans.dateType);
-  console.log('currentDateType', currentDateType);
+  const currentSelectedDate = useSelector((state: RootState) => state.minyans.currentDate);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -82,7 +81,11 @@ export function ImportMinyans(): React.JSX.Element {
 
   const handleImport = () => {
     axios
-      .post(`${API_BASE_URL}/minyan/import/${dateType}`, { currentDateType })
+      .post(`${API_BASE_URL}/minyan/import/${dateType}`, {
+        currentDateType,
+        selectedDate: selectedDate ? selectedDate : null,
+        currentSelectedDate,
+      })
       .then((res) => {
         dispatch(
           setSettingTimes({

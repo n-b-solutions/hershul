@@ -3,7 +3,11 @@ import { eDateType } from "../../lib/types/minyan.type";
 import MinyanService from "../services/minyan.service";
 
 const MinyanController = {
-  get: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  get: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const result = await MinyanService.get();
       res.send(result);
@@ -12,7 +16,11 @@ const MinyanController = {
     }
   },
 
-  getCalendar: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getCalendar: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const date = new Date(req.params.date || new Date());
       const result = await MinyanService.getCalendar(date);
@@ -22,7 +30,11 @@ const MinyanController = {
     }
   },
 
-  getByDateType: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getByDateType: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { dateType } = req.query;
       const result = await MinyanService.getByDateType(dateType as eDateType);
@@ -32,7 +44,11 @@ const MinyanController = {
     }
   },
 
-  getById: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getById: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const result = await MinyanService.getById(id);
@@ -42,26 +58,42 @@ const MinyanController = {
     }
   },
 
-  getCountMinyanByCategory: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getCountMinyanByCategory: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { category } = req.params;
-      const result = await MinyanService.getCountMinyanByCategory(category as eDateType);
+      const result = await MinyanService.getCountMinyanByCategory(
+        category as eDateType
+      );
       res.send(result);
     } catch (error) {
       next(error);
     }
   },
-  getCountMinyanByCalendar: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { selectedDate } = req.params;
-    const result = await MinyanService.getCountMinyanByCalendar(new Date(selectedDate || Date.now()));
-    res.send(result);
-  } catch (error) {
-    next(error);
-  }
-},
+  getCountMinyanByCalendar: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { selectedDate } = req.params;
+      const result = await MinyanService.getCountMinyanByCalendar(
+        new Date(selectedDate || Date.now())
+      );
+      res.send(result);
+    } catch (error) {
+      next(error);
+    }
+  },
 
-  post: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  post: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const result = await MinyanService.post(req.body);
       res.send(result);
@@ -70,18 +102,34 @@ const MinyanController = {
     }
   },
 
-  postDuplicateMinyanByCategory: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  postDuplicateMinyanByCategory: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    let result;
     try {
       const { category } = req.params;
-      const { currentDateType } = req.body;
-      const result = await MinyanService.postDuplicateMinyanByCategory(category as eDateType, currentDateType);
+
+      const { currentDateType, selectedDate, currentSelectedDate } = req.body;
+      result = await MinyanService.postDuplicateMinyanByCategory(
+        category as eDateType,
+        currentDateType,
+        selectedDate,
+        currentSelectedDate
+      );
+
       res.send(result);
     } catch (error) {
       next(error);
     }
   },
 
-  addInactiveDates: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  addInactiveDates: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const inactiveDate = req.body;
       const { id } = req.params;
@@ -92,7 +140,11 @@ const MinyanController = {
     }
   },
 
-  removeInactiveDates: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  removeInactiveDates: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { date } = req.body;
       const { id } = req.params;
@@ -103,18 +155,30 @@ const MinyanController = {
     }
   },
 
-  updateInactiveDate: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  updateInactiveDate: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { date, isRoutine } = req.body;
       const { id } = req.params;
-      const result = await MinyanService.updateInactiveDate(date, isRoutine, id);
+      const result = await MinyanService.updateInactiveDate(
+        date,
+        isRoutine,
+        id
+      );
       res.send(result);
     } catch (error) {
       next(error);
     }
   },
 
-  put: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  put: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { field, value, internalField } = req.body;
       const { id } = req.params;
@@ -125,7 +189,11 @@ const MinyanController = {
     }
   },
 
-  delete: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  delete: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const result = await MinyanService.delete(id);

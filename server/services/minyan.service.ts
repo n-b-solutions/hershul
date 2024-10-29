@@ -203,12 +203,22 @@ const MinyanService = {
 
   postDuplicateMinyanByCategory: async (
     duplicateFromDateType: eDateType,
-    currentDateType: eDateType
+    currentDateType: eDateType,
+    selectedDate?: Date,
+    currentSelectedDate?: Date
   ): Promise<MinyanType[]> => {
     try {
-      const minyansToDuplicateFrom = await MinyanModel.find({
+      let cond: any = {
         dateType: duplicateFromDateType,
-      });
+      };
+      if (selectedDate && duplicateFromDateType === eDateType.calendar) {
+        cond = {
+          ...(await getMongoConditionForActiveMinyansByDate(
+            new Date(selectedDate)
+          )),
+        };
+      }
+      const minyansToDuplicateFrom = await MinyanModel.find(cond);
 
       const duplicateMinyansToInsert = minyansToDuplicateFrom.map((minyan) => {
         return {
@@ -217,14 +227,14 @@ const MinyanService = {
           endDate: minyan.endDate,
           blink: minyan.blink,
           dateType: currentDateType,
-          specificDate: minyan.specificDate,
+          specificDate: currentSelectedDate && { date: currentSelectedDate },
         };
       });
 
-      await MinyanModel.insertMany(duplicateMinyansToInsert);
-
+      const insertData = await MinyanModel.insertMany(duplicateMinyansToInsert);
+      const ids = insertData.map((minyan) => minyan._id);
       const duplicateMinyansDocuments = await MinyanModel.find({
-        dateType: currentDateType,
+        _id: { $in: ids },
       })
         .populate("roomId")
         .populate("startDate.messageId")

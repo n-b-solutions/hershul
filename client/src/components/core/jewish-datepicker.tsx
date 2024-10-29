@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { setCurrentSelectedDate } from '@/redux/minyans/setting-times-slice';
+import { dispatch } from '@/redux/store';
 import { WEEK_DAYS } from '@/utils/AdapterHebDate';
 import { HDate } from '@hebcal/core';
 import { TextField, TextFieldProps } from '@mui/material';
@@ -27,6 +29,7 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
   const handleDateChange = (newDate: Dayjs | null) => {
     if (newDate) {
       setSelectedDate(newDate);
+      dispatch(setCurrentSelectedDate({ currentDate: newDate.toDate() }));
     }
   };
 
