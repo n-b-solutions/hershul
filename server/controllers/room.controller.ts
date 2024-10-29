@@ -49,7 +49,8 @@ const RoomController = {
   ): Promise<void> => {
     try {
       const { id } = req.params;
-      const result = await RoomService.update(req.body, id);
+      const { bulbStatus } = req.body;
+      const result = await RoomService.updateBulbStatus(bulbStatus, id);
       res.send(result);
     } catch (error) {
       next(error);

@@ -1,8 +1,9 @@
 import { Types } from "mongoose";
 import RoomModel from "../models/room.model";
 import { ApiError } from "../../lib/utils/api-error.util";
-import { RoomType } from "../../lib/types/room.type";
+import { eBulbStatus, RoomType } from "../../lib/types/room.type";
 import { convertRoomDocument } from "../utils/convert-document.util";
+import ControlByWebService from "./control-by-web.service";
 
 const RoomService = {
   get: async (): Promise<RoomType[]> => {
@@ -41,20 +42,28 @@ const RoomService = {
     }
   },
 
-  update: async (
-    roomData: Partial<RoomType>,
+  updateBulbStatus: async (
+    bulbStatus: eBulbStatus,
     id?: string
   ): Promise<RoomType> => {
     try {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");
       }
-      const updatedRoom = await RoomModel.findByIdAndUpdate(id, roomData, {
-        new: true,
-      });
+      const updatedRoom = await RoomModel.findByIdAndUpdate(
+        id,
+        { bulbStatus },
+        {
+          new: true,
+        }
+      ).lean(true);
       if (!updatedRoom) {
         throw new ApiError(404, "Room not found");
       }
+      await ControlByWebService.updateUsingControlByWeb(
+        updatedRoom.ipAddress,
+        bulbStatus
+      );
       return convertRoomDocument(updatedRoom);
     } catch (error) {
       console.error(`Error updating room with ID ${id}:`, error);

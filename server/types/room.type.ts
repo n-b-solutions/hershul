@@ -6,3 +6,16 @@ export interface RoomDocument extends Omit<RoomType, "id"> {
   _id: Types.ObjectId;
   ipAddress: string;
 }
+
+export const eBulbColorNum = {
+  white: 1,
+  red: 2,
+  blue: 3,
+  yellow: 4,
+};
+
+export const eBulbStatusNum = {
+  off: 0,
+  on: 1,
+  blink: 2,
+};
