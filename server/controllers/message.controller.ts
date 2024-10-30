@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import MessageService from "../services/message.service";
+import { ApiError } from "../../lib/utils/api-error.util";
 
 const MessageController = {
   get: async (
@@ -35,8 +36,13 @@ const MessageController = {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const result = await MessageService.create(req.body);
-      res.send(result);
+      const messageData = req.body;
+      const file = req.file;
+      if (!file) {
+        throw new ApiError(400, "Audio file is required");
+      }
+      const newMessage = await MessageService.create(messageData, file);
+      res.status(201).json(newMessage);
     } catch (error) {
       next(error);
     }
