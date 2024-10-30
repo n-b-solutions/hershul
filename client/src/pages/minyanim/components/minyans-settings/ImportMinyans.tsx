@@ -107,7 +107,7 @@ export function ImportMinyans(): React.JSX.Element {
   const handleDateChange = (newDate: Dayjs | null) => {
     setSelectedDate(newDate);
     if (newDate) {
-      dispatch(setCurrentSelectedDate({ currentDate: newDate.toDate() }));
+      dispatch(setCurrentSelectedDate({ currentDate: newDate.toISOString() }));
     }
   };
 

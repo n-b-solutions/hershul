@@ -53,8 +53,8 @@ const settingTimesSlice = createSlice({
     setCurrentDateType: (state: Istate, action: PayloadAction<{ currentType: eDateType }>) => {
       state.dateType = action.payload.currentType;
     },
-    setCurrentSelectedDate: (state: Istate, action: PayloadAction<{ currentDate: Date }>) => {
-      state.currentDate = action.payload.currentDate;
+    setCurrentSelectedDate: (state: Istate, action: PayloadAction<{ currentDate: string }>) => {
+      state.currentDate = new Date(action.payload.currentDate);
     },
   },
 });
