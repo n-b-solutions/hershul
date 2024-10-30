@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { fetchMessages } from '@/redux/message/messageThunk';
 import { Dialog, IconButton, InputAdornment, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -7,17 +8,15 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import { color, height } from '@mui/system';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
+import { X as CloseIcon } from '@phosphor-icons/react/dist/ssr/X';
 import { useDispatch, useSelector } from 'react-redux';
 
-import {
-  messageLoading,
-  messages,
-} from '../../redux/message/messageSlice';
+import { messageLoading, messages } from '../../redux/message/messageSlice';
 import type { AppDispatch } from '../../redux/store';
 import { CreateMessagePopup } from './CreateMessagePopup';
-import { fetchMessages } from '@/redux/message/messageThunk';
 
 export function MessagesPopup(props: {
   open: boolean;
@@ -40,13 +39,12 @@ export function MessagesPopup(props: {
   }, [dispatch, open]);
 
   const handleCreateDialogOpen = () => {
-    handleClose();
     setIsCreateDialogOpen(true);
   };
 
   const handleCreateDialogClose = (messageId?: string) => {
     setIsCreateDialogOpen(false);
-    if (messageId) handleClose(messageId);
+    handleClose(messageId);
   };
 
   const handleItemClick = (message: string, messageId?: string) => {
@@ -73,7 +71,7 @@ export function MessagesPopup(props: {
         BackdropProps={{ invisible: true }}
         open={open}
         onClose={(messageId: string) => handleClose(messageId)}
-        onClick={(event)=> event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
       >
         <Box sx={{ bgcolor: 'transparent', p: 0, display: 'flex', justifyContent: 'center' }}>
           <Paper
@@ -82,10 +80,16 @@ export function MessagesPopup(props: {
               boxShadow: 'var(--mui-shadows-16)',
               width: '320px',
               mx: 'auto',
+              position: 'relative',
             }}
           >
-            <Box sx={{ px: 3, py: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
               <Typography variant="h6">Messages</Typography>
+              <IconButton sx={{ color: 'red', fontSize: '1rem' }} onClick={() => handleClose()}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Box sx={{ px: 3, py: 2 }}>
               <TextField
                 fullWidth
                 placeholder="Search..."
