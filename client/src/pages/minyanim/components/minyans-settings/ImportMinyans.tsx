@@ -7,7 +7,7 @@ import {
   typesOfDates,
   WARNING_IMPORT_MINYAN,
 } from '@/const/minyans.const';
-import { setSettingTimes } from '@/redux/minyans/setting-times-slice';
+import { setCurrentSelectedDate, setSettingTimes } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typography } from '@mui/material';
 import axios from 'axios';
@@ -30,7 +30,7 @@ export function ImportMinyans(): React.JSX.Element {
   const [dateType, setDateType] = useState<eDateType | string>(EMPTY_STRING);
   const [dateTypeArray, setDateTypeArray] = useState<CountMinyanOfDate[]>([]);
   const [countMinyan, setCountMinyan] = useState<number | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
   const [open, setOpen] = useState<boolean>(false);
   const currentDateType = useSelector((state: RootState) => state.minyans.dateType);
   const currentSelectedDate = useSelector((state: RootState) => state.minyans.currentDate);
@@ -42,14 +42,14 @@ export function ImportMinyans(): React.JSX.Element {
         return await axios
           .get<CountType>(`${API_BASE_URL}/minyan/import/count/${type.value}`)
           .then((res) => {
-            return { category: type, count: res.data.count };
+            return { category: type, count: res.data?.count };
           })
           .catch((err: any) => console.log('Error fetching data: ', err));
       })
     ).then((res: any) => {
       setDateTypeArray(
         res?.filter(
-          (dtCount: CountMinyanOfDate) => dtCount.count !== 0 || dtCount.category.value === eDateType.calendar
+          (dtCount: CountMinyanOfDate) => dtCount?.count !== 0 || dtCount?.category.value === eDateType.calendar
         )
       );
     });
@@ -63,8 +63,8 @@ export function ImportMinyans(): React.JSX.Element {
           const calendarIndex = currentDateTypeArray.findIndex(
             (f: CountMinyanOfDate) => f.category.value === eDateType.calendar
           );
-          currentDateTypeArray[calendarIndex].count = res.data.count;
-          setCountMinyan(res.data.count);
+          currentDateTypeArray[calendarIndex].count = res.data?.count;
+          setCountMinyan(res.data?.count);
           return currentDateTypeArray;
         });
       })
@@ -81,7 +81,8 @@ export function ImportMinyans(): React.JSX.Element {
 
   const handleImport = () => {
     axios
-      .post(`${API_BASE_URL}/minyan/import/${dateType}`, {
+      .post(`${API_BASE_URL}/minyan/import`, {
+        dateType,
         currentDateType,
         selectedDate: selectedDate ? selectedDate : null,
         currentSelectedDate,
@@ -100,6 +101,13 @@ export function ImportMinyans(): React.JSX.Element {
     setOpen(false);
     setDateType(EMPTY_STRING);
     setCountMinyan(null);
+  };
+
+  const handleDateChange = (newDate: Dayjs | null) => {
+    setSelectedDate(newDate);
+    if (newDate) {
+      dispatch(setCurrentSelectedDate({ currentDate: newDate.toDate() }));
+    }
   };
 
   return (
@@ -157,10 +165,11 @@ export function ImportMinyans(): React.JSX.Element {
 
                 {dateType === eDateType.calendar && (
                   <JewishDatePicker
-                    selectedDate={selectedDate}
+                    selectedDate={selectedDate || dayjs()}
                     setSelectedDate={setSelectedDate}
                     label="Select Date"
                     sx={{ width: '318px', height: '40px' }}
+                    onDateChange={handleDateChange}
                   />
                 )}
                 {dateType !== eDateType.calendar && <Box sx={{ width: '318px', height: '40px' }} />}

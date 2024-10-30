@@ -1,19 +1,18 @@
 import * as React from 'react';
-import { setCurrentSelectedDate } from '@/redux/minyans/setting-times-slice';
-import { dispatch } from '@/redux/store';
 import { WEEK_DAYS } from '@/utils/AdapterHebDate';
 import { HDate } from '@hebcal/core';
 import { TextField, TextFieldProps } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker, DatePickerProps } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 
-interface JewishDatePickerProps {
-  selectedDate: Dayjs;
-  setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs>>;
+interface JewishDatePickerProps extends Omit<DatePickerProps<Dayjs>, 'value' | 'onChange'> {
+  selectedDate: Dayjs | null;
+  setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs | null>>;
   label?: string;
   sx?: any;
   format?: string;
   disabled?: boolean;
+  onDateChange?: (newDate: Dayjs | null) => void;
 }
 
 const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
@@ -23,13 +22,15 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
   sx,
   format = 'MMM D, YYYY',
   disabled = false,
+  onDateChange,
+  ...props
 }) => {
-  const hebrewDate = new HDate(selectedDate.toDate()).renderGematriya();
+  const hebrewDate = new HDate(selectedDate?.toDate()).renderGematriya();
 
   const handleDateChange = (newDate: Dayjs | null) => {
-    if (newDate) {
-      setSelectedDate(newDate);
-      dispatch(setCurrentSelectedDate({ currentDate: newDate.toDate() }));
+    setSelectedDate(newDate);
+    if (onDateChange) {
+      onDateChange(newDate);
     }
   };
 
@@ -69,9 +70,10 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
       sx={{
         ...sx,
         '& .MuiButtonBase-root': {
-          height: '20px', // Adjust this value as needed
+          height: '20px',
         },
       }}
+      {...props}
     />
   );
 };

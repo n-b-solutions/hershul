@@ -42,7 +42,7 @@ MinyanListRouter.post(
   }
 );
 MinyanListRouter.post(
-  "/import/:category",
+  "/import",
   (req: Request, res: Response, next: NextFunction) => {
     MinyanController.postDuplicateMinyanByCategory(req, res, next);
   }

@@ -107,13 +107,12 @@ const MinyanController = {
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    let result;
     try {
-      const { category } = req.params;
+      const { currentDateType, selectedDate, currentSelectedDate, dateType } =
+        req.body;
 
-      const { currentDateType, selectedDate, currentSelectedDate } = req.body;
-      result = await MinyanService.postDuplicateMinyanByCategory(
-        category as eDateType,
+      const result = await MinyanService.postDuplicateMinyanByCategory(
+        dateType as eDateType,
         currentDateType,
         selectedDate,
         currentSelectedDate
