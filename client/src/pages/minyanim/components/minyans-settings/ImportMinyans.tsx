@@ -3,6 +3,7 @@ import { API_BASE_URL } from '@/const/api.const';
 import {
   EMPTY_STRING,
   IMPORT_MINYANS,
+  NO_MINYANS,
   TITTLE_IMPORT_MINYAN_MODEL,
   typesOfDates,
   WARNING_IMPORT_MINYAN,
@@ -177,7 +178,9 @@ export function ImportMinyans(): React.JSX.Element {
                   <Typography variant="h6" sx={{ color: 'red', textAlign: 'center' }}>
                     {WARNING_IMPORT_MINYAN(countMinyan)}
                   </Typography>
-                ) : null}
+                ) : (
+                  <Typography sx={{ textAlign: 'center' }}>{NO_MINYANS}</Typography>
+                )}
               </Stack>
               <Stack direction="row" spacing={3} sx={{ alignItems: 'center', justifyContent: 'space-between', p: 2 }}>
                 <div>
