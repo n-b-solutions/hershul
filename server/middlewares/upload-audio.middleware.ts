@@ -20,8 +20,8 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    const basename = path.basename(file.originalname, ext);
-    const name = req.body.name || basename;
+    const basename = path.basename(file.originalname, ext).replace(/\s+/g, '_'); // Replace spaces with underscores
+    const name = req.body.name ? req.body.name.replace(/\s+/g, '_') : basename; // Replace spaces with underscores
     cb(null, `${name}${ext}`);
   },
 });
