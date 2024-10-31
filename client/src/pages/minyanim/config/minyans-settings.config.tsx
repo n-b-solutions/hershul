@@ -127,7 +127,7 @@ export const getMinyansSettingsColumns = ({
     valueOption: roomArray,
     padding: 'none',
     name: 'Room',
-    width: '80px',
+    width: '110px',
     field: 'room',
     align: 'center',
   },
