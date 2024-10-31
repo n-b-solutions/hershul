@@ -2,7 +2,7 @@ import ControlByWebService from "./control-by-web.service";
 
 const activePolls: { [ipAddress: string]: NodeJS.Timeout } = {};
 
-export const startPolling = (ipAddress: string, interval?: number) => {
+export const startPolling = (ipAddress: string, interval: number = 1000) => {
   if (activePolls[ipAddress]) {
     console.log(`Polling already active for IP ${ipAddress}`);
     return;
@@ -14,12 +14,11 @@ export const startPolling = (ipAddress: string, interval?: number) => {
       console.log(`Polled update: Status ${status}, Color ${color}`);
       // Process the polled update as needed
     } catch (error) {
-      console.error("Error polling bulb status from ControlByWeb:", error);
+      console.error(`Error polling bulb status from ControlByWeb: ${error}`);
     }
-  }, interval || 1000);
+  }, interval);
 
   activePolls[ipAddress] = poll;
-  console.log(`Started polling for IP ${ipAddress}`);
 };
 
 export const stopPolling = (ipAddress: string) => {

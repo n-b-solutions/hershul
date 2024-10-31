@@ -7,12 +7,18 @@ import ControlByWebService from "./control-by-web.service";
 import { startPolling } from "./polling.service";
 // import { io } from "../socketio";
 
+const pollingInterval = 5000; // Poll every 5 seconds
+
 const RoomService = {
   get: async (): Promise<RoomType[]> => {
     try {
       const rooms = await RoomModel.find().lean(true);
       // Start polling for the room's ControlByWeb device
-      rooms.map(({ ipAddress }) => startPolling(ipAddress));
+      rooms.forEach(({ ipAddress }) => {
+        if (ipAddress) {
+          startPolling(ipAddress, pollingInterval);
+        }
+      });
       return rooms.map(convertRoomDocument);
     } catch (error) {
       console.error("Error fetching rooms:", error);
@@ -29,7 +35,7 @@ const RoomService = {
       if (!room) {
         throw new ApiError(404, "Room not found");
       }
-      return convertRoomDocument(room);
+     return convertRoomDocument(room);
     } catch (error) {
       console.error(`Error fetching room with ID ${id}:`, error);
       throw new ApiError(500, (error as Error).message);
