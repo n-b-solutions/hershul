@@ -32,9 +32,11 @@ const MessageService = {
     }
   },
 
-  create: async (messageData: MessageType): Promise<MessageType> => {
+  create: async (messageData: MessageType, file: Express.Multer.File): Promise<MessageType> => {
     try {
-      const newMessage = await MessageModel.create(messageData);
+      const audioUrl = `/uploads/audio/${file.filename}`;
+      const newMessageData = { ...messageData, audioUrl };
+      const newMessage = await MessageModel.create(newMessageData);
       return convertMessageDocument(newMessage);
     } catch (error) {
       console.error("Error creating message:", error);

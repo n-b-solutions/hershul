@@ -36,7 +36,7 @@ import { getMinyansSettingsColumns } from '../../config/minyans-settings.config'
 
 const isRoutineColumn: ColumnDef<CalendarRowType> = {
   editInputType: 'switch',
-  valueForEdit: (row) => row.isRoutine,
+  valueForEdit: (row) => row?.isRoutine,
   name: 'Is Routine',
   width: '8px',
   padding: 'normal',
@@ -45,7 +45,7 @@ const isRoutineColumn: ColumnDef<CalendarRowType> = {
   editable: true,
   formatter: (row) => {
     if (row.isRoutine === undefined) return <></>;
-    return row.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
+    return row?.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
   },
 };
 
@@ -59,7 +59,6 @@ export function Calendar({
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const dispatch = useDispatch();
   const [loading, setLoading] = React.useState<boolean>(true);
-  const hebrewDate = new HDate(selectedDate.toDate()).renderGematriya(); // Get date as string in Hebrew
 
   React.useEffect(() => {
     setLoading(true);
@@ -181,7 +180,7 @@ export function Calendar({
     internalField?: string
   ): void => {
     const updateId = settingTimesItem[index].id;
-    const fieldForEditDB = field === eFieldName.room ? eFieldName.roomId : field; // Synchronous dispatch update
+    let fieldForEditDB = field === eFieldName.room ? eFieldName.roomId : field; // Synchronous dispatch update
     dispatch(updateSettingTimesValue({ index, field, value, internalField }));
     // Async API call can be handled here, but avoid returning Promise<void>
     const isInactiveDate = isMinyanInactiveForSelectedDate(
@@ -194,11 +193,17 @@ export function Calendar({
         isRoutine: value,
       });
     } else {
+      let internalFieldForEditDB = internalField;
+      if (field === (eFieldName.isRoutine as keyof MinyanRowType)) {
+        //TODO: fix! might cause errors
+        fieldForEditDB = eFieldName.specificDate;
+        internalFieldForEditDB = eFieldName.isRoutine;
+      }
       axios
         .put<EditedType>(`${API_BASE_URL}/minyan/${updateId}`, {
           value,
           field: fieldForEditDB,
-          internalField,
+          internalField: internalFieldForEditDB,
         })
         .then((res) => {
           const editValue = rooms?.find((room) => room.id === res.data.editedValue) || value;
@@ -220,7 +225,7 @@ export function Calendar({
     field: keyof MinyanType,
     internalField?: string
   ): void => {
-    value && dispatch(updateSettingTimesValue({ index, field, value, internalField }));
+    value != null && dispatch(updateSettingTimesValue({ index, field, value, internalField }));
   };
   const handleDateChange = (newDate: Dayjs | null) => {
     if (newDate) {
@@ -314,7 +319,7 @@ export function Calendar({
           Loading...
         </Typography>
       ) : (
-        <Box style={{ height: 'calc(100% - 80px)', overflowY: 'auto' }}>
+        <Box style={{ height: 'calc(100% - 90px)', overflowY: 'auto' }}>
           <DataTable<MinyanType, EditMinyanValueType>
             columns={[
               ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),

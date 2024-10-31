@@ -1,6 +1,6 @@
 import { eDateType, MinyanType } from "../../lib/types/minyan.type";
 import { MinyanDocument } from "../types/minyan.type";
-import { isRoshHodesh } from "./time.helper";
+import { isRoshHodesh, getMinchaGedolaTime } from "./time.helper";
 
 export const getActiveMinyans = (minyans: MinyanType[] | MinyanDocument[]) => {
   const now = new Date();
@@ -9,43 +9,55 @@ export const getActiveMinyans = (minyans: MinyanType[] | MinyanDocument[]) => {
   );
 };
 
-export async function getQueryDateType(date?: Date): Promise<string> {
-  let queryDateType: string;
-  let dayOfWeek;
-  if (date) {
-    dayOfWeek = date.getDay();
-  } else {
-    const today = new Date();
-    dayOfWeek = today.getDay();
-  }
+export const getQueryDateType = async (date?: Date): Promise<eDateType> => {
+  const dayOfWeek = getDayOfWeek(date);
   const roshChodesh = await isRoshHodesh();
 
   if (roshChodesh) {
-    queryDateType = eDateType.roshHodesh;
+    return eDateType.roshHodesh;
   } else {
-    switch (dayOfWeek) {
-      case 0: // Sunday
-      case 2: // Tuesday
-      case 3: // Thursday
-        queryDateType = eDateType.sunday;
-        break;
-      case 1: // Monday
-      case 4: // Wednesday
-        queryDateType = eDateType.monday;
-        break;
-      case 5: // Friday
-        queryDateType = eDateType.friday;
-        break;
-      case 6: // Saturday (Shabbat)
-        queryDateType = eDateType.saturday;
-        break;
-      default:
-        queryDateType = eDateType.calendar; // Fallback default value
-    }
+    return getDateTypeByDayOfWeek(dayOfWeek);
   }
+};
 
-  return queryDateType;
-}
+export const getDayOfWeek = (date?: Date): number => {
+  if (date) {
+    return date.getDay();
+  } else {
+    const today = new Date();
+    return today.getDay();
+  }
+};
+
+export const getDateTypeByDayOfWeek = (dayOfWeek: number): eDateType => {
+  switch (dayOfWeek) {
+    case 0: // Sunday
+    case 2: // Tuesday
+    case 3: // Thursday
+      return eDateType.sunday;
+    case 1: // Monday
+    case 4: // Wednesday
+      return eDateType.monday;
+    case 5: // Friday
+      return eDateType.friday;
+    case 6: // Saturday (Shabbat)
+      return eDateType.saturday;
+    default:
+      return eDateType.calendar; // Fallback default value
+  }
+};
+
+export const getRoshChodeshCond = async (dateType: eDateType, date: Date) => {
+  if (dateType === eDateType.roshHodesh) {
+    const dayOfWeekDateType = getDateTypeByDayOfWeek(date.getDay());
+    const minchaGedolaTime = await getMinchaGedolaTime(date);
+    return {
+      dateType: dayOfWeekDateType,
+      "startDate.time": { $gte: minchaGedolaTime },
+    };
+  }
+  return {};
+};
 
 export const getMongoConditionForActiveMinyansByDate = async (date: Date) => {
   const startOfDay = new Date(date);
@@ -75,9 +87,13 @@ export const getMongoConditionForActiveMinyansByDate = async (date: Date) => {
       },
     ],
   };
+  const roshChodeshCond = await getRoshChodeshCond(dateType, date);
 
   return {
-    $or: [calendarCond, dateTypeCond],
+    $or: [
+      calendarCond, // Assuming calendarCond is always populated
+      dateTypeCond, // Assuming dateTypeCond is always populated
+      ...(Object.keys(roshChodeshCond).length > 0 ? [roshChodeshCond] : []), // Conditional check for roshChodeshCond
+    ],
   };
 };
-
