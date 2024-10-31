@@ -29,6 +29,7 @@ export interface CountMinyanOfDate {
 
 export function ImportMinyans(): React.JSX.Element {
   const [dateType, setDateType] = useState<eDateType | string>(EMPTY_STRING);
+  const [isCategorySelected, setIsCategorySelected] = useState<boolean>(false);
   const [dateTypeArray, setDateTypeArray] = useState<CountMinyanOfDate[]>([]);
   const [countMinyan, setCountMinyan] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
@@ -77,6 +78,7 @@ export function ImportMinyans(): React.JSX.Element {
   }, [selectedDate]);
 
   const handleChange = (e: SelectChangeEvent<any>) => {
+    setIsCategorySelected(true);
     setDateType(e.target.value);
     const countMinyan: CountMinyanOfDate | undefined = dateTypeArray.find(
       (f: CountMinyanOfDate) => f.category.value === e.target.value
@@ -184,7 +186,9 @@ export function ImportMinyans(): React.JSX.Element {
                     {WARNING_IMPORT_MINYAN(countMinyan)}
                   </Typography>
                 ) : (
-                  <Typography sx={{ textAlign: 'center' }}>{NO_MINYANS}</Typography>
+                  <>
+                    {isCategorySelected && <Typography sx={{ textAlign: 'center' }}>{NO_MINYANS}</Typography>}
+                  </>
                 )}
               </Stack>
               <Stack direction="row" spacing={3} sx={{ alignItems: 'center', justifyContent: 'space-between', p: 2 }}>
