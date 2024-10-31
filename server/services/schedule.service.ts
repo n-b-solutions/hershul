@@ -11,7 +11,11 @@ import {
 import { getQueryDateType, getRoshChodeshCond } from "../helpers/minyan.helper";
 import { MinyanType } from "../../lib/types/minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
-import { convertMinyanDocument } from "../utils/convert-document.util";
+import {
+  convertMinyanDocument,
+  convertRoomDocument,
+} from "../utils/convert-document.util";
+import RoomService from "./room.service";
 
 const ScheduleService = {
   get: async (): Promise<MinyanType[]> => {
@@ -102,14 +106,15 @@ const ScheduleService = {
     const rooms = await RoomModel.find();
 
     for (const room of rooms) {
+      let updatedRoom = convertRoomDocument(room);
       const currentStatus = roomStatusMap.get(room?._id?.toString() || "");
       if (currentStatus && room.bulbStatus !== currentStatus) {
-        room.bulbStatus = currentStatus;
-        await RoomModel.findByIdAndUpdate(room._id, {
-          $set: { bulbStatus: currentStatus },
-        });
+        updatedRoom = await RoomService.updateBulbStatus(
+          currentStatus,
+          room._id?.toString()
+        );
       }
-      updates.push(room);
+      updates.push(updatedRoom);
     }
 
     return updates;
