@@ -24,8 +24,8 @@ const ControlByWebService = {
     try {
       const bulbStatusNum = eBulbStatusNum[bulbStatus];
       const colorNum = color ? eBulbColorNum[color] : 1;
-      const url = `https://${ipAddress}/customState.json?showUnits=1&showColors=1&relay${colorNum}=${bulbStatusNum}`;
-      await axios.post(url);
+      const url = `http://${ipAddress}/state.xml?relay${colorNum}=${bulbStatusNum}`;
+      await axios.get(url);
       console.log(
         `Updating bulb status to ${bulbStatusNum} for IP ${ipAddress}`
       );
