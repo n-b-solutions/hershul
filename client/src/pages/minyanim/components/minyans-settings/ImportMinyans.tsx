@@ -31,7 +31,7 @@ export function ImportMinyans(): React.JSX.Element {
   const [dateType, setDateType] = useState<eDateType | string>(EMPTY_STRING);
   const [dateTypeArray, setDateTypeArray] = useState<CountMinyanOfDate[]>([]);
   const [countMinyan, setCountMinyan] = useState<number | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const currentDateType = useSelector((state: RootState) => state.minyans.dateType);
   const currentSelectedDate = useSelector((state: RootState) => state.minyans.currentDate);
@@ -40,12 +40,14 @@ export function ImportMinyans(): React.JSX.Element {
   useEffect(() => {
     Promise.all(
       typesOfDates.map(async (type: SelectOption<eDateType>) => {
-        return await axios
-          .get<CountType>(`${API_BASE_URL}/minyan/import/count/${type.value}`)
-          .then((res) => {
-            return { category: type, count: res.data?.count };
-          })
-          .catch((err: any) => console.log('Error fetching data: ', err));
+        return type.value === eDateType.calendar
+          ? { category: type, count: 0 }
+          : await axios
+              .get<CountType>(`${API_BASE_URL}/minyan/import/count/${type.value}`)
+              .then((res) => {
+                return { category: type, count: res.data?.count };
+              })
+              .catch((err: any) => console.log('Error fetching data: ', err));
       })
     ).then((res: any) => {
       setDateTypeArray(
@@ -57,19 +59,21 @@ export function ImportMinyans(): React.JSX.Element {
   }, []);
 
   useEffect(() => {
-    axios
-      .get<CountType>(`${API_BASE_URL}/minyan/import/count/calendar/${selectedDate}`)
-      .then((res) => {
-        setDateTypeArray((currentDateTypeArray) => {
-          const calendarIndex = currentDateTypeArray.findIndex(
-            (f: CountMinyanOfDate) => f.category.value === eDateType.calendar
-          );
-          currentDateTypeArray[calendarIndex].count = res.data?.count;
-          setCountMinyan(res.data?.count);
-          return currentDateTypeArray;
-        });
-      })
-      .catch((err: any) => console.log('Error fetching data: ', err));
+    if (selectedDate) {
+      axios
+        .get<CountType>(`${API_BASE_URL}/minyan/import/count/calendar/${selectedDate}`)
+        .then((res) => {
+          setDateTypeArray((currentDateTypeArray) => {
+            const calendarIndex = currentDateTypeArray.findIndex(
+              (f: CountMinyanOfDate) => f.category.value === eDateType.calendar
+            );
+            currentDateTypeArray[calendarIndex].count = res.data?.count;
+            setCountMinyan(res.data?.count);
+            return currentDateTypeArray;
+          });
+        })
+        .catch((err: any) => console.log('Error fetching data: ', err));
+    }
   }, [selectedDate]);
 
   const handleChange = (e: SelectChangeEvent<any>) => {
@@ -102,6 +106,7 @@ export function ImportMinyans(): React.JSX.Element {
     setOpen(false);
     setDateType(EMPTY_STRING);
     setCountMinyan(null);
+    setSelectedDate(null);
   };
 
   const handleDateChange = (newDate: Dayjs | null) => {
@@ -166,7 +171,7 @@ export function ImportMinyans(): React.JSX.Element {
 
                 {dateType === eDateType.calendar && (
                   <JewishDatePicker
-                    selectedDate={selectedDate || dayjs()}
+                    selectedDate={selectedDate}
                     setSelectedDate={setSelectedDate}
                     label="Select Date"
                     sx={{ width: '318px', height: '40px' }}
@@ -187,7 +192,10 @@ export function ImportMinyans(): React.JSX.Element {
                   <Button onClick={handleClose}>Cancel</Button>
                 </div>
                 <div>
-                  <Button disabled={!countMinyan || !selectedDate} onClick={handleImport}>
+                  <Button
+                    disabled={!countMinyan || (!selectedDate && dateType === eDateType.calendar)}
+                    onClick={handleImport}
+                  >
                     Import
                   </Button>
                 </div>

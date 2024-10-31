@@ -25,7 +25,7 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
   onDateChange,
   ...props
 }) => {
-  const hebrewDate = new HDate(selectedDate?.toDate()).renderGematriya();
+  const hebrewDate = selectedDate ? new HDate(selectedDate.toDate()).renderGematriya() : '';
 
   const handleDateChange = (newDate: Dayjs | null) => {
     setSelectedDate(newDate);
@@ -53,7 +53,7 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
       disabled={disabled}
       format={format}
       label={label}
-      value={selectedDate}
+      value={selectedDate || null}
       minDate={dayjs()}
       onChange={handleDateChange}
       dayOfWeekFormatter={(date, dayJs: Dayjs) => WEEK_DAYS[dayJs.day()]}
