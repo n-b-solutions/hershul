@@ -68,10 +68,8 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
       }}
       slots={{ textField: CustomTextField }}
       sx={{
+        width: '-webkit-fill-available',
         ...sx,
-        '& .MuiButtonBase-root': {
-          height: '20px',
-        },
       }}
       {...props}
     />

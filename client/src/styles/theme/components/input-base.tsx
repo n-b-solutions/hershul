@@ -29,6 +29,6 @@ export const MuiInputBase = {
       },
     },
     multiline: { '--Input-paddingBlock': '12px' },
-    sizeSmall: { '--Input-fontSize': '0.875rem', '--Input-paddingInline': '8px', '--Input-minHeight': '32px' },
+    sizeSmall: { '--Input-fontSize': '0.875rem', '--Input-paddingInline': '8px'},
   },
 } satisfies Components<Theme>['MuiInputBase'];
