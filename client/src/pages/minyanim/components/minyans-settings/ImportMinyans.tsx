@@ -48,12 +48,15 @@ export function ImportMinyans(): React.JSX.Element {
               .then((res) => {
                 return { category: type, count: res.data?.count };
               })
-              .catch((err: any) => console.log('Error fetching data: ', err));
+              .catch((err: any) => {
+                console.log('Error fetching data: ', err);
+                return { category: type, count: 0 }; // במקרה של שגיאה, החזר אובייקט עם count=0
+              });
       })
     ).then((res: any) => {
       setDateTypeArray(
         res?.filter(
-          (dtCount: CountMinyanOfDate) => dtCount?.count !== 0 || dtCount?.category.value === eDateType.calendar
+          (dtCount: CountMinyanOfDate) => dtCount?.count !== 0 || dtCount?.category?.value === eDateType.calendar
         )
       );
     });
@@ -66,10 +69,12 @@ export function ImportMinyans(): React.JSX.Element {
         .then((res) => {
           setDateTypeArray((currentDateTypeArray) => {
             const calendarIndex = currentDateTypeArray.findIndex(
-              (f: CountMinyanOfDate) => f.category.value === eDateType.calendar
+              (f: CountMinyanOfDate) => f.category?.value === eDateType.calendar
             );
-            currentDateTypeArray[calendarIndex].count = res.data?.count;
-            setCountMinyan(res.data?.count);
+            if (calendarIndex !== -1) {
+              currentDateTypeArray[calendarIndex].count = res.data?.count;
+              setCountMinyan(res.data?.count);
+            }
             return currentDateTypeArray;
           });
         })
@@ -81,7 +86,7 @@ export function ImportMinyans(): React.JSX.Element {
     setIsCategorySelected(true);
     setDateType(e.target.value);
     const countMinyan: CountMinyanOfDate | undefined = dateTypeArray.find(
-      (f: CountMinyanOfDate) => f.category.value === e.target.value
+      (f: CountMinyanOfDate) => f.category?.value === e.target.value
     );
     countMinyan && setCountMinyan(countMinyan.count);
   };
@@ -165,8 +170,8 @@ export function ImportMinyans(): React.JSX.Element {
                     Choose Category
                   </Option>
                   {dateTypeArray?.map((option: CountMinyanOfDate) => (
-                    <Option value={option.category?.value} key={option.category?.value}>
-                      {option.category?.label}
+                    <Option value={option?.category?.value} key={option?.category?.value}>
+                      {option?.category?.label}
                     </Option>
                   ))}
                 </Select>
