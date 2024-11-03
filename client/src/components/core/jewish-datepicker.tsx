@@ -31,19 +31,6 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
     onDateChange?.(newDate);
   };
 
-  // Custom text field to display the Hebrew date
-  const CustomTextField: React.FC<TextFieldProps> = (params) => (
-    <TextField
-      size="small"
-      {...params}
-      value={hebrewDate}
-      InputProps={{
-        ...params.InputProps,
-        readOnly: true,
-      }}
-    />
-  );
-
   return (
     <DatePicker
       format={format}
@@ -60,8 +47,8 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
             },
           },
         },
+        textField: { inputProps: { value: hebrewDate } },
       }}
-      slots={{ textField: CustomTextField }}
       sx={{
         width: '100%',
         ...sx,
