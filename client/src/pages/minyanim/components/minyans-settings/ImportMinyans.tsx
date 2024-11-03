@@ -172,23 +172,15 @@ export function ImportMinyans(): React.JSX.Element {
                 </Select>
 
                 {dateType === eDateType.calendar && (
-                  <JewishDatePicker
-                    selectedDate={selectedDate}
-                    setSelectedDate={setSelectedDate}
-                    label="Select Date"
-                    sx={{ width: '318px', height: '40px' }}
-                    onDateChange={handleDateChange}
-                  />
+                  <JewishDatePicker selectedDate={selectedDate} label="Select Date" onDateChange={handleDateChange} />
                 )}
-                {dateType !== eDateType.calendar && <Box sx={{ width: '318px', height: '40px' }} />}
+                {dateType !== eDateType.calendar && <Box sx={{ height: '40px' }} />}
                 {countMinyan ? (
                   <Typography variant="h6" sx={{ color: 'red', textAlign: 'center' }}>
                     {WARNING_IMPORT_MINYAN(countMinyan)}
                   </Typography>
                 ) : (
-                  <>
-                    {isCategorySelected && <Typography sx={{ textAlign: 'center' }}>{NO_MINYANS}</Typography>}
-                  </>
+                  <>{isCategorySelected && <Typography sx={{ textAlign: 'center' }}>{NO_MINYANS}</Typography>}</>
                 )}
               </Stack>
               <Stack direction="row" spacing={3} sx={{ alignItems: 'center', justifyContent: 'space-between', p: 2 }}>

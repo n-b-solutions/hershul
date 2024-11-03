@@ -5,52 +5,47 @@ import { TextField, TextFieldProps } from '@mui/material';
 import { DatePicker, DatePickerProps } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 
+// Define the props for the JewishDatePicker component
 interface JewishDatePickerProps extends Omit<DatePickerProps<Dayjs>, 'value' | 'onChange'> {
   selectedDate: Dayjs | null;
-  setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs | null>>;
   label?: string;
   sx?: any;
   format?: string;
-  disabled?: boolean;
   onDateChange?: (newDate: Dayjs | null) => void;
 }
 
+// JewishDatePicker component
 const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
   selectedDate,
-  setSelectedDate,
   label,
   sx,
   format = 'MMM D, YYYY',
-  disabled = false,
   onDateChange,
   ...props
 }) => {
-  const hebrewDate = selectedDate ? new HDate(selectedDate.toDate()).renderGematriya() : '';
+  // Convert the selected date to a Hebrew date string
+  const hebrewDate = React.useMemo(() => selectedDate ? new HDate(selectedDate.toDate()).renderGematriya() : '', [selectedDate]);
 
+  // Handle date change event
   const handleDateChange = (newDate: Dayjs | null) => {
-    setSelectedDate(newDate);
-    if (onDateChange) {
-      onDateChange(newDate);
-    }
+    onDateChange?.(newDate);
   };
 
-  function CustomTextField(params: TextFieldProps) {
-    return (
-      <TextField
-        size="small"
-        {...params}
-        value={hebrewDate}
-        InputProps={{
-          ...params.InputProps,
-          readOnly: true,
-        }}
-      />
-    );
-  }
+  // Custom text field to display the Hebrew date
+  const CustomTextField: React.FC<TextFieldProps> = (params) => (
+    <TextField
+      size="small"
+      {...params}
+      value={hebrewDate}
+      InputProps={{
+        ...params.InputProps,
+        readOnly: true,
+      }}
+    />
+  );
 
   return (
     <DatePicker
-      disabled={disabled}
       format={format}
       label={label}
       value={selectedDate || null}
@@ -68,10 +63,8 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
       }}
       slots={{ textField: CustomTextField }}
       sx={{
+        width: '100%',
         ...sx,
-        '& .MuiButtonBase-root': {
-          height: '20px',
-        },
       }}
       {...props}
     />
