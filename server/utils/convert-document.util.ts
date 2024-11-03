@@ -1,7 +1,7 @@
 import { MinyanType } from "../../lib/types/minyan.type";
 import { RoomType } from "../../lib/types/room.type";
 import { MinyanDocument } from "../types/minyan.type";
-import { RoomDocument } from "../types/room.type";
+import { RoomDocument, RoomServerType } from "../types/room.type";
 import { convertObjectIdTostring } from "./convert-object-id.util";
 import { convertIdsKeys } from "./convert-keys.util";
 import { MessageDocument } from "../types/message.type";
@@ -19,6 +19,13 @@ export const convertRoomDocument = (roomDocument: RoomDocument): RoomType => {
     roomDocument
   );
   delete room.ipAddress;
+  return room;
+};
+
+export const convertRoomDocumentToServerType = (
+  roomDocument: RoomDocument
+): RoomServerType => {
+  const room = convertDocument<RoomDocument, RoomServerType>(roomDocument);
   return room;
 };
 

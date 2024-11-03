@@ -2,13 +2,15 @@ import { Types } from "mongoose";
 import RoomModel from "../models/room.model";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { eBulbStatus, RoomType } from "../../lib/types/room.type";
-import { convertRoomDocument } from "../utils/convert-document.util";
+import { convertRoomDocumentToServerType } from "../utils/convert-document.util";
+import { convertRoomToClient } from "../utils/convert-room.util";
 import ControlByWebService from "./control-by-web.service";
 import { startPolling } from "./polling.service";
+import { RoomServerType } from "../types/room.type";
 
 const pollingInterval = 5000; // Poll every 5 seconds
 
-const roomCache: { [id: string]: RoomType & { ipAddress: string } } = {};
+const roomCache: { [id: string]: RoomServerType } = {};
 
 const RoomService = {
   get: async (): Promise<RoomType[]> => {
@@ -16,14 +18,16 @@ const RoomService = {
       if (Object.keys(roomCache).length === 0) {
         const rooms = await RoomModel.find().lean(true);
         rooms.forEach((room) => {
-          roomCache[room._id.toString()] = room;
+          roomCache[room._id.toString()] =
+            convertRoomDocumentToServerType(room);
           // Start polling for the room's ControlByWeb device
           if (room.ipAddress) {
-            startPolling(room.ipAddress, pollingInterval);
+            console.log('ipAddress', room.ipAddress)
+            // startPolling(room.ipAddress, pollingInterval);
           }
         });
       }
-      return Object.values(roomCache).map(convertRoomDocument);
+      return Object.values(roomCache).map(convertRoomToClient);
     } catch (error) {
       console.error("Error fetching rooms:", error);
       throw new ApiError(500, (error as Error).message);
@@ -40,9 +44,9 @@ const RoomService = {
         if (!room) {
           throw new ApiError(404, "Room not found");
         }
-        roomCache[id] = room;
+        roomCache[id] = convertRoomDocumentToServerType(room);
       }
-      return convertRoomDocument(roomCache[id]);
+      return convertRoomToClient(roomCache[id]);
     } catch (error) {
       console.error(`Error fetching room with ID ${id}:`, error);
       throw new ApiError(500, (error as Error).message);
@@ -60,7 +64,7 @@ const RoomService = {
       const ipAddress = roomCache[id]?.ipAddress;
       await ControlByWebService.updateUsingControlByWeb(ipAddress, bulbStatus);
       roomCache[id].bulbStatus = bulbStatus;
-      return convertRoomDocument(roomCache[id]);
+      return convertRoomToClient(roomCache[id]);
     } catch (error) {
       console.error(`Error updating room with ID ${id}:`, error);
       throw new ApiError(500, (error as Error).message);
