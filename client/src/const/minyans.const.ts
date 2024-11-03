@@ -11,6 +11,7 @@ export const MESSAGE_ID = 'messageId';
 //#endregion TODO: As to be removed, use keyof instead
 
 export const NO_DATA = 'No minyans have been determined for this category';
+export const NO_MINYANS = 'No minyans available for the selected category / date ';
 
 export const IMPORT_MINYANS = 'import minyans';
 

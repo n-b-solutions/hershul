@@ -9,12 +9,12 @@ export const enum eFieldName {
   startDate = 'startDate',
   blink = 'blink',
   roomId = 'roomId',
-  specificDate = 'isRoutine',
+  specificDate = 'specificDate',
   endDateTime = 'endDate.time',
   startDateTime = 'startDate.time',
   blinkSecondsNum = 'blink.secondsNum',
-  isRoutine = 'specificDate.isRoutine',
   isEdited = 'isEdited',
+  isRoutine = 'isRoutine',
 }
 
 export const enum eRowEditMode {

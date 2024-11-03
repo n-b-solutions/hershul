@@ -24,6 +24,12 @@ MinyanListRouter.get(
   }
 );
 MinyanListRouter.get(
+  "/import/count/calendar/:selectedDate",
+  (req: Request, res: Response, next: NextFunction) => {
+    MinyanController.getCountMinyanByCalendar(req, res, next);
+  }
+);
+MinyanListRouter.get(
   "/import/count/:category",
   (req: Request, res: Response, next: NextFunction) => {
     MinyanController.getCountMinyanByCategory(req, res, next);
@@ -36,7 +42,7 @@ MinyanListRouter.post(
   }
 );
 MinyanListRouter.post(
-  "/import/:category",
+  "/import",
   (req: Request, res: Response, next: NextFunction) => {
     MinyanController.postDuplicateMinyanByCategory(req, res, next);
   }
