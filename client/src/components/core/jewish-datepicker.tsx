@@ -11,7 +11,6 @@ interface JewishDatePickerProps extends Omit<DatePickerProps<Dayjs>, 'value' | '
   label?: string;
   sx?: any;
   format?: string;
-  disabled?: boolean;
   onDateChange?: (newDate: Dayjs | null) => void;
 }
 
@@ -21,7 +20,6 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
   label,
   sx,
   format = 'MMM D, YYYY',
-  disabled = false,
   onDateChange,
   ...props
 }) => {
@@ -48,7 +46,6 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
 
   return (
     <DatePicker
-      disabled={disabled}
       format={format}
       label={label}
       value={selectedDate || null}

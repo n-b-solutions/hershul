@@ -172,11 +172,7 @@ export function ImportMinyans(): React.JSX.Element {
                 </Select>
 
                 {dateType === eDateType.calendar && (
-                  <JewishDatePicker
-                    selectedDate={selectedDate}
-                    label="Select Date"
-                    onDateChange={handleDateChange}
-                  />
+                  <JewishDatePicker selectedDate={selectedDate} label="Select Date" onDateChange={handleDateChange} />
                 )}
                 {dateType !== eDateType.calendar && <Box sx={{ height: '40px' }} />}
                 {countMinyan ? (
