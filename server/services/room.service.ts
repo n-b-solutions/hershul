@@ -5,21 +5,25 @@ import { eBulbStatus, RoomType } from "../../lib/types/room.type";
 import { convertRoomDocument } from "../utils/convert-document.util";
 import ControlByWebService from "./control-by-web.service";
 import { startPolling } from "./polling.service";
-// import { io } from "../socketio";
 
 const pollingInterval = 5000; // Poll every 5 seconds
+
+const roomCache: { [id: string]: RoomType & { ipAddress: string } } = {};
 
 const RoomService = {
   get: async (): Promise<RoomType[]> => {
     try {
-      const rooms = await RoomModel.find().lean(true);
-      // Start polling for the room's ControlByWeb device
-      rooms.forEach(({ ipAddress }) => {
-        if (ipAddress) {
-          startPolling(ipAddress, pollingInterval);
-        }
-      });
-      return rooms.map(convertRoomDocument);
+      if (Object.keys(roomCache).length === 0) {
+        const rooms = await RoomModel.find().lean(true);
+        rooms.forEach((room) => {
+          roomCache[room._id.toString()] = room;
+          // Start polling for the room's ControlByWeb device
+          if (room.ipAddress) {
+            startPolling(room.ipAddress, pollingInterval);
+          }
+        });
+      }
+      return Object.values(roomCache).map(convertRoomDocument);
     } catch (error) {
       console.error("Error fetching rooms:", error);
       throw new ApiError(500, (error as Error).message);
@@ -31,23 +35,16 @@ const RoomService = {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");
       }
-      const room = await RoomModel.findById(id);
-      if (!room) {
-        throw new ApiError(404, "Room not found");
+      if (!roomCache[id]) {
+        const room = await RoomModel.findById(id).lean(true);
+        if (!room) {
+          throw new ApiError(404, "Room not found");
+        }
+        roomCache[id] = room;
       }
-     return convertRoomDocument(room);
+      return convertRoomDocument(roomCache[id]);
     } catch (error) {
       console.error(`Error fetching room with ID ${id}:`, error);
-      throw new ApiError(500, (error as Error).message);
-    }
-  },
-
-  create: async (roomData: RoomType): Promise<RoomType> => {
-    try {
-      const newRoom = await RoomModel.create(roomData);
-      return convertRoomDocument(newRoom);
-    } catch (error) {
-      console.error("Error creating room:", error);
       throw new ApiError(500, (error as Error).message);
     }
   },
@@ -60,61 +57,12 @@ const RoomService = {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");
       }
-      const updatedRoom = await RoomModel.findByIdAndUpdate(
-        id,
-        { bulbStatus },
-        {
-          new: true,
-        }
-      ).lean(true);
-      if (!updatedRoom) {
-        throw new ApiError(404, "Room not found");
-      }
-      await ControlByWebService.updateUsingControlByWeb(
-        updatedRoom.ipAddress,
-        bulbStatus
-      );
-      return convertRoomDocument(updatedRoom);
+      const ipAddress = roomCache[id]?.ipAddress;
+      await ControlByWebService.updateUsingControlByWeb(ipAddress, bulbStatus);
+      roomCache[id].bulbStatus = bulbStatus;
+      return convertRoomDocument(roomCache[id]);
     } catch (error) {
       console.error(`Error updating room with ID ${id}:`, error);
-      throw new ApiError(500, (error as Error).message);
-    }
-  },
-
-  updateBulbStatusByIpAddress: async (
-    bulbStatus: eBulbStatus,
-    ipAddress: string
-  ): Promise<RoomType> => {
-    try {
-      const updatedRoom = await RoomModel.findOneAndUpdate(
-        { ipAddress },
-        { bulbStatus },
-        {
-          new: true,
-        }
-      ).lean(true);
-      if (!updatedRoom) {
-        throw new ApiError(404, "Room not found");
-      }
-      // io.emit("bulbStatus", updatedRoom);
-      return convertRoomDocument(updatedRoom);
-    } catch (error) {
-      console.error(`Error updating room with ipAddress ${ipAddress}:`, error);
-      throw new ApiError(500, (error as Error).message);
-    }
-  },
-
-  delete: async (id?: string): Promise<void> => {
-    try {
-      if (!id || !Types.ObjectId.isValid(id)) {
-        throw new ApiError(400, "Invalid ID format");
-      }
-      const deletedRoom = await RoomModel.findByIdAndDelete(id);
-      if (!deletedRoom) {
-        throw new ApiError(404, "Room not found");
-      }
-    } catch (error) {
-      console.error(`Error deleting room with ID ${id}:`, error);
       throw new ApiError(500, (error as Error).message);
     }
   },

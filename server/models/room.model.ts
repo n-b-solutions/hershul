@@ -6,10 +6,6 @@ const RoomSchema = new Schema<RoomDocument>({
     type: SchemaTypes.String,
     required: true,
   },
-  bulbStatus: {
-    type: SchemaTypes.String,
-    required: true,
-  },
   ipAddress: {
     type: SchemaTypes.String,
     required: true,
