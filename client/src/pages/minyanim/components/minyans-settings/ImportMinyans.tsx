@@ -174,7 +174,6 @@ export function ImportMinyans(): React.JSX.Element {
                 {dateType === eDateType.calendar && (
                   <JewishDatePicker
                     selectedDate={selectedDate}
-                    setSelectedDate={setSelectedDate}
                     label="Select Date"
                     onDateChange={handleDateChange}
                   />

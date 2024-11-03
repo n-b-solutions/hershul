@@ -311,7 +311,7 @@ export function Calendar({
       <JewishDatePicker
         label="Specific Date"
         selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
+        onDateChange={setSelectedDate}
         sx={{ paddingBottom: '2%', paddingLeft: '1%', width: '20%' }}
       />
       {loading ? (
