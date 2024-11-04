@@ -13,8 +13,7 @@ export const startPolling = (ipAddress: string, interval: number = 1000) => {
     try {
       const { status, color } = await ControlByWebService.getBulbStatusByIp(ipAddress);
       console.log(`Polled update: Status ${status}, Color ${color}`);
-      //socket.emit('bulbStatusUpdated', { roomId, status, color });
-      // Process the polled update as needed
+      await RoomService.updateFromControlByWeb(ipAddress, status, color);
     } catch (error) {
       console.error(`Error polling bulb status from ControlByWeb: ${error}`);
     }

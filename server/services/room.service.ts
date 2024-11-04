@@ -19,7 +19,7 @@ const RoomService = {
       if (Object.keys(roomCache).length === 0) {
         const rooms = await RoomModel.find().lean(true);
         rooms.forEach((room) => {
-          roomCache[room.id.toString()] = convertRoomDocumentToServerType(room);
+          roomCache[room._id.toString()] = convertRoomDocumentToServerType(room);
           // Start polling for the room's ControlByWeb device
           if (room.ipAddress) {
             startPolling(room.ipAddress, pollingInterval);
