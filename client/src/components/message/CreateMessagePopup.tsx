@@ -74,7 +74,17 @@ export const CreateMessagePopup = ({
   }, []);
 
   return (
-    <Dialog open={open} onClose={() => handleClose()} onClick={(event) => event.stopPropagation()}>
+    <Dialog
+      open={open}
+      onClose={() => handleClose()}
+      onClick={(event) => event.stopPropagation()}
+      PaperProps={{
+        sx: {
+          width: '300px',
+          height: '400px',
+        },
+      }}
+    >
       <Box sx={{ p: 3 }}>
         <Box maxWidth="sm">
           <Grid container spacing={3}>
@@ -111,19 +121,10 @@ export const CreateMessagePopup = ({
           <Box sx={{ mt: 3 }}>
             {audioBlob ? (
               <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSave}
-                  disabled={isSaveDisabled || loading}
-                >
+                <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled || loading}>
                   Save
                 </Button>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={handleRedo}
-                >
+                <Button variant="outlined" color="secondary" onClick={handleRedo}>
                   Redo
                 </Button>
               </Box>
