@@ -1,12 +1,13 @@
 import { Types } from "mongoose";
 import RoomModel from "../models/room.model";
 import { ApiError } from "../../lib/utils/api-error.util";
-import { eBulbStatus, RoomType } from "../../lib/types/room.type";
+import { eBulbStatus, eBulbColor, RoomType } from "../../lib/types/room.type";
 import { convertRoomDocumentToServerType } from "../utils/convert-document.util";
 import { convertRoomToClient } from "../utils/convert-room.util";
 import ControlByWebService from "./control-by-web.service";
 import { startPolling } from "./polling.service";
 import { RoomServerType } from "../types/room.type";
+import { io } from "../socketio"; // Import the socket instance
 
 const pollingInterval = 5000; // Poll every 5 seconds
 
@@ -18,12 +19,10 @@ const RoomService = {
       if (Object.keys(roomCache).length === 0) {
         const rooms = await RoomModel.find().lean(true);
         rooms.forEach((room) => {
-          roomCache[room._id.toString()] =
-            convertRoomDocumentToServerType(room);
+          roomCache[room.id.toString()] = convertRoomDocumentToServerType(room);
           // Start polling for the room's ControlByWeb device
           if (room.ipAddress) {
-            console.log('ipAddress', room.ipAddress)
-            // startPolling(room.ipAddress, pollingInterval);
+            startPolling(room.ipAddress, pollingInterval);
           }
         });
       }
@@ -55,18 +54,72 @@ const RoomService = {
 
   updateBulbStatus: async (
     bulbStatus: eBulbStatus,
+    bulbColor?: eBulbColor,
     id?: string
   ): Promise<RoomType> => {
     try {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");
       }
+
+      if (!roomCache[id]) {
+        const room = await RoomModel.findById(id).lean(true);
+        if (!room) {
+          throw new ApiError(404, "Room not found");
+        }
+        roomCache[id] = convertRoomDocumentToServerType(room);
+      }
+
       const ipAddress = roomCache[id]?.ipAddress;
-      await ControlByWebService.updateUsingControlByWeb(ipAddress, bulbStatus);
+      await ControlByWebService.updateUsingControlByWeb(
+        ipAddress,
+        bulbStatus,
+        bulbColor
+      );
       roomCache[id].bulbStatus = bulbStatus;
+      roomCache[id].bulbColor = bulbColor;
       return convertRoomToClient(roomCache[id]);
     } catch (error) {
       console.error(`Error updating room with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
+  updateFromControlByWeb: async (
+    ipAddress: string,
+    bulbStatus: eBulbStatus,
+    bulbColor: eBulbColor
+  ): Promise<RoomType> => {
+    try {
+      let room = Object.values(roomCache).find(
+        (room) => room.ipAddress === ipAddress
+      );
+
+      if (!room) {
+        const roomDoc = await RoomModel.findOne({ ipAddress }).lean(true);
+        if (!roomDoc) {
+          throw new ApiError(404, "Room not found");
+        }
+        room = convertRoomDocumentToServerType(roomDoc);
+        roomCache[room.id] = room;
+      }
+      const roomId = room.id;
+      roomCache[roomId].bulbStatus = bulbStatus;
+      roomCache[roomId].bulbColor = bulbColor;
+
+      // Emit the update via socket
+      io.emit("bulbStatusUpdated", {
+        roomId,
+        bulbStatus,
+        bulbColor,
+      });
+
+      return convertRoomToClient(roomCache[roomId]);
+    } catch (error) {
+      console.error(
+        `Error updating room from ControlByWeb with IP ${ipAddress}:`,
+        error
+      );
       throw new ApiError(500, (error as Error).message);
     }
   },
