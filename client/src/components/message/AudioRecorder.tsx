@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, IconButton, Button, Typography } from '@mui/material';
+import { Box, IconButton, Button, Typography, CircularProgress } from '@mui/material';
 import { Microphone as MicrophoneIcon, Stop as StopIcon, FloppyDisk as SaveIcon, ArrowCounterClockwise as RedoIcon } from '@phosphor-icons/react';
 
 interface AudioRecorderProps {
@@ -66,21 +66,39 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2 }}>
-            <IconButton
-                onClick={isRecording ? stopRecording : startRecording}
-                sx={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: '50%',
-                    bgcolor: isRecording ? 'error.main' : 'primary.main',
-                    color: 'white',
-                    '&:hover': {
-                      bgcolor: isRecording ? 'error.dark' : 'primary.dark',
-                    },
-                  }}
-            >
-                {isRecording ? <StopIcon size={24} /> : <MicrophoneIcon size={24} />}
-            </IconButton>
+            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                <IconButton
+                    onClick={isRecording ? stopRecording : startRecording}
+                    sx={{
+                        width: 100,
+                        height: 100,
+                        borderRadius: '50%',
+                        bgcolor: isRecording ? 'error.main' : 'primary.main',
+                        color: 'white',
+                        zIndex: 2, // Ensure the button is above the CircularProgress
+                        '&:hover': {
+                          bgcolor: isRecording ? 'error.dark' : 'primary.dark',
+                        },
+                      }}
+                >
+                    {isRecording ? <StopIcon size={24} /> : <MicrophoneIcon size={24} />}
+                </IconButton>
+                {isRecording && (
+                    <CircularProgress
+                        variant="determinate"
+                        value={(recordingDuration % 60) * (100 / 60)}
+                        size={140} // Increased size to move the circle further from the button
+                        thickness={2} // Thinner circle
+                        sx={{
+                            position: 'absolute',
+                            top: -20, // Adjusted to position the circle further from the button
+                            left: -20, // Adjusted to position the circle further from the button
+                            zIndex: 1,
+                            color: 'rgba(255, 0, 0, 0.5)', // Weak red color
+                        }}
+                    />
+                )}
+            </Box>
             {isRecording && (
                 <Typography variant="h6" sx={{ mt: 2 }}>
                     {formatDuration(recordingDuration)}
@@ -89,7 +107,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
             {audioURL && (
                 <>
                     <Typography variant="h6" sx={{ mt: 2 }}>
-                        Recording Duration: {formatDuration(recordingDuration)}
+                        {formatDuration(recordingDuration)}
                     </Typography>
                     <audio controls src={audioURL} style={{ marginTop: 16 }} />
                     <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
