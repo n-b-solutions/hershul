@@ -109,7 +109,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
                     <Typography variant="h6" sx={{ mt: 2 }}>
                         {formatDuration(recordingDuration)}
                     </Typography>
-                    <audio controls src={audioURL} style={{ marginTop: 16 }} />
+                    <audio controls src={audioURL} style={{ marginTop: 16,width:'75%' }} />
                     <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                         <Button
                             variant="contained"
