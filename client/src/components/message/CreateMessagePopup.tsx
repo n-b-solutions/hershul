@@ -31,9 +31,9 @@ export const CreateMessagePopup = ({
   const [audioBlob, setAudioBlob] = React.useState<Blob | null>(null);
 
   const dispatch = useDispatch<AppDispatch>();
-  const rooms = useSelector(selectRooms); // Fetch rooms from Redux store
+  const rooms = useSelector(selectRooms);
   const loading = useSelector(messageLoading);
-  const roomsLoading = useSelector(selectRoomsLoading); // Check if rooms are loading
+  const roomsLoading = useSelector(selectRoomsLoading);
   const isSaveDisabled = !name || !audioBlob;
 
   const handleRoomChange = (event: SelectChangeEvent<string>) => {
@@ -52,16 +52,18 @@ export const CreateMessagePopup = ({
     }
   };
 
+  const handleRedo = () => {
+    setAudioBlob(null);
+  };
+
   React.useEffect(() => {
     if (!open) {
-      // Reset form fields when modal closes
       setSelectedRoom(room || '');
       setName('');
       setAudioBlob(null);
     }
   }, [open, room]);
 
-  // Fetch rooms from Redux when the component mounts
   React.useEffect(() => {
     const getRooms = async () => {
       if (!rooms) {
@@ -76,51 +78,57 @@ export const CreateMessagePopup = ({
       <Box sx={{ p: 3 }}>
         <Box maxWidth="sm">
           <Grid container spacing={3}>
-            <Grid sm={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Name</InputLabel>
-                <OutlinedInput name="name" value={name} onChange={(e) => setName(e.target.value)} />
-              </FormControl>
-            </Grid>
+            {audioBlob && (
+              <>
+                <Grid sm={6} xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel>Name</InputLabel>
+                    <OutlinedInput name="name" value={name} onChange={(e) => setName(e.target.value)} />
+                  </FormControl>
+                </Grid>
 
-            <Grid sm={6} xs={12}>
-              <FormControl fullWidth disabled={!!room}>
-                <InputLabel>Room</InputLabel>
-                <Select value={selectedRoom} onChange={handleRoomChange} input={<OutlinedInput label="Room" />}>
-                  {roomsLoading ? (
-                    <MenuItem value="" disabled>
-                      Loading rooms...
-                    </MenuItem>
-                  ) : (
-                    rooms.map((room) => (
-                      <MenuItem key={room.id} value={room.name}>
-                        {room.name}
-                      </MenuItem>
-                    ))
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
+                <Grid sm={6} xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel>Room</InputLabel>
+                    <Select value={selectedRoom} onChange={handleRoomChange} input={<OutlinedInput label="Room" />}>
+                      {roomsLoading ? (
+                        <MenuItem value="" disabled>
+                          Loading rooms...
+                        </MenuItem>
+                      ) : (
+                        rooms.map((room) => (
+                          <MenuItem key={room.id} value={room.name}>
+                            {room.name}
+                          </MenuItem>
+                        ))
+                      )}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </>
+            )}
           </Grid>
           <Box sx={{ mt: 3 }}>
-            <AudioRecorder onSave={(blob) => setAudioBlob(blob)} />
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-            <Button onClick={() => handleClose()} variant="outlined" sx={{ mr: 1 }}>
-              Cancel
-            </Button>
-            {isSaveDisabled || loading ? (
-              <Tooltip title="Please fill all the new audio details" arrow>
-                <span>
-                  <Button onClick={handleSave} variant="contained" disabled={isSaveDisabled || loading}>
-                    Save
-                  </Button>
-                </span>
-              </Tooltip>
+            {audioBlob ? (
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSave}
+                  disabled={isSaveDisabled || loading}
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={handleRedo}
+                >
+                  Redo
+                </Button>
+              </Box>
             ) : (
-              <Button onClick={handleSave} variant="contained" disabled={isSaveDisabled || loading}>
-                Save
-              </Button>
+              <AudioRecorder onSave={(blob) => setAudioBlob(blob)} onRedo={handleRedo} />
             )}
           </Box>
         </Box>

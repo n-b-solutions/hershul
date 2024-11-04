@@ -1,12 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { Box, IconButton } from '@mui/material';
-import { Microphone as MicrophoneIcon, Stop as StopIcon } from '@phosphor-icons/react';
+import { Box, IconButton, Button } from '@mui/material';
+import { Microphone as MicrophoneIcon, Stop as StopIcon, FloppyDisk as SaveIcon, ArrowCounterClockwise as RedoIcon } from '@phosphor-icons/react';
 
 interface AudioRecorderProps {
     onSave: (audioBlob: Blob | null) => void;
+    onRedo: () => void;
 }
 
-const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave }) => {
+const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const [audioURL, setAudioURL] = useState<string | null>(null);
@@ -23,8 +24,6 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave }) => {
                     const blob = new Blob([event.data], { type: 'audio/wav' });
                     setAudioBlob(blob);
                     setAudioURL(URL.createObjectURL(blob));
-                    
-                    onSave(blob); // העברת ה-blob האחרון ל-onSave
                 }
             };
     
@@ -35,55 +34,51 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave }) => {
         }
     };
     
-    const stopRecording = async () => {
+    const stopRecording = () => {
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
             setIsRecording(false);
         }
     };
-    
 
     return (
-        <Box sx={{ display: 'flex', alignItems: 'center', p: 2 }}>
-            <IconButton onClick={isRecording ? stopRecording : startRecording} sx={{ mr: 2 }}>
-                {isRecording ? <StopIcon size={24} color="#3f51b5" /> : <MicrophoneIcon size={24} color="#3f51b5" />}
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2 }}>
+            <IconButton
+                onClick={isRecording ? stopRecording : startRecording}
+                sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    backgroundColor: '#3f51b5',
+                    color: '#fff',
+                    mb: 2,
+                }}
+            >
+                {isRecording ? <StopIcon size={24} /> : <MicrophoneIcon size={24} />}
             </IconButton>
-            <Box className="waveform" sx={{ display: 'flex', gap: 2 }}>
-                {Array.from({ length: 15 }).map((_, index) => (
-                    <span 
-                        key={index} 
-                        className={`bar ${isRecording ? 'active' : ''}`} 
-                        style={{
-                            animationDelay: `${index * 0.1}s`,
-                            height: `${20 + Math.random() * 30}px`
-                        }}
-                    ></span>
-                ))}
-            </Box>
-            
             {audioURL && (
-                
-                <audio controls src={audioURL} style={{ marginTop: 16 }} />
+                <>
+                    <audio controls src={audioURL} style={{ marginTop: 16 }} />
+                    <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<SaveIcon />}
+                            onClick={() => onSave(audioBlob)}
+                        >
+                            Save
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            startIcon={<RedoIcon />}
+                            onClick={onRedo}
+                        >
+                            Redo
+                        </Button>
+                    </Box>
+                </>
             )}
-            <style>
-                {`
-                @keyframes pulse {
-                    0% { transform: scaleY(1); }
-                    50% { transform: scaleY(1.5); }
-                    100% { transform: scaleY(1); }
-                }
-
-                .bar {
-                    width: 8px;
-                    background-color: #3f51b5;
-                    transform-origin: bottom;
-                }
-
-                .bar.active {
-                    animation: pulse 0.5s ease-in-out infinite;
-                }
-                `}
-            </style>
         </Box>
     );
 };
