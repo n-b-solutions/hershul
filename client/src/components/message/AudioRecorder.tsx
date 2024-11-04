@@ -75,7 +75,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
                         borderRadius: '50%',
                         bgcolor: isRecording ? 'error.main' : 'primary.main',
                         color: 'white',
-                        zIndex: 2, // Ensure the button is above the CircularProgress
+                        zIndex: 2, 
                         '&:hover': {
                           bgcolor: isRecording ? 'error.dark' : 'primary.dark',
                         },
@@ -87,14 +87,14 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
                     <CircularProgress
                         variant="determinate"
                         value={(recordingDuration % 60) * (100 / 60)}
-                        size={140} // Increased size to move the circle further from the button
-                        thickness={2} // Thinner circle
+                        size={140} 
+                        thickness={1} 
                         sx={{
                             position: 'absolute',
-                            top: -20, // Adjusted to position the circle further from the button
-                            left: -20, // Adjusted to position the circle further from the button
+                            top: -20, 
+                            left: -20, 
                             zIndex: 1,
-                            color: 'rgba(255, 0, 0, 0.5)', // Weak red color
+                            color: 'rgba(255, 0, 0, 0.5)', 
                         }}
                     />
                 )}
