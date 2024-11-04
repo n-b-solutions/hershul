@@ -19,7 +19,8 @@ const RoomService = {
       if (Object.keys(roomCache).length === 0) {
         const rooms = await RoomModel.find().lean(true);
         rooms.forEach((room) => {
-          roomCache[room._id.toString()] = convertRoomDocumentToServerType(room);
+          roomCache[room._id.toString()] =
+            convertRoomDocumentToServerType(room);
           // Start polling for the room's ControlByWeb device
           if (room.ipAddress) {
             startPolling(room.ipAddress, pollingInterval);
@@ -88,7 +89,7 @@ const RoomService = {
   updateFromControlByWeb: async (
     ipAddress: string,
     bulbStatus: eBulbStatus,
-    bulbColor: eBulbColor
+    bulbColor = eBulbColor.white
   ): Promise<RoomType> => {
     try {
       let room = Object.values(roomCache).find(
@@ -104,8 +105,8 @@ const RoomService = {
         roomCache[room.id] = room;
       }
       const roomId = room.id;
-      roomCache[roomId].bulbStatus = bulbStatus;
-      roomCache[roomId].bulbColor = bulbColor;
+      roomCache[roomId]!.bulbStatus = bulbStatus;
+      roomCache[roomId]!.bulbColor = bulbColor;
 
       // Emit the update via socket
       io.emit("bulbStatusUpdated", {
@@ -114,7 +115,7 @@ const RoomService = {
         bulbColor,
       });
 
-      return convertRoomToClient(roomCache[roomId]);
+      return convertRoomToClient(roomCache[roomId]!);
     } catch (error) {
       console.error(
         `Error updating room from ControlByWeb with IP ${ipAddress}:`,

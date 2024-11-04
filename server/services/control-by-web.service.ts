@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { eBulbColorNum, eBulbStatusNum } from "../types/room.type";
 import { ApiError } from "../../lib/utils/api-error.util";
-import { eBulbStatus } from "../../lib/types/room.type";
+import { eBulbColor, eBulbStatus } from "../../lib/types/room.type";
 
 /**
  * Service for updating bulb status using ControlByWeb.
@@ -46,14 +46,14 @@ const ControlByWebService = {
   getBulbStatusByIp: async (
     ipAddress: string
   ): Promise<{
-    status: keyof typeof eBulbStatusNum;
-    color?: keyof typeof eBulbColorNum;
+    status: eBulbStatus;
+    color?: eBulbColor;
   }> => {
     try {
       const url = `http://${ipAddress}/state.xml`;
       const response = await axios.get(url);
-      let status: keyof typeof eBulbStatusNum | undefined;
-      let color: keyof typeof eBulbColorNum | undefined;
+      let status: eBulbStatus | undefined=  undefined;
+      let color: eBulbColor | undefined=  undefined;
 
       for (const colorKey in eBulbColorNum) {
         const colorNum = eBulbColorNum[colorKey as keyof typeof eBulbColorNum];
@@ -66,8 +66,8 @@ const ControlByWebService = {
             status = Object.keys(eBulbStatusNum).find(
               (key) =>
                 eBulbStatusNum[key as keyof typeof eBulbStatusNum] === statusNum
-            ) as keyof typeof eBulbStatusNum;
-            color = colorKey as keyof typeof eBulbColorNum;
+            ) as eBulbStatus;
+            color = colorKey as eBulbColor;
             break;
           }
         }
@@ -97,14 +97,19 @@ const ControlByWebService = {
   pollBulbStatus: (
     ipAddress: string,
     interval: number,
-    callback: (_status: keyof typeof eBulbStatusNum, _color?: keyof typeof eBulbColorNum) => void
+    callback: (
+      _status: keyof typeof eBulbStatusNum,
+      _color?: keyof typeof eBulbColorNum
+    ) => void
   ): void => {
     let previousStatus: keyof typeof eBulbStatusNum | undefined;
     let previousColor: keyof typeof eBulbColorNum | undefined;
 
     setInterval(async () => {
       try {
-        const { status, color } = await ControlByWebService.getBulbStatusByIp(ipAddress);
+        const { status, color } = await ControlByWebService.getBulbStatusByIp(
+          ipAddress
+        );
         if (status !== previousStatus || color !== previousColor) {
           previousStatus = status;
           previousColor = color;

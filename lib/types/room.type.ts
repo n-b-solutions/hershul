@@ -2,7 +2,7 @@ export interface RoomType {
   id: string;
   name: string;
   bulbStatus: eBulbStatus;
-  bulbColor: eBulbColor;
+  bulbColor?: eBulbColor;
 }
 
 export const enum eBulbStatus {
