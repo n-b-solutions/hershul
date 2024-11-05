@@ -50,6 +50,13 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
         }
     };
 
+    const handleRedo = () => {
+        setAudioBlob(null);
+        setAudioURL(null);
+        setRecordingDuration(0);
+        onRedo();
+    };
+
     useEffect(() => {
         return () => {
             if (intervalRef.current) {
@@ -123,7 +130,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
                             variant="outlined"
                             color="secondary"
                             startIcon={<RedoIcon />}
-                            onClick={onRedo}
+                            onClick={handleRedo}
                         >
                             Redo
                         </Button>
