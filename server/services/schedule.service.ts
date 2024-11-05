@@ -37,9 +37,11 @@ const ScheduleService = {
   updateRoomStatuses: async (): Promise<void> => {
     try {
       const now = new Date();
+      const nowTime = new Date(0, 0, 0, now.getHours(), now.getMinutes(), now.getSeconds());
+
       // Get all the minyans
       const conditions = await getMongoConditionForActiveMinyansByDate(now);
-      const minyans = await MinyanModel.find(conditions)
+      const minyans = await MinyanModel.find(conditions);
       const roomStatusMap = new Map<string, eBulbStatus>();
 
       // Process minyans to determine room statuses
@@ -49,16 +51,18 @@ const ScheduleService = {
           const startDate = new Date(minyan.startDate.time);
           const endDate = new Date(minyan.endDate.time);
           const blinkMinutes = Number(minyan.blink?.secondsNum);
-          const blurStartTime = new Date(
-            startDate.getTime() - blinkMinutes * 60000
-          );
+          const blurStartTime = new Date(startDate.getTime() - blinkMinutes * 60000);
+
+          const startTime = new Date(0, 0, 0, startDate.getHours(), startDate.getMinutes(), startDate.getSeconds());
+          const endTime = new Date(0, 0, 0, endDate.getHours(), endDate.getMinutes(), endDate.getSeconds());
+          const blurStartTimeOnly = new Date(0, 0, 0, blurStartTime.getHours(), blurStartTime.getMinutes(), blurStartTime.getSeconds());
 
           // Check if any action occurred in the current minute
-          if (now >= blurStartTime && now < startDate) {
+          if (nowTime >= blurStartTimeOnly && nowTime < startTime) {
             if (!minyan.steadyFlag) {
               roomStatusMap.set(roomId, eBulbStatus.blink);
             }
-          } else if (now >= startDate && now <= endDate) {
+          } else if (nowTime >= startTime && nowTime <= endTime) {
             if (!minyan.steadyFlag) {
               roomStatusMap.set(roomId, eBulbStatus.on);
             }
