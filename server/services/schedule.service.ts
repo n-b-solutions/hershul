@@ -8,7 +8,7 @@ import {
   Location,
 } from "@hebcal/core";
 import { getQueryDateType, getRoshChodeshCond } from "../helpers/minyan.helper";
-import { MinyanType } from "../../lib/types/minyan.type";
+import { eDateType, MinyanType } from "../../lib/types/minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { convertMinyanDocument } from "../utils/convert-document.util";
 import RoomService from "./room.service";
@@ -72,7 +72,7 @@ const ScheduleService = {
     try {
       const now = new Date();
       // Get all the minyans
-      const minyans = await MinyanService.get();
+      const minyans = await MinyanService.getByDateType(eDateType.sunday);
       const roomStatusMap = new Map<string, eBulbStatus>();
 
       // Process minyans to determine room statuses
@@ -96,6 +96,9 @@ const ScheduleService = {
               roomStatusMap.set(roomId, eBulbStatus.on);
             }
           } else {
+            if (!roomStatusMap.get(roomId)) {
+              roomStatusMap.set(roomId, eBulbStatus.off);
+            }
             if (minyan.steadyFlag) {
               roomStatusMap.set(roomId, eBulbStatus.off);
               await MinyanService.put("steadyFlag", "", false, minyan.id);

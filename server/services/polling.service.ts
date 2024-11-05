@@ -17,7 +17,6 @@ const pollWithRetry = async (
     const { status, color } = await ControlByWebService.getBulbStatusByIp(
       ipAddress
     );
-    console.log(`Polled update: Status ${status}, Color ${color}`);
     await RoomService.updateFromControlByWeb(ipAddress, status, color);
   } catch (error) {
     if ((error as AxiosError).code === "ECONNRESET" && retries < MAX_RETRIES) {

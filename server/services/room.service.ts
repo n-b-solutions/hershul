@@ -71,25 +71,25 @@ const RoomService = {
         roomCache[id] = convertRoomDocumentToServerType(room);
       }
 
-      const ipAddress = roomCache[id]?.ipAddress;
-
       // Check if the status or color has changed
       if (
         roomCache[id].bulbStatus !== bulbStatus ||
         roomCache[id].bulbColor !== bulbColor
       ) {
+        const ipAddress = roomCache[id]?.ipAddress;
         await ControlByWebService.updateUsingControlByWeb(
           ipAddress,
           bulbStatus,
           bulbColor
         );
-        roomCache[id].bulbStatus = bulbStatus;
-        roomCache[id].bulbColor = bulbColor;
       }
 
       return convertRoomToClient(roomCache[id]);
     } catch (error) {
-      console.error(`Error updating room with ID ${id}:`, error);
+      console.error(
+        `Error updating room with ID ${id}:`,
+        (error as Error)?.message
+      );
       throw new ApiError(500, (error as Error).message);
     }
   },
@@ -144,7 +144,11 @@ const RoomService = {
       const rooms = await RoomService.get();
       for (const room of rooms) {
         if (room.bulbStatus !== eBulbStatus.off) {
-          await RoomService.updateBulbStatus(eBulbStatus.off, undefined, room.id);
+          await RoomService.updateBulbStatus(
+            eBulbStatus.off,
+            undefined,
+            room.id
+          );
         }
       }
       console.log("All room statuses have been set to 'off'!");
