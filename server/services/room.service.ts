@@ -138,6 +138,21 @@ const RoomService = {
       throw new ApiError(500, (error as Error).message);
     }
   },
+
+  updateAllRoomsToOffStatus: async (): Promise<void> => {
+    try {
+      const rooms = await RoomService.get();
+      for (const room of rooms) {
+        if (room.bulbStatus !== eBulbStatus.off) {
+          await RoomService.updateBulbStatus(eBulbStatus.off, undefined, room.id);
+        }
+      }
+      console.log("All room statuses have been set to 'off'!");
+    } catch (error) {
+      console.error("Error updating all rooms to 'off' status:", error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
 };
 
 export default RoomService;

@@ -1,6 +1,5 @@
-import { eBulbStatus, RoomType } from "../../lib/types/room.type";
+import { eBulbColor, eBulbStatus } from "../../lib/types/room.type";
 import MinyanModel from "../models/minyan.model";
-import RoomModel from "../models/room.model";
 import {
   GeoLocation,
   Zmanim,
@@ -11,11 +10,10 @@ import {
 import { getQueryDateType, getRoshChodeshCond } from "../helpers/minyan.helper";
 import { MinyanType } from "../../lib/types/minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
-import {
-  convertMinyanDocument,
-  convertRoomDocument,
-} from "../utils/convert-document.util";
+import { convertMinyanDocument } from "../utils/convert-document.util";
 import RoomService from "./room.service";
+import { convertHDateToDate } from "../utils/convert-date.util";
+import MinyanService from "./minyan.service";
 
 const ScheduleService = {
   get: async (): Promise<MinyanType[]> => {
@@ -69,141 +67,121 @@ const ScheduleService = {
       throw new ApiError(500, (error as Error).message);
     }
   },
-  updateRoomStatuses: async (): Promise<RoomType[]> => {
-    // TODO: Refactor this method to use a more efficient algorithm
-    const now = new Date();
-    const updates: RoomType[] = [];
 
-    const minyans = await MinyanModel.find();
-    const roomStatusMap = new Map<string, eBulbStatus>();
+  updateRoomStatuses: async (): Promise<void> => {
+    try {
+      const now = new Date();
+      // Get all the minyans
+      const minyans = await MinyanService.get();
+      const roomStatusMap = new Map<string, eBulbStatus>();
 
-    for (const minyan of minyans) {
-      const roomId = minyan.roomId.toString();
-      const startDate = new Date(minyan.startDate.time);
-      const endDate = new Date(minyan.endDate.time);
-      const blinkMinutes = Number(minyan.blink?.secondsNum);
-      const blurStartTime = new Date(
-        startDate.getTime() - blinkMinutes * 60000
+      // Process minyans to determine room statuses
+      await Promise.all(
+        minyans.map(async (minyan) => {
+          const roomId = minyan.room.id;
+          const startDate = new Date(minyan.startDate.time);
+          const endDate = new Date(minyan.endDate.time);
+          const blinkMinutes = Number(minyan.blink?.secondsNum);
+          const blurStartTime = new Date(
+            startDate.getTime() - blinkMinutes * 60000
+          );
+
+          // Check if any action occurred in the current minute
+          if (now >= blurStartTime && now < startDate) {
+            if (!minyan.steadyFlag) {
+              roomStatusMap.set(roomId, eBulbStatus.blink);
+            }
+          } else if (now >= startDate && now <= endDate) {
+            if (!minyan.steadyFlag) {
+              roomStatusMap.set(roomId, eBulbStatus.on);
+            }
+          } else {
+            if (minyan.steadyFlag) {
+              roomStatusMap.set(roomId, eBulbStatus.off);
+              await MinyanService.put("steadyFlag", "", false, minyan.id);
+            }
+          }
+        })
       );
 
-      if (now >= blurStartTime && now < startDate) {
-        if (!minyan.steadyFlag) {
-          roomStatusMap.set(roomId, eBulbStatus.blink);
-        }
-      } else if (now >= startDate && now <= endDate) {
-        if (!minyan.steadyFlag) {
-          roomStatusMap.set(roomId, eBulbStatus.on);
-        }
-      } else {
-        if (minyan.steadyFlag) {
-          minyan.steadyFlag = false;
-          roomStatusMap.set(roomId, eBulbStatus.off);
-          await minyan.save();
-        }
-      }
+      // Update room statuses based on the roomStatusMap
+      const rooms = await RoomService.get();
+      await Promise.all(
+        rooms.map(async (room) => {
+          const roomId = room.id?.toString();
+          const currentStatus = roomStatusMap.get(roomId || "");
+
+          if (currentStatus) {
+            await RoomService.updateBulbStatus(
+              currentStatus,
+              eBulbColor.white,
+              roomId
+            );
+          }
+        })
+      );
+    } catch (error) {
+      console.error("Error updating room statuses:", error);
     }
-
-    const rooms = await RoomModel.find();
-
-    for (const room of rooms) {
-      let updatedRoom = convertRoomDocument(room);
-      const currentStatus = roomStatusMap.get(room?._id?.toString() || "");
-      if (currentStatus && room.bulbStatus !== currentStatus) {
-        updatedRoom = await RoomService.updateBulbStatus(
-          currentStatus,
-          room._id?.toString()
-        );
-      }
-      updates.push(updatedRoom);
-    }
-
-    return updates;
   },
 
   logBeforeShkiah: async (): Promise<void> => {
-    // TODO: Refactor this method to use a more efficient algorithm
-    const now = new Date();
-    const today = now.getDay();
+    try {
+      const now = new Date();
+      const today = now.getDay();
 
-    const latitude = process.env.VITE_LATITUDE
-      ? parseFloat(process.env.VITE_LATITUDE)
-      : 40.7128; // Default to New York City latitude
-    const longitude = process.env.VITE_LONGITUDE
-      ? parseFloat(process.env.VITE_LONGITUDE)
-      : -74.006; // Default to New York City longitude
-    const tzid = process.env.VITE_TZID || "America/New_York";
+      const latitude = process.env.VITE_LATITUDE
+        ? parseFloat(process.env.VITE_LATITUDE)
+        : 40.7128; // Default to New York City latitude
+      const longitude = process.env.VITE_LONGITUDE
+        ? parseFloat(process.env.VITE_LONGITUDE)
+        : -74.006; // Default to New York City longitude
+      const tzid = process.env.VITE_TZID || "America/New_York";
 
-    const location = new Location(latitude, longitude, false, tzid);
+      const location = new Location(latitude, longitude, false, tzid);
 
-    if (today === 5) {
-      // Friday
-      // Calculate shkiah (sunset) time for Friday
-      const gloc = new GeoLocation(null, latitude, longitude, 0, tzid);
-      const zmanim = new Zmanim(gloc, now, false);
-      const shkiah = zmanim.shkiah();
-      // Calculate 30 minutes before shkiah
-      const shkiahMinus30 = new Date(shkiah.getTime() - 30 * 60000);
+      if (today === 5) {
+        // Friday
+        const gloc = new GeoLocation(null, latitude, longitude, 0, tzid);
+        const zmanim = new Zmanim(gloc, now, false);
+        const shkiah = zmanim.shkiah();
+        const shkiahMinus30 = new Date(shkiah.getTime() - 30 * 60000);
 
-      if (now >= shkiahMinus30 && now <= shkiah) {
-        const rooms = await RoomModel.find();
-        for (const room of rooms) {
-          if (room.bulbStatus !== eBulbStatus.off) {
-            room.bulbStatus = eBulbStatus.off;
-            await room.save();
-          }
+        if (now >= shkiahMinus30 && now <= shkiah) {
+          await RoomService.updateAllRoomsToOffStatus();
         }
-        console.log("All room statuses have been set to 'off'!");
-      }
-    } else if (today === 6) {
-      // Saturday
-      const havdalahDate = new HDate();
-      const mask = 0;
-      const eventTime = new Date();
+      } else if (today === 6) {
+        // Saturday
+        const havdalahDate = new HDate();
+        const mask = 0;
+        const eventTime = new Date();
 
-      const havdalahMins = process.env.VITE_HAVDALAMINS
-        ? parseInt(process.env.VITE_HAVDALAMINS)
-        : 50;
-      const linkedEvent = undefined;
-      const options = undefined;
+        const havdalahMins = process.env.VITE_HAVDALAMINS
+          ? parseInt(process.env.VITE_HAVDALAMINS)
+          : 50;
+        const linkedEvent = undefined;
+        const options = undefined;
 
-      const havdalahEvent = new HavdalahEvent(
-        havdalahDate,
-        mask,
-        eventTime,
-        location,
-        havdalahMins,
-        linkedEvent,
-        options
-      );
-
-      // Convert HDate to Date object if HDate has a method to get Date object
-      const havdalahTimeLocal = havdalahEvent.getDate();
-      // Add conversion method or utility function here
-
-      function convertHDateToDate(hDate) {
-        // Example conversion logic (adjust according to actual HDate properties)
-
-        return new Date(
-          hDate.getYear(),
-          hDate.getMonth() - 1,
-          hDate.getDay(),
-          hDate.getHours(),
-          hDate.getMinutes()
+        const havdalahEvent = new HavdalahEvent(
+          havdalahDate,
+          mask,
+          eventTime,
+          location,
+          havdalahMins,
+          linkedEvent,
+          options
         );
-      }
 
-      const havdalahTime = convertHDateToDate(havdalahTimeLocal);
+        const havdalahTimeLocal = havdalahEvent.getDate();
+        const havdalahTime = convertHDateToDate(havdalahTimeLocal);
 
-      if (now > havdalahTime) {
-        const rooms = await RoomModel.find();
-        for (const room of rooms) {
-          if (room.bulbStatus !== eBulbStatus.off) {
-            room.bulbStatus = eBulbStatus.off;
-            await room.save();
-          }
+        if (now > havdalahTime) {
+          await RoomService.updateAllRoomsToOffStatus();
         }
-        console.log("All room statuses have been set to 'off'!");
       }
+    } catch (error) {
+      console.error("Error in logBeforeShkiah:", error);
+      throw new ApiError(500, (error as Error).message);
     }
   },
 };
