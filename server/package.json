@@ -8,6 +8,7 @@
     "dev": "concurrently \"npm run watch\" \"npm run backend\"",
     "build": "npm install && tsc && npm run migrate-up",
     "start": "node build/server/app.js",
+    "start-prod": "pm2 start ecosystem.config.json --no-daemon",
     "migrate-up": "migrate-mongo up",
     "migrate-down": "migrate-mongo down",
     "drop-database": "cross-env NODE_ENV=development npx ts-node DB/scripts/drop-database.ts",

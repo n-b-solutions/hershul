@@ -14,7 +14,10 @@ import { ApiError } from "../../lib/utils/api-error.util";
 import { convertMinyanDocument } from "../utils/convert-document.util";
 import { MinyanDocument } from "../types/minyan.type";
 import { CountType, IdType } from "../../lib/types/metadata.type";
-import { getQueryDateType } from "../helpers/minyan.helper";
+import {
+  getMongoConditionForActiveMinyansByDate,
+  getQueryDateType,
+} from "../helpers/minyan.helper";
 
 const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
@@ -133,6 +136,22 @@ const MinyanService = {
     }
   },
 
+  getCountMinyanByCalendar: async (selectedDate: Date): Promise<CountType> => {
+    try {
+      const conditions = await getMongoConditionForActiveMinyansByDate(
+        selectedDate
+      );
+      const countMinyans = await MinyanModel.countDocuments(conditions);
+      return { count: countMinyans ?? 0 };
+    } catch (error) {
+      console.error(
+        `Error fetching minyan count for date type ${selectedDate}:`,
+        error
+      );
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
   getCountMinyanByCategory: async (dateType: eDateType): Promise<CountType> => {
     try {
       const countMinyans = await MinyanModel.countDocuments({
@@ -185,12 +204,22 @@ const MinyanService = {
 
   postDuplicateMinyanByCategory: async (
     duplicateFromDateType: eDateType,
-    currentDateType: eDateType
+    currentDateType: eDateType,
+    selectedDate?: Date,
+    currentSelectedDate?: Date
   ): Promise<MinyanType[]> => {
     try {
-      const minyansToDuplicateFrom = await MinyanModel.find({
+      let cond: any = {
         dateType: duplicateFromDateType,
-      });
+      };
+      if (selectedDate && duplicateFromDateType === eDateType.calendar) {
+        cond = {
+          ...(await getMongoConditionForActiveMinyansByDate(
+            new Date(selectedDate)
+          )),
+        };
+      }
+      const minyansToDuplicateFrom = await MinyanModel.find(cond);
 
       const duplicateMinyansToInsert = minyansToDuplicateFrom.map((minyan) => {
         return {
@@ -199,14 +228,14 @@ const MinyanService = {
           endDate: minyan.endDate,
           blink: minyan.blink,
           dateType: currentDateType,
-          specificDate: minyan.specificDate,
+          specificDate: currentSelectedDate && { date: currentSelectedDate },
         };
       });
 
-      await MinyanModel.insertMany(duplicateMinyansToInsert);
-
+      const insertData = await MinyanModel.insertMany(duplicateMinyansToInsert);
+      const ids = insertData.map((minyan) => minyan._id);
       const duplicateMinyansDocuments = await MinyanModel.find({
-        dateType: currentDateType,
+        _id: { $in: ids },
       })
         .populate("roomId")
         .populate("startDate.messageId")

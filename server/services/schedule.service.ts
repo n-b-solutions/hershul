@@ -7,54 +7,20 @@ import {
   HDate,
   Location,
 } from "@hebcal/core";
-import { getQueryDateType, getRoshChodeshCond } from "../helpers/minyan.helper";
-import { eDateType, MinyanType } from "../../lib/types/minyan.type";
+import { MinyanType } from "../../lib/types/minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { convertMinyanDocument } from "../utils/convert-document.util";
 import RoomService from "./room.service";
 import { convertHDateToDate } from "../utils/convert-date.util";
 import MinyanService from "./minyan.service";
+import { getMongoConditionForActiveMinyansByDate } from "../helpers/minyan.helper";
 
 const ScheduleService = {
   get: async (): Promise<MinyanType[]> => {
     try {
       const today = new Date();
-      const startOfDay = new Date(today);
-      startOfDay.setHours(0, 0, 0, 0); // start of day
-      const endOfDay = new Date(today);
-      endOfDay.setHours(23, 59, 59, 999); // end of day
-      const calendarCond = {
-        dateType: "calendar",
-        "specificDate.date": {
-          $gte: startOfDay.toISOString(),
-          $lt: endOfDay.toISOString(),
-        },
-      };
-      const dateType = await getQueryDateType(today);
-      const dateTypeCond = {
-        $and: [
-          { dateType },
-          {
-            "inactiveDates.date": {
-              $not: {
-                $gte: startOfDay,
-                $lt: endOfDay,
-              },
-            },
-          },
-        ],
-      };
-      const roshChodeshCond = await getRoshChodeshCond(dateType, today);
-
-      const query = {
-        $or: [
-          calendarCond, // Assuming calendarCond is always populated
-          dateTypeCond, // Assuming dateTypeCond is always populated
-          ...(Object.keys(roshChodeshCond).length > 0 ? [roshChodeshCond] : []), // Conditional check for roshChodeshCond
-        ],
-      };
-
-      const minyansForSchedule = await MinyanModel.find(query)
+      const conditions = await getMongoConditionForActiveMinyansByDate(today);
+      const minyansForSchedule = await MinyanModel.find(conditions)
         .populate("roomId")
         .populate("startDate.messageId")
         .populate("endDate.messageId")
@@ -72,13 +38,14 @@ const ScheduleService = {
     try {
       const now = new Date();
       // Get all the minyans
-      const minyans = await MinyanService.getByDateType(eDateType.sunday);
+      const conditions = await getMongoConditionForActiveMinyansByDate(now);
+      const minyans = await MinyanModel.find(conditions)
       const roomStatusMap = new Map<string, eBulbStatus>();
 
       // Process minyans to determine room statuses
       await Promise.all(
         minyans.map(async (minyan) => {
-          const roomId = minyan.room.id;
+          const roomId = minyan.roomId?.toString();
           const startDate = new Date(minyan.startDate.time);
           const endDate = new Date(minyan.endDate.time);
           const blinkMinutes = Number(minyan.blink?.secondsNum);
