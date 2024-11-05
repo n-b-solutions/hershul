@@ -72,13 +72,21 @@ const RoomService = {
       }
 
       const ipAddress = roomCache[id]?.ipAddress;
-      await ControlByWebService.updateUsingControlByWeb(
-        ipAddress,
-        bulbStatus,
-        bulbColor
-      );
-      roomCache[id].bulbStatus = bulbStatus;
-      roomCache[id].bulbColor = bulbColor;
+
+      // Check if the status or color has changed
+      if (
+        roomCache[id].bulbStatus !== bulbStatus ||
+        roomCache[id].bulbColor !== bulbColor
+      ) {
+        await ControlByWebService.updateUsingControlByWeb(
+          ipAddress,
+          bulbStatus,
+          bulbColor
+        );
+        roomCache[id].bulbStatus = bulbStatus;
+        roomCache[id].bulbColor = bulbColor;
+      }
+
       return convertRoomToClient(roomCache[id]);
     } catch (error) {
       console.error(`Error updating room with ID ${id}:`, error);
@@ -105,15 +113,21 @@ const RoomService = {
         roomCache[room.id] = room;
       }
       const roomId = room.id;
-      roomCache[roomId]!.bulbStatus = bulbStatus;
-      roomCache[roomId]!.bulbColor = bulbColor;
+      // Check if the status or color has changed
+      if (
+        roomCache[roomId]!.bulbStatus !== bulbStatus ||
+        roomCache[roomId]!.bulbColor !== bulbColor
+      ) {
+        roomCache[roomId]!.bulbStatus = bulbStatus;
+        roomCache[roomId]!.bulbColor = bulbColor;
 
-      // Emit the update via socket
-      io.emit("bulbStatusUpdated", {
-        roomId,
-        bulbStatus,
-        bulbColor,
-      });
+        // Emit the update via socket
+        io.emit("bulbStatusUpdated", {
+          roomId,
+          bulbStatus,
+          bulbColor,
+        });
+      }
 
       return convertRoomToClient(roomCache[roomId]!);
     } catch (error) {
