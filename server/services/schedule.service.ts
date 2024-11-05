@@ -42,7 +42,7 @@ const ScheduleService = {
       // Get all the minyans
       const conditions = await getMongoConditionForActiveMinyansByDate(now);
       const minyans = await MinyanModel.find(conditions);
-      const roomStatusMap = new Map<string, eBulbStatus>();
+      const roomStatusObj: { [key: string]: eBulbStatus } = {};
 
       // Process minyans to determine room statuses
       await Promise.all(
@@ -60,30 +60,30 @@ const ScheduleService = {
           // Check if any action occurred in the current minute
           if (nowTime >= blurStartTimeOnly && nowTime < startTime) {
             if (!minyan.steadyFlag) {
-              roomStatusMap.set(roomId, eBulbStatus.blink);
+              roomStatusObj[roomId] = eBulbStatus.blink;
             }
           } else if (nowTime >= startTime && nowTime <= endTime) {
             if (!minyan.steadyFlag) {
-              roomStatusMap.set(roomId, eBulbStatus.on);
+              roomStatusObj[roomId] = eBulbStatus.on;
             }
           } else {
-            if (!roomStatusMap.get(roomId)) {
-              roomStatusMap.set(roomId, eBulbStatus.off);
+            if (!roomStatusObj[roomId]) {
+              roomStatusObj[roomId] = eBulbStatus.off;
             }
             if (minyan.steadyFlag) {
-              roomStatusMap.set(roomId, eBulbStatus.off);
+              roomStatusObj[roomId] = eBulbStatus.off;
               await MinyanService.put("steadyFlag", "", false, minyan.id);
             }
           }
         })
       );
 
-      // Update room statuses based on the roomStatusMap
+      // Update room statuses based on the roomStatusObj
       const rooms = await RoomService.get();
       await Promise.all(
         rooms.map(async (room) => {
           const roomId = room.id?.toString();
-          const currentStatus = roomStatusMap.get(roomId || "");
+          const currentStatus = roomStatusObj[roomId || ""];
 
           if (currentStatus) {
             await RoomService.updateBulbStatus(
