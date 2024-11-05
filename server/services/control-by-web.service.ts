@@ -52,8 +52,8 @@ const ControlByWebService = {
     try {
       const url = `http://${ipAddress}/state.xml`;
       const response = await axios.get(url);
-      let status: eBulbStatus | undefined=  undefined;
-      let color: eBulbColor | undefined=  undefined;
+      let status: eBulbStatus | undefined = undefined;
+      let color: eBulbColor | undefined = undefined;
 
       for (const colorKey in eBulbColorNum) {
         const colorNum = eBulbColorNum[colorKey as keyof typeof eBulbColorNum];
@@ -74,16 +74,16 @@ const ControlByWebService = {
       }
 
       if (!status) {
-        status = eBulbStatus.off; //  no relay is active
+        status = eBulbStatus.off; // no relay is active
       }
 
       return { status, color };
     } catch (error) {
       console.error(
         "Error getting bulb status by IP from ControlByWeb:",
-        error
+        (error as Error).message
       );
-      throw new ApiError(500, (error as Error).message);
+      throw error;
     }
   },
 
