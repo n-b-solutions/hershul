@@ -100,13 +100,11 @@ const ControlByWebService = {
       if (fakeUpdate) {
         return { status: fakeUpdate.status, color: fakeUpdate.color };
       } else {
-        const fakeStatus = Object.keys(eBulbStatusNum)[
-          Math.floor(Math.random() * Object.keys(eBulbStatusNum).length)
-        ] as eBulbStatus;
-        const fakeColor = Object.keys(eBulbColor)[
-          Math.floor(Math.random() * Object.keys(eBulbColor).length)
-        ] as eBulbColor;
-        return { status: fakeStatus, color: fakeColor };
+        const defaultStatus = eBulbStatus.off;
+        const defaultColor = undefined;
+        fakeUpdates[ipAddress] = { status: defaultStatus, color: defaultColor };
+        writeFakeUpdates(fakeUpdates);
+        return { status: defaultStatus, color: defaultColor };
       }
     }
   },
