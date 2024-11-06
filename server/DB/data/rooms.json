@@ -1,32 +1,26 @@
 [
   {
     "name": "Divrey Yoel",
-    "bulbStatus": "off",
     "ipAddress": "192.168.1.32"
   },
   {
     "name": "Birech Moshe",
-    "bulbStatus": "off",
     "ipAddress": "192.168.1.33"
   },
   {
     "name": "Chaim Shia",
-    "bulbStatus": "off",
     "ipAddress": "192.168.1.34"
   },
   {
     "name": "Shlomie Yehuda",
-    "bulbStatus": "on",
     "ipAddress": "192.168.1.35"
   },
   {
     "name": "Shmuel Chaim",
-    "bulbStatus": "on",
     "ipAddress": "192.168.1.36"
   },
   {
     "name": "room6",
-    "bulbStatus": "on",
     "ipAddress": "0.0.0.0"
   }
 ]
