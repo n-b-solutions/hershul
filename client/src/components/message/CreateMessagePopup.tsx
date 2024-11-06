@@ -11,6 +11,7 @@ import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Grid from '@mui/material/Unstable_Grid2';
+import { ArrowCounterClockwise as RedoIcon, FloppyDisk as SaveIcon } from '@phosphor-icons/react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { fetchRooms, selectRooms, selectRoomsLoading } from '../../redux/room/room-slice';
@@ -81,15 +82,14 @@ export const CreateMessagePopup = ({
           overflow: 'visible',
           padding: 0,
           margin: 0,
-         },
+        },
       }}
       BackdropProps={{ invisible: true }}
       open={open}
       onClose={() => handleClose()}
       onClick={(event) => event.stopPropagation()}
-    
     >
-      <Box sx={{ bgcolor: 'transparent', p: 3, display: 'flex',} }>
+      <Box sx={{ bgcolor: 'transparent', p: 3, display: 'flex' }}>
         <Paper
           sx={{
             border: '1px solid var(--mui-palette-divider)',
@@ -133,11 +133,17 @@ export const CreateMessagePopup = ({
             </Grid>
             <Box sx={{ mt: 3 }}>
               {audioBlob ? (
-                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                  <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled || loading}>
+                <Box sx={{ display: 'flex', gap: '100px', mt: '75%' }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSave}
+                    disabled={isSaveDisabled || loading}
+                    startIcon={<SaveIcon />}
+                  >
                     Save
                   </Button>
-                  <Button variant="outlined" color="secondary" onClick={handleRedo}>
+                  <Button variant="outlined" color="secondary" onClick={handleRedo} startIcon={<RedoIcon />}>
                     Redo
                   </Button>
                 </Box>
