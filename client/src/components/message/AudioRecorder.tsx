@@ -20,7 +20,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const mediaRecorder = new MediaRecorder(stream);
             mediaRecorderRef.current = mediaRecorder;
-    
+
             mediaRecorder.ondataavailable = (event: BlobEvent) => {
                 if (event.data.size > 0) {
                     const blob = new Blob([event.data], { type: 'audio/wav' });
@@ -28,7 +28,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
                     setAudioURL(URL.createObjectURL(blob));
                 }
             };
-    
+
             mediaRecorder.start();
             setIsRecording(true);
             setRecordingDuration(0);
@@ -39,7 +39,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
             console.error('Error accessing audio devices.', err);
         }
     };
-    
+
     const stopRecording = () => {
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
@@ -75,7 +75,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2 }}>
             <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                 <IconButton
-                    onClick={isRecording ? stopRecording : startRecording}
+                    onClick={isRecording ? stopRecording : (audioBlob ? handleRedo : startRecording)}
                     sx={{
                         width: 100,
                         height: 100,
@@ -116,7 +116,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
                     <Typography variant="h6" sx={{ mt: 2 }}>
                         {formatDuration(recordingDuration)}
                     </Typography>
-                    <audio controls src={audioURL} style={{ marginTop: 16,width:'75%' }} />
+                    <audio controls src={audioURL} style={{ marginTop: 16, width: '75%' }} />
                     <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                         <Button
                             variant="contained"
