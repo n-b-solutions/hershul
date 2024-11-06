@@ -83,40 +83,6 @@ const ControlByWebService = {
 
     return { status, color };
   },
-
-  /**
-   * Polls the ControlByWeb device for changes in bulb status.
-   *
-   * @param ipAddress - The IP address of the ControlByWeb device.
-   * @param interval - The polling interval in milliseconds.
-   * @param callback - The callback function to call when the bulb status changes.
-   */
-  pollBulbStatus: (
-    ipAddress: string,
-    interval: number,
-    callback: (
-      _status: keyof typeof eBulbStatusNum,
-      _color?: keyof typeof eBulbColorNum
-    ) => void
-  ): void => {
-    let previousStatus: keyof typeof eBulbStatusNum | undefined;
-    let previousColor: keyof typeof eBulbColorNum | undefined;
-
-    setInterval(async () => {
-      try {
-        const { status, color } = await ControlByWebService.getBulbStatusByIp(
-          ipAddress
-        );
-        if (status !== previousStatus || color !== previousColor) {
-          previousStatus = status;
-          previousColor = color;
-          callback(status, color);
-        }
-      } catch (error) {
-        console.error("Error polling bulb status from ControlByWeb:", error);
-      }
-    }, interval);
-  },
 };
 
 export default ControlByWebService;
