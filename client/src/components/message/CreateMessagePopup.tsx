@@ -72,15 +72,13 @@ export const CreateMessagePopup = ({
     getRooms();
   }, []);
 
-  const dialogSize = audioBlob ? { width: '300px', height: '200px' } : { width: '300px', height: '400px' };
-
   return (
     <Dialog
       open={open}
       onClose={() => handleClose()}
       onClick={(event) => event.stopPropagation()}
       PaperProps={{
-        sx: dialogSize,
+        sx: { width: '300px', height: '400px' },
       }}
     >
       <Box sx={{ p: 3 }}>
