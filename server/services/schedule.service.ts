@@ -71,7 +71,7 @@ const ScheduleService = {
             }
           } else if (
             (nowHours > startHours || (nowHours === startHours && nowMinutes >= startMinutes)) &&
-            (nowHours < endHours || (nowHours === endHours && nowMinutes <= endMinutes))
+            (nowHours < endHours || (nowHours === endHours && nowMinutes < endMinutes))
           ) {
             if (!minyan.steadyFlag) {
               roomStatusObj[roomId] = eBulbStatus.on;
