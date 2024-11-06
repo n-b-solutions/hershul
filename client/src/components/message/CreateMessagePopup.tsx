@@ -96,7 +96,7 @@ export const CreateMessagePopup = ({
                 </Grid>
 
                 <Grid sm={6} xs={12}>
-                  <FormControl fullWidth>
+                  <FormControl fullWidth disabled={!!room}>
                     <InputLabel>Room</InputLabel>
                     <Select value={selectedRoom} onChange={handleRoomChange} input={<OutlinedInput label="Room" />}>
                       {roomsLoading ? (
