@@ -77,6 +77,7 @@ export function EditTableCellInputs<TRowModel extends object, TEdit = any>(props
       return props.selectOptions ? (
         <Select
           value={select}
+          sx={{ width: '70%' }}
           onChange={handleChange}
           inputRef={props.cellRef}
           onBlur={(e) => {

@@ -7,8 +7,8 @@ import { tFieldMinyanTable } from '@/types/minyans.type';
 import { Room } from '@/types/room.type';
 import { ColumnDef } from '@/types/table.type';
 
-import { ActionsMessage } from '../components/minyans-settings/ActionsMessage';
 import { MinyanType } from '../../../../../lib/types/minyan.type';
+import { ActionsMessage } from '../components/minyans-settings/ActionsMessage';
 
 const getFormatWithActionsMessage = (props: {
   value: number | string;
@@ -73,7 +73,7 @@ export const getMinyansSettingsColumns = ({
     valueForEdit: (row) => row.blink?.secondsNum,
     editInputType: 'number',
     name: 'Blink',
-    width: '10px',
+    width: '50px',
     field: 'blink',
     padding: 'none',
     align: 'center',
@@ -93,7 +93,7 @@ export const getMinyansSettingsColumns = ({
     editInputType: 'time',
     padding: 'none',
     name: 'Start Time',
-    width: '50px',
+    width: '70px',
     field: 'startDate',
     align: 'center',
     tooltip: 'Lights On',
@@ -113,7 +113,7 @@ export const getMinyansSettingsColumns = ({
     editInputType: 'time',
     padding: 'none',
     name: 'End Time',
-    width: '50px',
+    width: '70px',
     field: 'endDate',
     align: 'center',
     tooltip: 'Lights Off',
@@ -127,7 +127,7 @@ export const getMinyansSettingsColumns = ({
     valueOption: roomArray,
     padding: 'none',
     name: 'Room',
-    width: '110px',
+    width: '100px',
     field: 'room',
     align: 'center',
   },
