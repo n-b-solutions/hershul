@@ -318,7 +318,7 @@ export function Calendar({
           Loading...
         </Typography>
       ) : (
-        <Box style={{ height: 'calc(100% - 90px)', overflowY: 'auto' }}>
+        <Box style={{ height: 'calc(100% - 92px)', overflowY: 'auto' }}>
           <DataTable<MinyanType, EditMinyanValueType>
             columns={[
               ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
