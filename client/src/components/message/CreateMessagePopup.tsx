@@ -2,7 +2,7 @@ import * as React from 'react';
 import { messageLoading } from '@/redux/message/messageSlice';
 import { createMessage } from '@/redux/message/messageThunk';
 import type { AppDispatch } from '@/redux/store';
-import { Dialog } from '@mui/material';
+import { Dialog, Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
@@ -74,61 +74,79 @@ export const CreateMessagePopup = ({
 
   return (
     <Dialog
+      PaperProps={{
+        sx: {
+          backgroundColor: 'transparent',
+          boxShadow: 'none',
+          overflow: 'visible',
+          padding: 0,
+          margin: 0,
+         },
+      }}
+      BackdropProps={{ invisible: true }}
       open={open}
       onClose={() => handleClose()}
       onClick={(event) => event.stopPropagation()}
-      PaperProps={{
-        sx: { width: '300px', height: '400px' },
-      }}
+    
     >
-      <Box sx={{ p: 3 }}>
-        <Box maxWidth="sm">
-          <Grid container spacing={3}>
-            {audioBlob && (
-              <>
-                <Grid sm={6} xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel>Name</InputLabel>
-                    <OutlinedInput name="name" value={name} onChange={(e) => setName(e.target.value)} />
-                  </FormControl>
-                </Grid>
+      <Box sx={{ bgcolor: 'transparent', p: 3, display: 'flex',} }>
+        <Paper
+          sx={{
+            border: '1px solid var(--mui-palette-divider)',
+            boxShadow: 'var(--mui-shadows-16)',
+            width: '320px',
+            height: '487px',
+            mx: 'auto',
+          }}
+        >
+          <Box maxWidth="sm" sx={{ px: 3, py: 2 }}>
+            <Grid container spacing={3}>
+              {audioBlob && (
+                <>
+                  <Grid sm={6} xs={12}>
+                    <FormControl fullWidth>
+                      <InputLabel>Name</InputLabel>
+                      <OutlinedInput name="name" value={name} onChange={(e) => setName(e.target.value)} />
+                    </FormControl>
+                  </Grid>
 
-                <Grid sm={6} xs={12}>
-                  <FormControl fullWidth disabled={!!room}>
-                    <InputLabel>Room</InputLabel>
-                    <Select value={selectedRoom} onChange={handleRoomChange} input={<OutlinedInput label="Room" />}>
-                      {roomsLoading ? (
-                        <MenuItem value="" disabled>
-                          Loading rooms...
-                        </MenuItem>
-                      ) : (
-                        rooms.map((room) => (
-                          <MenuItem key={room.id} value={room.name}>
-                            {room.name}
+                  <Grid sm={6} xs={12}>
+                    <FormControl fullWidth disabled={!!room}>
+                      <InputLabel>Room</InputLabel>
+                      <Select value={selectedRoom} onChange={handleRoomChange} input={<OutlinedInput label="Room" />}>
+                        {roomsLoading ? (
+                          <MenuItem value="" disabled>
+                            Loading rooms...
                           </MenuItem>
-                        ))
-                      )}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </>
-            )}
-          </Grid>
-          <Box sx={{ mt: 3 }}>
-            {audioBlob ? (
-              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled || loading}>
-                  Save
-                </Button>
-                <Button variant="outlined" color="secondary" onClick={handleRedo}>
-                  Redo
-                </Button>
-              </Box>
-            ) : (
-              <AudioRecorder onSave={(blob) => setAudioBlob(blob)} onRedo={handleRedo} />
-            )}
+                        ) : (
+                          rooms.map((room) => (
+                            <MenuItem key={room.id} value={room.name}>
+                              {room.name}
+                            </MenuItem>
+                          ))
+                        )}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </>
+              )}
+            </Grid>
+            <Box sx={{ mt: 3 }}>
+              {audioBlob ? (
+                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                  <Button variant="contained" color="primary" onClick={handleSave} disabled={isSaveDisabled || loading}>
+                    Save
+                  </Button>
+                  <Button variant="outlined" color="secondary" onClick={handleRedo}>
+                    Redo
+                  </Button>
+                </Box>
+              ) : (
+                <AudioRecorder onSave={(blob) => setAudioBlob(blob)} onRedo={handleRedo} />
+              )}
+            </Box>
           </Box>
-        </Box>
+        </Paper>
       </Box>
     </Dialog>
   );
