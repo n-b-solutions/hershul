@@ -47,49 +47,49 @@ const ControlByWebService = {
     ipAddress: string,
     bulbStatus: keyof typeof eBulbStatusNum,
     color?: keyof typeof eBulbColorNum,
-    blinkDuration?: number
+    // blinkDuration?: number
   ): Promise<void> => {
     const bulbStatusNum = eBulbStatusNum[bulbStatus];
     const colorNum = color ? eBulbColorNum[color] : 1;
 
-    if (bulbStatus === eBulbStatus.blink && blinkDuration) {
-      const blinkInterval = 1000; // 1 second interval for blinking
-      const endTime = Date.now() + blinkDuration * 1000;
+    // if (bulbStatus === eBulbStatus.blink && blinkDuration) {
+    //   const blinkInterval = 1000; // 1 second interval for blinking
+    //   const endTime = Date.now() + blinkDuration * 1000;
 
-      while (Date.now() < endTime) {
-        if (isProd) {
-          await Promise.all([
-            axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=1`),
-            new Promise((resolve) => setTimeout(resolve, blinkInterval)),
-            axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=0`),
-            new Promise((resolve) => setTimeout(resolve, blinkInterval)),
-          ]);
-        } else {
-          const fakeUpdates = readFakeUpdates();
-          fakeUpdates[ipAddress] = { status: "on", color };
-          writeFakeUpdates(fakeUpdates);
-          await new Promise((resolve) => setTimeout(resolve, blinkInterval));
-          fakeUpdates[ipAddress] = { status: "off", color };
-          writeFakeUpdates(fakeUpdates);
-          await new Promise((resolve) => setTimeout(resolve, blinkInterval));
-        }
-      }
+    //   while (Date.now() < endTime) {
+    //     if (isProd) {
+    //       await Promise.all([
+    //         axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=1`),
+    //         new Promise((resolve) => setTimeout(resolve, blinkInterval)),
+    //         axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=0`),
+    //         new Promise((resolve) => setTimeout(resolve, blinkInterval)),
+    //       ]);
+    //     } else {
+    //       const fakeUpdates = readFakeUpdates();
+    //       fakeUpdates[ipAddress] = { status: "on", color };
+    //       writeFakeUpdates(fakeUpdates);
+    //       await new Promise((resolve) => setTimeout(resolve, blinkInterval));
+    //       fakeUpdates[ipAddress] = { status: "off", color };
+    //       writeFakeUpdates(fakeUpdates);
+    //       await new Promise((resolve) => setTimeout(resolve, blinkInterval));
+    //     }
+    //   }
+    // } else {
+    if (isProd) {
+      const url = `http://${ipAddress}/state.xml?relay${colorNum}=${bulbStatusNum}`;
+      await axios.get(url);
+      console.log(
+        `Updating bulb status to ${bulbStatusNum} for IP ${ipAddress}`
+      );
     } else {
-      if (isProd) {
-        const url = `http://${ipAddress}/state.xml?relay${colorNum}=${bulbStatusNum}`;
-        await axios.get(url);
-        console.log(
-          `Updating bulb status to ${bulbStatusNum} for IP ${ipAddress}`
-        );
-      } else {
-        const fakeUpdates = readFakeUpdates();
-        fakeUpdates[ipAddress] = { status: bulbStatus, color };
-        writeFakeUpdates(fakeUpdates);
-        console.log(
-          `Fake update: Setting bulb status to ${bulbStatus} and color to ${color} for IP ${ipAddress}`
-        );
-      }
+      const fakeUpdates = readFakeUpdates();
+      fakeUpdates[ipAddress] = { status: bulbStatus, color };
+      writeFakeUpdates(fakeUpdates);
+      console.log(
+        `Fake update: Setting bulb status to ${bulbStatus} and color to ${color} for IP ${ipAddress}`
+      );
     }
+    // }
   },
 
   /**

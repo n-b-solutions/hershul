@@ -39,6 +39,7 @@ const ScheduleService = {
       const now = new Date();
       const nowHours = now.getHours();
       const nowMinutes = now.getMinutes();
+      const nowSeconds = now.getSeconds();
 
       // Get all the minyans
       const conditions = await getMongoConditionForActiveMinyansByDate(now);
@@ -52,35 +53,43 @@ const ScheduleService = {
           const roomId = minyan.roomId?.toString();
           const startDate = new Date(minyan.startDate.time);
           const endDate = new Date(minyan.endDate.time);
-          const blinkMinutes = Number(minyan.blink?.secondsNum);
+          const blinkSeconds = Number(minyan.blink?.secondsNum);
 
           const startHours = startDate.getHours();
           const startMinutes = startDate.getMinutes();
+          const startSeconds = startDate.getSeconds();
           const endHours = endDate.getHours();
           const endMinutes = endDate.getMinutes();
-          const blinkStartTime = new Date(
-            startDate.getTime() - blinkMinutes * 60000
-          );
+          const endSeconds = endDate.getSeconds();
+          const blinkStartTime = new Date(startDate.getTime() - blinkSeconds * 1000);
           const blinkStartHours = blinkStartTime.getHours();
           const blinkStartMinutes = blinkStartTime.getMinutes();
+          const blinkStartSeconds = blinkStartTime.getSeconds();
 
           // Check if any action occurred in the current minute
           if (
             (nowHours > blinkStartHours ||
               (nowHours === blinkStartHours &&
-                nowMinutes >= blinkStartMinutes)) &&
+                (nowMinutes > blinkStartMinutes ||
+                  (nowMinutes === blinkStartMinutes && nowSeconds >= blinkStartSeconds)))) &&
             (nowHours < startHours ||
-              (nowHours === startHours && nowMinutes < startMinutes))
+              (nowHours === startHours &&
+                (nowMinutes < startMinutes ||
+                  (nowMinutes === startMinutes && nowSeconds < startSeconds))))
           ) {
             if (!minyan.steadyFlag) {
               roomStatusObj[roomId] = eBulbStatus.blink;
-              roomBlinkDurationObj[roomId] = blinkMinutes;
+              roomBlinkDurationObj[roomId] = blinkSeconds;
             }
           } else if (
             (nowHours > startHours ||
-              (nowHours === startHours && nowMinutes >= startMinutes)) &&
+              (nowHours === startHours &&
+                (nowMinutes > startMinutes ||
+                  (nowMinutes === startMinutes && nowSeconds >= startSeconds)))) &&
             (nowHours < endHours ||
-              (nowHours === endHours && nowMinutes < endMinutes))
+              (nowHours === endHours &&
+                (nowMinutes < endMinutes ||
+                  (nowMinutes === endMinutes && nowSeconds < endSeconds))))
           ) {
             if (!minyan.steadyFlag) {
               roomStatusObj[roomId] = eBulbStatus.on;

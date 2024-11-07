@@ -21,7 +21,7 @@ export const initSocketio = (server) => {
   });
 
   // TODO: Remove this cron job form here and move it to a separate file
-  const job = new CronJob("* * * * *", async () => {
+  const job = new CronJob("* * * * * *", async () => {
     console.log("Running cron job to update rooms...");
     await ScheduleService.updateRoomStatuses();
     await ScheduleService.logBeforeShkiah();
