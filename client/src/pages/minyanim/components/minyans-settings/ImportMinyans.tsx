@@ -10,7 +10,7 @@ import {
 } from '@/const/minyans.const';
 import { setCurrentSelectedDate, setSettingTimes } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
-import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typography } from '@mui/material';
+import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typography, IconButton } from '@mui/material';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,6 +21,7 @@ import { Option } from '@/components/core/option';
 
 import { CountType } from '../../../../../../lib/types/metadata.type';
 import { eDateType } from '../../../../../../lib/types/minyan.type';
+import { X as CloseIcon } from '@phosphor-icons/react';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
@@ -48,12 +49,15 @@ export function ImportMinyans(): React.JSX.Element {
               .then((res) => {
                 return { category: type, count: res.data?.count };
               })
-              .catch((err: any) => console.log('Error fetching data: ', err));
+              .catch((err: any) => {
+                console.log('Error fetching data: ', err);
+                return { category: type, count: 0 };
+              });
       })
     ).then((res: any) => {
       setDateTypeArray(
         res?.filter(
-          (dtCount: CountMinyanOfDate) => dtCount?.count !== 0 || dtCount?.category.value === eDateType.calendar
+          (dtCount: CountMinyanOfDate) => dtCount?.count !== 0 || dtCount?.category?.value === eDateType.calendar
         )
       );
     });
@@ -66,10 +70,12 @@ export function ImportMinyans(): React.JSX.Element {
         .then((res) => {
           setDateTypeArray((currentDateTypeArray) => {
             const calendarIndex = currentDateTypeArray.findIndex(
-              (f: CountMinyanOfDate) => f.category.value === eDateType.calendar
+              (f: CountMinyanOfDate) => f.category?.value === eDateType.calendar
             );
-            currentDateTypeArray[calendarIndex].count = res.data?.count;
-            setCountMinyan(res.data?.count);
+            if (calendarIndex !== -1) {
+              currentDateTypeArray[calendarIndex].count = res.data?.count;
+              setCountMinyan(res.data?.count);
+            }
             return currentDateTypeArray;
           });
         })
@@ -81,7 +87,7 @@ export function ImportMinyans(): React.JSX.Element {
     setIsCategorySelected(true);
     setDateType(e.target.value);
     const countMinyan: CountMinyanOfDate | undefined = dateTypeArray.find(
-      (f: CountMinyanOfDate) => f.category.value === e.target.value
+      (f: CountMinyanOfDate) => f.category?.value === e.target.value
     );
     countMinyan && setCountMinyan(countMinyan.count);
   };
@@ -157,6 +163,9 @@ export function ImportMinyans(): React.JSX.Element {
                   {TITTLE_IMPORT_MINYAN_MODEL}
                 </Typography>
               </Box>
+              <IconButton  sx={{ color: 'red', fontSize: '1rem' }} onClick={handleClose}>
+                <CloseIcon />
+              </IconButton>
             </Stack>
             <Box sx={{ justifyContent: 'center' }}>
               <Stack spacing={3} sx={{ alignItems: 'center', justifyContent: 'center', p: 2 }}>
@@ -165,8 +174,8 @@ export function ImportMinyans(): React.JSX.Element {
                     Choose Category
                   </Option>
                   {dateTypeArray?.map((option: CountMinyanOfDate) => (
-                    <Option value={option.category?.value} key={option.category?.value}>
-                      {option.category?.label}
+                    <Option value={option?.category?.value} key={option?.category?.value}>
+                      {option?.category?.label}
                     </Option>
                   ))}
                 </Select>
