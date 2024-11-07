@@ -12,7 +12,6 @@ import {
 import { isRoshHodesh } from "../helpers/time.helper";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { convertMinyanDocument } from "../utils/convert-document.util";
-import { MinyanDocument } from "../types/minyan.type";
 import { CountType, IdType } from "../../lib/types/metadata.type";
 import {
   getMongoConditionForActiveMinyansByDate,
@@ -176,14 +175,16 @@ const MinyanService = {
     specificDate,
   }: NewMinyanType): Promise<MinyanType> => {
     try {
-      // Adjust the time fields to set seconds to 00
-      startTime.setSeconds(0, 0);
-      endTime.setSeconds(0, 0);
+      // Convert strings to Date objects and set seconds to 00
+      const startDate = new Date(startTime);
+      const endDate = new Date(endTime);
+      startDate.setSeconds(0, 0);
+      endDate.setSeconds(0, 0);
 
-      const newMinyan: Omit<MinyanDocument, "id"> = {
+      const newMinyan = {
         roomId: new ObjectId(roomId),
-        startDate: { time: startTime },
-        endDate: { time: endTime },
+        startDate: { time: startDate },
+        endDate: { time: endDate },
         ...(blinkNum ? { blink: { secondsNum: blinkNum } } : {}),
         dateType,
         specificDate,
@@ -382,19 +383,21 @@ const MinyanService = {
         throw new ApiError(400, "Invalid ID format");
       }
 
-      // Adjust the time fields to set seconds to 00
+      // Convert strings to Date objects and set seconds to 00
       if (
         field === "endDate" &&
         internalField === "time" &&
-        value instanceof Date
+        typeof value === "string"
       ) {
+        value = new Date(value);
         value.setSeconds(0, 0);
       }
       if (
         field === "startDate" &&
         internalField === "time" &&
-        value instanceof Date
+        typeof value === "string"
       ) {
+        value = new Date(value);
         value.setSeconds(0, 0);
       }
 
