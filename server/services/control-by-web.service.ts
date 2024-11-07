@@ -3,6 +3,19 @@ import fs from "fs";
 import path from "path";
 import { eBulbStatus, eBulbColor } from "../../lib/types/room.type";
 import { eBulbColorNum, eBulbStatusNum } from "../types/room.type";
+import axiosRetry from "axios-retry";
+
+// Configure axios to use axios-retry
+axiosRetry(axios, {
+  retries: 5, // Number of retries
+  retryDelay: (retryCount) => {
+    return retryCount * 1000; // Exponential backoff (1s, 2s, 3s, etc.)
+  },
+  retryCondition: (error) => {
+    // Retry on ECONNRESET errors
+    return error.code === "ECONNRESET";
+  },
+});
 
 const isProd = process.env.NODE_ENV === "production";
 const fakeUpdatesFilePath = path.join(process.cwd(), "fake-updates.json");
