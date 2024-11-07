@@ -38,7 +38,6 @@ const isRoutineColumn: ColumnDef<CalendarRowType> = {
   editInputType: 'switch',
   valueForEdit: (row) => row?.isRoutine,
   name: 'Is Routine',
-  width: '8px',
   padding: 'normal',
   align: 'center',
   field: 'isRoutine',
@@ -319,7 +318,7 @@ export function Calendar({
           Loading...
         </Typography>
       ) : (
-        <Box style={{ height: 'calc(100% - 90px)', overflowY: 'auto' }}>
+        <Box style={{ height: 'calc(100% - 92px)', overflowY: 'auto' }}>
           <DataTable<MinyanType, EditMinyanValueType>
             columns={[
               ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
