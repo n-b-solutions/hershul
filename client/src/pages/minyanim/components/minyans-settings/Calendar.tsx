@@ -39,7 +39,7 @@ const isRoutineColumn: ColumnDef<CalendarRowType> = {
   valueForEdit: (row) => row?.isRoutine,
   name: 'Is Routine',
   width: '8px',
-  padding: 'normal',
+  padding: 'none',
   align: 'center',
   field: 'isRoutine',
   editable: true,
