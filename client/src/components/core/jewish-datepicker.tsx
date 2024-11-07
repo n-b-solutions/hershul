@@ -2,51 +2,40 @@ import * as React from 'react';
 import { WEEK_DAYS } from '@/utils/AdapterHebDate';
 import { HDate } from '@hebcal/core';
 import { TextField, TextFieldProps } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker, DatePickerProps } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 
-interface JewishDatePickerProps {
-  selectedDate: Dayjs;
-  setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs>>;
+// Define the props for the JewishDatePicker component
+interface JewishDatePickerProps extends Omit<DatePickerProps<Dayjs>, 'value' | 'onChange'> {
+  selectedDate: Dayjs | null;
   label?: string;
   sx?: any;
   format?: string;
+  onDateChange?: (newDate: Dayjs | null) => void;
 }
 
+// JewishDatePicker component
 const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
   selectedDate,
-  setSelectedDate,
   label,
   sx,
   format = 'MMM D, YYYY',
+  onDateChange,
+  ...props
 }) => {
-  const hebrewDate = new HDate(selectedDate.toDate()).renderGematriya();
+  // Convert the selected date to a Hebrew date string
+  const hebrewDate = React.useMemo(() => selectedDate ? new HDate(selectedDate.toDate()).renderGematriya() : '', [selectedDate]);
 
+  // Handle date change event
   const handleDateChange = (newDate: Dayjs | null) => {
-    if (newDate) {
-      setSelectedDate(newDate);
-    }
+    onDateChange?.(newDate);
   };
-
-  function CustomTextField(params: TextFieldProps) {
-    return (
-      <TextField
-        size="small"
-        {...params}
-        value={hebrewDate}
-        InputProps={{
-          ...params.InputProps,
-          readOnly: true,
-        }}
-      />
-    );
-  }
 
   return (
     <DatePicker
       format={format}
       label={label}
-      value={selectedDate}
+      value={selectedDate || null}
       minDate={dayjs()}
       onChange={handleDateChange}
       dayOfWeekFormatter={(date, dayJs: Dayjs) => WEEK_DAYS[dayJs.day()]}
@@ -58,9 +47,13 @@ const JewishDatePicker: React.FC<JewishDatePickerProps> = ({
             },
           },
         },
+        textField: { inputProps: { value: hebrewDate } },
       }}
-      slots={{ textField: CustomTextField }}
-      sx={sx}
+      sx={{
+        width: '100%',
+        ...sx,
+      }}
+      {...props}
     />
   );
 };

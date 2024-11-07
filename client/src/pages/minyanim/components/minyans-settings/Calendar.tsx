@@ -38,7 +38,6 @@ const isRoutineColumn: ColumnDef<CalendarRowType> = {
   editInputType: 'switch',
   valueForEdit: (row) => row?.isRoutine,
   name: 'Is Routine',
-  width: '8px',
   padding: 'normal',
   align: 'center',
   field: 'isRoutine',
@@ -311,15 +310,15 @@ export function Calendar({
       <JewishDatePicker
         label="Specific Date"
         selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        sx={{ paddingBottom: '2%', paddingLeft: '1%' }}
+        onDateChange={handleDateChange}
+        sx={{ paddingBottom: '2%', paddingLeft: '1%', width: '20%' }}
       />
       {loading ? (
         <Typography textAlign="center" variant="h6">
           Loading...
         </Typography>
       ) : (
-        <Box style={{ height: 'calc(100% - 90px)', overflowY: 'auto' }}>
+        <Box style={{ height: 'calc(100% - 92px)', overflowY: 'auto' }}>
           <DataTable<MinyanType, EditMinyanValueType>
             columns={[
               ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
