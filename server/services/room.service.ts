@@ -56,7 +56,8 @@ const RoomService = {
   updateBulbStatus: async (
     bulbStatus: eBulbStatus,
     bulbColor?: eBulbColor,
-    id?: string
+    id?: string,
+    blinkDuration?: number
   ): Promise<RoomType> => {
     try {
       if (!id || !Types.ObjectId.isValid(id)) {
@@ -80,7 +81,8 @@ const RoomService = {
         await ControlByWebService.updateUsingControlByWeb(
           ipAddress,
           bulbStatus,
-          bulbColor
+          bulbColor,
+          blinkDuration
         );
       }
 
