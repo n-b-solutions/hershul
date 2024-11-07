@@ -29,19 +29,6 @@ const RoomController = {
     }
   },
 
-  create: async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const result = await RoomService.create(req.body);
-      res.send(result);
-    } catch (error) {
-      next(error);
-    }
-  },
-
   update: async (
     req: Request,
     res: Response,
@@ -49,22 +36,13 @@ const RoomController = {
   ): Promise<void> => {
     try {
       const { id } = req.params;
-      const result = await RoomService.update(req.body, id);
+      const { bulbStatus, bulbColor } = req.body;
+      const result = await RoomService.updateBulbStatus(
+        bulbStatus,
+        bulbColor,
+        id
+      );
       res.send(result);
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  delete: async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const { id } = req.params;
-      await RoomService.delete(id);
-      res.sendStatus(204);
     } catch (error) {
       next(error);
     }

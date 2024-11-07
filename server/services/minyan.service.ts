@@ -23,6 +23,7 @@ const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
     try {
       const minyans = await MinyanModel.find()
+        .lean(true)
         .populate("roomId")
         .populate("startDate.messageId")
         .populate("endDate.messageId")

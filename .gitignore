@@ -21,18 +21,21 @@ server/dist
 *.pem
 .swc
 
-# debug
+# log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# environment varibales
+# environment variables
 .env*
 !.env*.example
 /server/.env*
 !/server/.env*.example
 /client/.env*
 !/client/.env*.example
+
+# fake updates for development
+/server/fake-updates.json
 
 # vercel
 .vercel

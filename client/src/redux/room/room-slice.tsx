@@ -5,6 +5,7 @@ import axios from 'axios';
 import { SelectOption } from '@/types/metadata.type';
 import { Room } from '@/types/room.type';
 
+import { BulbStatusUpdate } from '../../../../lib/types/io.type';
 import { eBulbStatus, RoomType } from '../../../../lib/types/room.type';
 import { RootState } from '../store';
 
@@ -60,8 +61,12 @@ const roomsSlice = createSlice({
       const { roomName, newStatus } = action.payload;
       state.rooms = state.rooms.map((room) => (room.name === roomName ? { ...room, status: newStatus } : room));
     },
-    setRoomStatusFromSocket: (state, action: PayloadAction<RoomType[]>) => {
-      state.rooms = action.payload;
+    setRoomStatusFromSocket: (state, action: PayloadAction<BulbStatusUpdate>) => {
+      const roomIndex = state.rooms.findIndex((r) => r.id.toString() === action.payload.roomId);
+      if (roomIndex !== -1) {
+        state.rooms[roomIndex].bulbStatus = action.payload.bulbStatus;
+        state.rooms[roomIndex].bulbColor = action.payload.bulbColor;
+      }
     },
   },
   extraReducers: (builder) => {
