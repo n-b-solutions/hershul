@@ -100,7 +100,7 @@ export const CreateMessagePopup = ({
           }}
         >
           <Box maxWidth="sm" sx={{ px: 3, py: 2 }}>
-            <Grid container spacing={3}>
+            <Grid container spacing={3} justifyContent="center">
               {audioBlob && (
                 <>
                   <Grid sm={6} xs={12}>
@@ -133,7 +133,7 @@ export const CreateMessagePopup = ({
             </Grid>
             <Box sx={{ mt: 3 }}>
               {audioBlob ? (
-                <Box sx={{ display: 'flex', gap: '100px', mt: '75%' }}>
+                <Box sx={{ display: 'flex', gap: 12, mt: '113%' }}>
                   <Button
                     variant="contained"
                     color="primary"
