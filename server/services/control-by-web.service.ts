@@ -45,10 +45,12 @@ const ControlByWebService = {
 
       while (Date.now() < endTime) {
         if (isProd) {
-          await axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=1`);
-          await new Promise((resolve) => setTimeout(resolve, blinkInterval));
-          await axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=0`);
-          await new Promise((resolve) => setTimeout(resolve, blinkInterval));
+          await Promise.all([
+            axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=1`),
+            new Promise((resolve) => setTimeout(resolve, blinkInterval)),
+            axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=0`),
+            new Promise((resolve) => setTimeout(resolve, blinkInterval)),
+          ]);
         } else {
           const fakeUpdates = readFakeUpdates();
           fakeUpdates[ipAddress] = { status: "on", color };
