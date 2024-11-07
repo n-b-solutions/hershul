@@ -50,7 +50,7 @@ export function ImportMinyans(): React.JSX.Element {
               })
               .catch((err: any) => {
                 console.log('Error fetching data: ', err);
-                return { category: type, count: 0 }; // במקרה של שגיאה, החזר אובייקט עם count=0
+                return { category: type, count: 0 };
               });
       })
     ).then((res: any) => {
