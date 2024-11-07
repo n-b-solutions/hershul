@@ -1,11 +1,11 @@
 import * as React from 'react';
+import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { MinusCircle as MinusCircleIcon } from '@phosphor-icons/react/dist/ssr/MinusCircle';
-import { PlusCircle as PlusCircleIcon } from '@phosphor-icons/react/dist/ssr/PlusCircle';
+import { X as CloseIcon, MinusCircle as MinusCircleIcon, PlusCircle as PlusCircleIcon } from '@phosphor-icons/react';
 
 import { usePopover } from '@/hooks/use-popover';
 
@@ -138,7 +138,12 @@ export function FilterPopover({ children, title, onClose, anchorEl, open }: Filt
       sx={{ '& .MuiPopover-paper': { mt: '4px', width: '280px' } }}
     >
       <Stack spacing={2} sx={{ p: 2 }}>
-        <Typography variant="subtitle2">{title}</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="subtitle2">{title}</Typography>
+          <IconButton sx={{ color: 'red', fontSize: '1rem' }} onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
         {children}
       </Stack>
     </Popover>

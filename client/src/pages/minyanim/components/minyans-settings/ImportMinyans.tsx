@@ -10,7 +10,7 @@ import {
 } from '@/const/minyans.const';
 import { setCurrentSelectedDate, setSettingTimes } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
-import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typography } from '@mui/material';
+import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typography, IconButton } from '@mui/material';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,6 +21,7 @@ import { Option } from '@/components/core/option';
 
 import { CountType } from '../../../../../../lib/types/metadata.type';
 import { eDateType } from '../../../../../../lib/types/minyan.type';
+import { X as CloseIcon } from '@phosphor-icons/react';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
@@ -162,6 +163,9 @@ export function ImportMinyans(): React.JSX.Element {
                   {TITTLE_IMPORT_MINYAN_MODEL}
                 </Typography>
               </Box>
+              <IconButton  sx={{ color: 'red', fontSize: '1rem' }} onClick={handleClose}>
+                <CloseIcon />
+              </IconButton>
             </Stack>
             <Box sx={{ justifyContent: 'center' }}>
               <Stack spacing={3} sx={{ alignItems: 'center', justifyContent: 'center', p: 2 }}>
