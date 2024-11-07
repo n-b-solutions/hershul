@@ -176,6 +176,10 @@ const MinyanService = {
     specificDate,
   }: NewMinyanType): Promise<MinyanType> => {
     try {
+      // Adjust the time fields to set seconds to 00
+      startTime.setSeconds(0, 0);
+      endTime.setSeconds(0, 0);
+
       const newMinyan: Omit<MinyanDocument, "id"> = {
         roomId: new ObjectId(roomId),
         startDate: { time: startTime },
@@ -377,6 +381,23 @@ const MinyanService = {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");
       }
+
+      // Adjust the time fields to set seconds to 00
+      if (
+        field === "endDate" &&
+        internalField === "time" &&
+        value instanceof Date
+      ) {
+        value.setSeconds(0, 0);
+      }
+      if (
+        field === "startDate" &&
+        internalField === "time" &&
+        value instanceof Date
+      ) {
+        value.setSeconds(0, 0);
+      }
+
       const fieldForEdit = internalField ? `${field}.${internalField}` : field;
       const updatedMinyan = await MinyanModel.findByIdAndUpdate(
         id,
