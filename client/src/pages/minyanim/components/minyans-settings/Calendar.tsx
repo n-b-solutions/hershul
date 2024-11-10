@@ -12,7 +12,7 @@ import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
 import { HDate } from '@hebcal/core';
 import { TextField, TextFieldProps, Typography } from '@mui/material';
-import { Box } from '@mui/system';
+import { Box, height } from '@mui/system';
 import { ArrowArcLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
@@ -58,6 +58,7 @@ export function Calendar({
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const dispatch = useDispatch();
   const [loading, setLoading] = React.useState<boolean>(true);
+  const dateRef = React.useRef<HTMLTableRowElement>(null);
 
   React.useEffect(() => {
     setLoading(true);
@@ -307,18 +308,20 @@ export function Calendar({
 
   return (
     <>
-      <JewishDatePicker
-        label="Specific Date"
-        selectedDate={selectedDate}
-        onDateChange={handleDateChange}
-        sx={{ paddingBottom: '2%', paddingLeft: '1%', width: '20%' }}
-      />
+      <Box ref={dateRef}>
+        <JewishDatePicker
+          label="Specific Date"
+          selectedDate={selectedDate}
+          onDateChange={handleDateChange}
+          sx={{ paddingBottom: '2%', paddingLeft: '1%', width: '20%' }}
+        />
+      </Box>
       {loading ? (
         <Typography textAlign="center" variant="h6">
           Loading...
         </Typography>
       ) : (
-        <Box style={{ height: 'calc(100% - 92px)', overflowY: 'auto' }}>
+        <Box style={{ height: `calc(100% - ${dateRef})`, overflowY: 'auto' }}>
           <DataTable<MinyanType, EditMinyanValueType>
             columns={[
               ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
