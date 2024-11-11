@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import RoomService from "../services/room.service";
+import MinyanService from "../services/minyan.service";
 
 const RoomController = {
   get: async (
@@ -37,7 +38,9 @@ const RoomController = {
     try {
       const { id } = req.params;
       const { bulbStatus, bulbColor } = req.body;
-      
+      if (bulbStatus === "off" && id) {
+        MinyanService.setSteadyFlagForActiveMinyans(id);
+      }
       const result = await RoomService.updateBulbStatus(
         bulbStatus,
         bulbColor,

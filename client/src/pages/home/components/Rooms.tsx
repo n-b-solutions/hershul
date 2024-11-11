@@ -43,14 +43,6 @@ export function Rooms(): React.JSX.Element {
 
   const handleStatusChange = async (newStatus: eBulbStatus, id: string) => {
     dispatch(updateRoomStatus({ id, newStatus }));
-
-    if (newStatus === eBulbStatus.off) {
-      try {
-        await axios.put(`${API_BASE_URL}/minyan/setSteadyFlagForActiveMinyans`, { roomId: id });
-      } catch (error) {
-        console.error('Error setting steadyFlag for active minyans:', error);
-      }
-    }
   };
 
   return (
