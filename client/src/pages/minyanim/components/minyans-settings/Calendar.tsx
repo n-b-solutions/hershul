@@ -10,9 +10,8 @@ import {
 } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
-import { HDate } from '@hebcal/core';
-import { TextField, TextFieldProps, Typography } from '@mui/material';
-import { Box, height } from '@mui/system';
+import { Typography } from '@mui/material';
+import { Box } from '@mui/system';
 import { ArrowArcLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
@@ -58,7 +57,7 @@ export function Calendar({
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const dispatch = useDispatch();
   const [loading, setLoading] = React.useState<boolean>(true);
-  const dateRef = React.useRef<HTMLTableRowElement>(null);
+  const dateRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     setLoading(true);
@@ -321,7 +320,7 @@ export function Calendar({
           Loading...
         </Typography>
       ) : (
-        <Box style={{ height: `calc(100% - ${dateRef})`, overflowY: 'auto' }}>
+        <Box style={{ height: `calc(100% - ${dateRef?.current?.clientHeight}px)`, overflowY: 'auto' }}>
           <DataTable<MinyanType, EditMinyanValueType>
             columns={[
               ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
