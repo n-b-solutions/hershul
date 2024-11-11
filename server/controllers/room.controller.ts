@@ -37,6 +37,7 @@ const RoomController = {
     try {
       const { id } = req.params;
       const { bulbStatus, bulbColor } = req.body;
+      
       const result = await RoomService.updateBulbStatus(
         bulbStatus,
         bulbColor,

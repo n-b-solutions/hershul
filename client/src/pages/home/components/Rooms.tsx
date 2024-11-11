@@ -12,9 +12,11 @@ import { AddMessageButton } from '@/components/message/AddMessageButton';
 
 import { BulbStatusUpdate } from '../../../../../lib/types/io.type';
 import { eBulbStatus } from '../../../../../lib/types/room.type';
-import { fetchRooms, setRoomStatusFromSocket, updateRoomStatus } from '../../../redux/room/room-slice'; // תעדכן את הנתיב
+import { fetchRooms, setRoomStatusFromSocket, updateRoomStatus } from '../../../redux/room/room-slice';
 import { AppDispatch, RootState } from '../../../redux/store';
 import { socket } from '../../../socket';
+import axios from 'axios';
+import { API_BASE_URL } from '@/const/api.const';
 
 export function Rooms(): React.JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
@@ -39,8 +41,16 @@ export function Rooms(): React.JSX.Element {
     };
   }, [dispatch]);
 
-  const handleStatusChange = (newStatus: eBulbStatus, id: string) => {
+  const handleStatusChange = async (newStatus: eBulbStatus, id: string) => {
     dispatch(updateRoomStatus({ id, newStatus }));
+
+    if (newStatus === eBulbStatus.off) {
+      try {
+        await axios.put(`${API_BASE_URL}/minyan/setSteadyFlagForActiveMinyans`, { roomId: id });
+      } catch (error) {
+        console.error('Error setting steadyFlag for active minyans:', error);
+      }
+    }
   };
 
   return (

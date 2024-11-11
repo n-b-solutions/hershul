@@ -366,6 +366,29 @@ const MinyanService = {
       throw new ApiError(500, (error as Error).message);
     }
   },
+  
+  setSteadyFlagForActiveMinyans: async (roomId: string): Promise<void> => {
+    try {
+      const now = new Date();
+      const conditions = await getMongoConditionForActiveMinyansByDate(now);
+      const timeCond = {
+        "startDate.time": { $lte: now },
+        "endDate.time": { $gte: now },
+      };
+      const queryConditions = {
+        ...conditions,
+        roomId: roomId,
+        ...timeCond,
+      };
+
+      await MinyanModel.updateMany(queryConditions, {
+        $set: { steadyFlag: true },
+      });
+    } catch (error) {
+      console.error("Error setting steadyFlag for active minyans:", error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
 
   put: async (
     field: string,

@@ -47,6 +47,9 @@ MinyanListRouter.post(
     MinyanController.postDuplicateMinyanByCategory(req, res, next);
   }
 );
+MinyanListRouter.put("/setSteadyFlagForActiveMinyans", (req, res, next) => {
+  MinyanController.setSteadyFlagForActiveMinyans(req, res, next);
+});
 MinyanListRouter.put(
   "/addInactiveDates/:id",
   (req: Request, res: Response, next: NextFunction) => {
