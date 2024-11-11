@@ -144,6 +144,11 @@ export function DataTable<
 
   return (
     <Table {...props}>
+      <colgroup>
+        {columns.map((column) => (
+          <col style={{ width: `${100 / columns.length}%` }} key={column.name} />
+        ))}
+      </colgroup>
       <TableHead sx={{ ...(hideHead && { visibility: 'collapse', '--TableCell-borderWidth': 0 }) }}>
         <TableRow>
           {selectable ? (
