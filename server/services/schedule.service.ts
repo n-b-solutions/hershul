@@ -45,7 +45,6 @@ const ScheduleService = {
       const conditions = await getMongoConditionForActiveMinyansByDate(now);
       const minyans = await MinyanModel.find(conditions);
       const roomStatusObj: { [key: string]: eBulbStatus } = {};
-      const roomBlinkDurationObj: { [key: string]: number | undefined } = {};
 
       // Process minyans to determine room statuses
       await Promise.all(
@@ -61,7 +60,9 @@ const ScheduleService = {
           const endHours = endDate.getHours();
           const endMinutes = endDate.getMinutes();
           const endSeconds = endDate.getSeconds();
-          const blinkStartTime = new Date(startDate.getTime() - blinkSeconds * 1000);
+          const blinkStartTime = new Date(
+            startDate.getTime() - blinkSeconds * 1000
+          );
           const blinkStartHours = blinkStartTime.getHours();
           const blinkStartMinutes = blinkStartTime.getMinutes();
           const blinkStartSeconds = blinkStartTime.getSeconds();
@@ -71,7 +72,8 @@ const ScheduleService = {
             (nowHours > blinkStartHours ||
               (nowHours === blinkStartHours &&
                 (nowMinutes > blinkStartMinutes ||
-                  (nowMinutes === blinkStartMinutes && nowSeconds >= blinkStartSeconds)))) &&
+                  (nowMinutes === blinkStartMinutes &&
+                    nowSeconds >= blinkStartSeconds)))) &&
             (nowHours < startHours ||
               (nowHours === startHours &&
                 (nowMinutes < startMinutes ||
@@ -79,13 +81,13 @@ const ScheduleService = {
           ) {
             if (!minyan.steadyFlag) {
               roomStatusObj[roomId] = eBulbStatus.blink;
-              roomBlinkDurationObj[roomId] = blinkSeconds;
             }
           } else if (
             (nowHours > startHours ||
               (nowHours === startHours &&
                 (nowMinutes > startMinutes ||
-                  (nowMinutes === startMinutes && nowSeconds >= startSeconds)))) &&
+                  (nowMinutes === startMinutes &&
+                    nowSeconds >= startSeconds)))) &&
             (nowHours < endHours ||
               (nowHours === endHours &&
                 (nowMinutes < endMinutes ||
@@ -112,20 +114,17 @@ const ScheduleService = {
         rooms.map(async (room) => {
           const roomId = room.id?.toString();
           const currentStatus = roomStatusObj[roomId || ""];
-          const blinkDuration = roomBlinkDurationObj[roomId || ""];
-
           if (currentStatus) {
             await RoomService.updateBulbStatus(
               currentStatus,
               eBulbColor.white,
-              roomId,
-              blinkDuration
+              roomId
             );
           }
         })
       );
     } catch (error) {
-      console.error("Error updating room statuses:", error);
+      console.error("Error updating room statuses:", (error as Error)?.message);
     }
   },
 

@@ -9,7 +9,7 @@ import { startPolling } from "./polling.service";
 import { RoomServerType } from "../types/room.type";
 import { io } from "../socketio"; // Import the socket instance
 
-const pollingInterval = 5000; // Poll every 5 seconds
+const pollingInterval = 1000; // Poll every 5 seconds
 
 const roomCache: { [id: string]: RoomServerType } = {};
 
@@ -56,8 +56,7 @@ const RoomService = {
   updateBulbStatus: async (
     bulbStatus: eBulbStatus,
     bulbColor?: eBulbColor,
-    id?: string,
-    blinkDuration?: number
+    id?: string
   ): Promise<RoomType> => {
     try {
       if (!id || !Types.ObjectId.isValid(id)) {
@@ -81,8 +80,7 @@ const RoomService = {
         await ControlByWebService.updateUsingControlByWeb(
           ipAddress,
           bulbStatus,
-          bulbColor,
-          blinkDuration
+          bulbColor
         );
       }
 
