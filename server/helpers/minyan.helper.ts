@@ -1,3 +1,4 @@
+import { HDate } from "@hebcal/core";
 import { eDateType, MinyanType } from "../../lib/types/minyan.type";
 import { MinyanDocument } from "../types/minyan.type";
 import { isRoshHodesh, getMinchaGedolaTime } from "./time.helper";
@@ -65,12 +66,29 @@ export const getMongoConditionForActiveMinyansByDate = async (date: Date) => {
   const endOfDay = new Date(date);
   endOfDay.setHours(23, 59, 59, 999); // end of day
 
+  const hDate = new HDate(date);
+  const hebrewDay = hDate.getDate();
+  const hebrewMonth = hDate.getMonthName();
+
   const calendarCond = {
     dateType: "calendar",
-    "specificDate.date": {
-      $gte: startOfDay.toISOString(),
-      $lt: endOfDay.toISOString(),
-    },
+    $or: [
+      {
+        "specificDate.date": {
+          $gte: startOfDay.toISOString(),
+          $lt: endOfDay.toISOString(),
+        },
+      },
+      {
+        "specificDate.isRoutine": true,
+        $expr: {
+          $and: [
+            { $eq: ["$specificDate.hebrewDayMonth", hebrewDay.toString()] },
+            { $eq: ["$specificDate.hebrewMonth", hebrewMonth] },
+          ],
+        },
+      },
+    ],
   };
 
   const dateType = await getQueryDateType(date);
