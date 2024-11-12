@@ -27,6 +27,8 @@ const specificDateSchema: Schema<SpecificDateType> = new Schema(
   {
     date: { type: SchemaTypes.Date },
     isRoutine: { type: SchemaTypes.Boolean, default: false },
+    hebrewMonth: { type: SchemaTypes.String },
+    hebrewDayMonth: { type: SchemaTypes.String },
   },
   { _id: false }
 );

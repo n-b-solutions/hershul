@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import MinyanModel from "../models/minyan.model";
 import { io } from "../socketio";
 import {
+  convertToHebrewDate,
   eDateType,
   EditedType,
   MinyanType,
@@ -18,6 +19,7 @@ import {
   getMongoConditionForActiveMinyansByDate,
   getQueryDateType,
 } from "../helpers/minyan.helper";
+import { HDate } from "@hebcal/core";
 
 const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
@@ -43,6 +45,11 @@ const MinyanService = {
       const queryDateType = await getQueryDateType(date);
       const startOfDay = new Date(date).setHours(0, 0, 0, 0); // start of day;
       const endOfDay = new Date(date).setHours(23, 59, 59, 999); // end of day
+  
+      const hDate = new HDate(date);
+      const hebrewDay = hDate.getDate();
+      const hebrewMonth = hDate.getMonthName();
+  
       const minyans = await MinyanModel.find({
         $or: [
           { dateType: queryDateType },
@@ -51,6 +58,15 @@ const MinyanService = {
             "specificDate.date": {
               $gte: startOfDay,
               $lt: endOfDay,
+            },
+          },
+          {
+            "specificDate.isRoutine": true,
+            $expr: {
+              $and: [
+                { $eq: ["$specificDate.hebrewDayMonth", hebrewDay.toString()] },
+                { $eq: ["$specificDate.hebrewMonth", hebrewMonth] },
+              ],
             },
           },
         ],
@@ -136,7 +152,7 @@ const MinyanService = {
   },
 
   getCountMinyanByCalendar: async (selectedDate: Date): Promise<CountType> => {
-    try {
+    try {      
       const conditions = await getMongoConditionForActiveMinyansByDate(
         selectedDate
       );
@@ -175,13 +191,16 @@ const MinyanService = {
     specificDate,
   }: NewMinyanType): Promise<MinyanType> => {
     try {
+      const convertedSpecificDate = specificDate
+        ? convertToHebrewDate(new Date(specificDate.date))
+        : undefined;
       const newMinyan: Omit<MinyanDocument, "id"> = {
         roomId: new ObjectId(roomId),
         startDate: { time: startTime },
         endDate: { time: endTime },
         ...(blinkNum ? { blink: { secondsNum: blinkNum } } : {}),
         dateType,
-        specificDate,
+        specificDate: convertedSpecificDate,
       };
       const minyanRecord = await MinyanModel.create(newMinyan);
 
