@@ -73,6 +73,7 @@ const RoomService = {
 
       // Check if the status or color has changed
       if (
+        bulbStatus === eBulbStatus.blink ||
         roomCache[id].bulbStatus !== bulbStatus ||
         roomCache[id].bulbColor !== bulbColor
       ) {
