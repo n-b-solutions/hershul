@@ -101,9 +101,13 @@ export function ImportMinyans(): React.JSX.Element {
         currentSelectedDate,
       })
       .then((res) => {
+        const updatedData = res.data.map((item: any) => ({
+          ...item,
+          isRoutine: false,
+        }));
         dispatch(
           setSettingTimes({
-            setting: res.data,
+            setting: updatedData,
           })
         );
       })
