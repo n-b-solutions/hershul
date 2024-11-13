@@ -69,6 +69,21 @@ const ScheduleService = {
 
           // Check if any action occurred in the current minute
           if (
+            (nowHours > startHours ||
+              (nowHours === startHours &&
+                (nowMinutes > startMinutes ||
+                  (nowMinutes === startMinutes &&
+                    nowSeconds >= startSeconds)))) &&
+            (nowHours < blinkStartHours ||
+              (nowHours === blinkStartHours &&
+                (nowMinutes < blinkStartMinutes ||
+                  (nowMinutes === blinkStartMinutes &&
+                    nowSeconds < blinkStartSeconds))))
+          ) {
+            if (minyan.steadyFlag) {
+              roomStatusObj[roomId] = eBulbStatus.on;
+            }
+          } else if (
             (nowHours > blinkStartHours ||
               (nowHours === blinkStartHours &&
                 (nowMinutes > blinkStartMinutes ||
@@ -83,28 +98,10 @@ const ScheduleService = {
               roomStatusObj[roomId] = eBulbStatus.blink;
             }
           } else if (
-            (nowHours > startHours ||
-              (nowHours === startHours &&
-                (nowMinutes > startMinutes ||
-                  (nowMinutes === startMinutes &&
-                    nowSeconds >= startSeconds)))) &&
-            (nowHours < endHours ||
-              (nowHours === endHours &&
-                (nowMinutes < endMinutes ||
-                  (nowMinutes === endMinutes && nowSeconds < endSeconds))))
-          ) {
-            if (!roomStatusObj[roomId]) {
-              roomStatusObj[roomId] = eBulbStatus.on;
-            }
-            if (minyan.steadyFlag) {
-              roomStatusObj[roomId] = eBulbStatus.on;
-              await MinyanService.put("steadyFlag", "", true, minyan.id);
-            }
-          } else if (
-            (nowHours > endHours ||
-              (nowHours === endHours &&
-                (nowMinutes > endMinutes ||
-                  (nowMinutes === endMinutes && nowSeconds >= endSeconds))))
+            nowHours > endHours ||
+            (nowHours === endHours &&
+              (nowMinutes > endMinutes ||
+                (nowMinutes === endMinutes && nowSeconds >= endSeconds)))
           ) {
             if (!roomStatusObj[roomId]) {
               roomStatusObj[roomId] = eBulbStatus.off;
@@ -196,6 +193,5 @@ const ScheduleService = {
     }
   },
 };
-
 
 export default ScheduleService;
