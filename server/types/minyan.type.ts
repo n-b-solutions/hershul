@@ -9,6 +9,7 @@ export interface AlertTypeDocument {
 export interface BlinkAlertTypeDocument {
   secondsNum: number;
   messageId?: ObjectId;
+  repeatInterval?:number;
 }
 
 export interface MinyanDocument {

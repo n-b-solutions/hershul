@@ -19,6 +19,7 @@ const blinkAlertSchema: Schema<BlinkAlertTypeDocument> = new Schema(
   {
     secondsNum: { type: Number },
     messageId: { type: SchemaTypes.ObjectId, ref: "messages" },
+    repeatInterval: { type: Number, default: null },
   },
   { _id: false }
 );
