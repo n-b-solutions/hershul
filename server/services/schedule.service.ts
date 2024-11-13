@@ -80,7 +80,7 @@ const ScheduleService = {
                   (nowMinutes === blinkStartMinutes &&
                     nowSeconds < blinkStartSeconds))))
           ) {
-            if (minyan.steadyFlag) {
+            if (!minyan.steadyFlag) {
               roomStatusObj[roomId] = eBulbStatus.on;
             }
           } else if (
