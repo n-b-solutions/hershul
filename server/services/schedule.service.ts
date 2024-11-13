@@ -98,10 +98,9 @@ const ScheduleService = {
               roomStatusObj[roomId] = eBulbStatus.blink;
             }
           } else if (
-            nowHours > endHours ||
-            (nowHours === endHours &&
-              (nowMinutes > endMinutes ||
-                (nowMinutes === endMinutes && nowSeconds >= endSeconds)))
+            nowHours === endHours &&
+            nowMinutes === endMinutes &&
+            nowSeconds === endSeconds
           ) {
             if (!roomStatusObj[roomId]) {
               roomStatusObj[roomId] = eBulbStatus.off;
