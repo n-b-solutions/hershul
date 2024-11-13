@@ -9,9 +9,11 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import axios from 'axios';
 
-import { ScheduleActionType, MinyanType } from '@/types/minyans.type';
+import { ScheduleActionType } from '@/types/minyans.type';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/DataTable';
+
+import { MinyanType } from '../../../../../lib/types/minyan.type';
 import { columns } from '../config/schedule.config';
 
 export function Schedule(): React.JSX.Element {
@@ -23,7 +25,7 @@ export function Schedule(): React.JSX.Element {
       const roomName = minyan.room?.name;
       const startTime = new Date(minyan.startDate.time);
       const endTime = new Date(minyan.endDate.time);
-      const blinkTime = minyan.blink ? new Date(endTime.getTime() - minyan.blink.secondsNum * 1000) : null;
+      const blinkTime = minyan.blink ? new Date(endTime.getTime() - minyan.blink.secondsNum * 1000) : endTime;
 
       const onAction = {
         minyanId: minyan.id,
