@@ -50,27 +50,6 @@ const ControlByWebService = {
   ): Promise<void> => {
     const bulbStatusNum = eBulbStatusNum[bulbStatus];
     const colorNum = color ? eBulbColorNum[color] : 1;
-
-    if (bulbStatus === eBulbStatus.blink) {
-      if (isProd) {
-        await Promise.all([
-          axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=1`),
-          new Promise((resolve) => setTimeout(resolve, 1000)),
-          axios.get(`http://${ipAddress}/state.xml?relay${colorNum}=0`),
-        ]);
-        console.log(
-          `Updating bulb status to ${bulbStatusNum} for IP ${ipAddress}`
-        );
-      } else {
-        const fakeUpdates = readFakeUpdates();
-        fakeUpdates[ipAddress] = { status: "on", color };
-        writeFakeUpdates(fakeUpdates);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        fakeUpdates[ipAddress] = { status: "off", color };
-        writeFakeUpdates(fakeUpdates);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-    } else {
       if (isProd) {
         const url = `http://${ipAddress}/state.xml?relay${colorNum}=${bulbStatusNum}`;
         await axios.get(url);
@@ -84,7 +63,6 @@ const ControlByWebService = {
         console.log(
           `Fake update: Setting bulb status to ${bulbStatus} and color to ${color} for IP ${ipAddress}`
         );
-      }
     }
   },
 
