@@ -32,6 +32,9 @@ const writeFakeUpdates = (updates: any) => {
   fs.writeFileSync(fakeUpdatesFilePath, JSON.stringify(updates, null, 2));
 };
 
+// Store blink status
+const blinkStatusMap: { [ipAddress: string]: boolean } = {};
+
 const ControlByWebService = {
   /**
    * Updates the bulb status using ControlByWeb.
@@ -50,20 +53,23 @@ const ControlByWebService = {
   ): Promise<void> => {
     const bulbStatusNum = eBulbStatusNum[bulbStatus];
     const colorNum = color ? eBulbColorNum[color] : 1;
-      if (isProd) {
-        const url = `http://${ipAddress}/state.xml?relay${colorNum}=${bulbStatusNum}`;
-        await axios.get(url);
-        console.log(
-          `Updating bulb status to ${bulbStatusNum} for IP ${ipAddress}`
-        );
-      } else {
-        const fakeUpdates = readFakeUpdates();
-        fakeUpdates[ipAddress] = { status: bulbStatus, color };
-        writeFakeUpdates(fakeUpdates);
-        console.log(
-          `Fake update: Setting bulb status to ${bulbStatus} and color to ${color} for IP ${ipAddress}`
-        );
+    if (isProd) {
+      const url = `http://${ipAddress}/state.xml?relay${colorNum}=${bulbStatusNum}`;
+      await axios.get(url);
+      console.log(
+        `Updating bulb status to ${bulbStatusNum} for IP ${ipAddress}`
+      );
+    } else {
+      const fakeUpdates = readFakeUpdates();
+      fakeUpdates[ipAddress] = { status: bulbStatus, color };
+      writeFakeUpdates(fakeUpdates);
+      console.log(
+        `Fake update: Setting bulb status to ${bulbStatus} and color to ${color} for IP ${ipAddress}`
+      );
     }
+
+    // Store blink status
+    blinkStatusMap[ipAddress] = bulbStatus === eBulbStatus.blink;
   },
 
   /**
@@ -105,6 +111,11 @@ const ControlByWebService = {
 
       if (!status) {
         status = eBulbStatus.off; // no relay is active
+      }
+
+      // Check blink status
+      if (blinkStatusMap[ipAddress]) {
+        status = eBulbStatus.blink;
       }
 
       return { status, color };
