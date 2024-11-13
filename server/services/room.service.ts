@@ -9,7 +9,7 @@ import { startPolling } from "./polling.service";
 import { RoomServerType } from "../types/room.type";
 import { io } from "../socketio"; // Import the socket instance
 
-const pollingInterval = 5000; // Poll every 5 seconds
+const pollingInterval = 1000; // Poll every 5 seconds
 
 const roomCache: { [id: string]: RoomServerType } = {};
 
@@ -73,6 +73,7 @@ const RoomService = {
 
       // Check if the status or color has changed
       if (
+        bulbStatus === eBulbStatus.blink ||
         roomCache[id].bulbStatus !== bulbStatus ||
         roomCache[id].bulbColor !== bulbColor
       ) {
