@@ -45,11 +45,11 @@ const MinyanService = {
       const queryDateType = await getQueryDateType(date);
       const startOfDay = new Date(date).setHours(0, 0, 0, 0); // start of day;
       const endOfDay = new Date(date).setHours(23, 59, 59, 999); // end of day
-  
+
       const hDate = new HDate(date);
       const hebrewDay = hDate.getDate();
       const hebrewMonth = hDate.getMonthName();
-  
+
       const minyans = await MinyanModel.find({
         $or: [
           { dateType: queryDateType },
@@ -152,7 +152,7 @@ const MinyanService = {
   },
 
   getCountMinyanByCalendar: async (selectedDate: Date): Promise<CountType> => {
-    try {      
+    try {
       const conditions = await getMongoConditionForActiveMinyansByDate(
         selectedDate
       );
@@ -429,6 +429,24 @@ const MinyanService = {
       return { id: deletedMinyan._id?.toString() };
     } catch (error) {
       console.error(`Error deleting minyan with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
+  deleteExpiredMinyan: async (): Promise<void> => {
+    try {
+      const minyans = await MinyanModel.find();
+      const now = new Date();
+
+      for (const minyan of minyans) {
+        if (minyan.endDate.time < now) {
+          await MinyanModel.findByIdAndDelete(minyan._id);
+        }
+      }
+
+      io.emit("minyanUpdated", await MinyanModel.find());
+    } catch (error) {
+      console.error("Error deleting expired minyans:", error);
       throw new ApiError(500, (error as Error).message);
     }
   },

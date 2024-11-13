@@ -1,13 +1,14 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import { createServer } from 'http';
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import { createServer } from "http";
 
-import connectDB from './DB/mongoConnect';
-import { initSocketio } from './socketio';
-import { router } from './router';
-import { config } from 'dotenv';
-import errorHandler from './middlewares/error-handler.middleware';
+import connectDB from "./DB/mongoConnect";
+import { initSocketio } from "./socketio";
+import { router } from "./router";
+import { config } from "dotenv";
+import errorHandler from "./middlewares/error-handler.middleware";
+import CronService from "./services/cron.service";
 
 config();
 const app = express();
@@ -18,16 +19,17 @@ connectDB().catch((err) => console.log(err));
 
 //connect to socket io
 initSocketio(server);
+CronService.startCronJobs();
 
 // set security HTTP headers
 app.use(helmet());
 // parse json request body
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: "50mb" }));
 // parse urlencoded request body
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cors());
 
-app.use('/', router);
+app.use("/", router);
 
 // Use the error handling middleware
 app.use(errorHandler);
