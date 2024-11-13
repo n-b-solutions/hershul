@@ -12,11 +12,9 @@ import { AddMessageButton } from '@/components/message/AddMessageButton';
 
 import { BulbStatusUpdate } from '../../../../../lib/types/io.type';
 import { eBulbStatus } from '../../../../../lib/types/room.type';
-import { fetchRooms, setRoomStatusFromSocket, updateRoomStatus } from '../../../redux/room/room-slice';
+import { fetchRooms, setRoomStatusFromSocket, updateRoomStatus } from '../../../redux/room/room-slice'; // תעדכן את הנתיב
 import { AppDispatch, RootState } from '../../../redux/store';
 import { socket } from '../../../socket';
-import axios from 'axios';
-import { API_BASE_URL } from '@/const/api.const';
 
 export function Rooms(): React.JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
@@ -41,7 +39,7 @@ export function Rooms(): React.JSX.Element {
     };
   }, [dispatch]);
 
-  const handleStatusChange = async (newStatus: eBulbStatus, id: string) => {
+  const handleStatusChange = (newStatus: eBulbStatus, id: string) => {
     dispatch(updateRoomStatus({ id, newStatus }));
   };
 

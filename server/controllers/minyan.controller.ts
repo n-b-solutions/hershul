@@ -154,20 +154,6 @@ const MinyanController = {
     }
   },
 
-  setSteadyFlagForActiveMinyans: async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const { roomId } = req.body;
-      const result = await MinyanService.setSteadyFlagForActiveMinyans(roomId);
-      res.send(result);
-    } catch (error) {
-      next(error);
-    }
-  },
-
   updateInactiveDate: async (
     req: Request,
     res: Response,
@@ -201,6 +187,7 @@ const MinyanController = {
       next(error);
     }
   },
+
   delete: async (
     req: Request,
     res: Response,
