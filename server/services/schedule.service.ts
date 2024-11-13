@@ -57,26 +57,36 @@ const ScheduleService = {
           const startMinutes = startDate.getMinutes();
           const endHours = endDate.getHours();
           const endMinutes = endDate.getMinutes();
-          const blinkStartTime = new Date(startDate.getTime() - blinkMinutes * 60000);
+          const blinkStartTime = new Date(
+            endDate.getTime() - blinkMinutes * 1000
+          );
           const blinkStartHours = blinkStartTime.getHours();
           const blinkStartMinutes = blinkStartTime.getMinutes();
 
           // Check if any action occurred in the current minute
           if (
-            (nowHours > blinkStartHours || (nowHours === blinkStartHours && nowMinutes >= blinkStartMinutes)) &&
-            (nowHours < startHours || (nowHours === startHours && nowMinutes < startMinutes))
+            (nowHours > startHours ||
+              (nowHours === startHours && nowMinutes >= startMinutes)) &&
+            (nowHours < blinkStartHours ||
+              (nowHours === blinkStartHours && nowMinutes < blinkStartMinutes))
+          ) {
+            if (!minyan.steadyFlag) {
+              roomStatusObj[roomId] = eBulbStatus.on;
+            }
+          } else if (
+            (nowHours > blinkStartHours ||
+              (nowHours === blinkStartHours &&
+                nowMinutes >= blinkStartMinutes)) &&
+            (nowHours < endHours ||
+              (nowHours === endHours && nowMinutes < endMinutes))
           ) {
             if (!minyan.steadyFlag) {
               roomStatusObj[roomId] = eBulbStatus.blink;
             }
           } else if (
-            (nowHours > startHours || (nowHours === startHours && nowMinutes >= startMinutes)) &&
-            (nowHours < endHours || (nowHours === endHours && nowMinutes < endMinutes))
+            nowHours > endHours ||
+            (nowHours === endHours && nowMinutes >= endMinutes)
           ) {
-            if (!minyan.steadyFlag) {
-              roomStatusObj[roomId] = eBulbStatus.on;
-            }
-          } else {
             if (!roomStatusObj[roomId]) {
               roomStatusObj[roomId] = eBulbStatus.off;
             }
@@ -139,7 +149,6 @@ const ScheduleService = {
         const havdalahDate = new HDate();
         const mask = 0;
         const eventTime = new Date();
-
         const havdalahMins = process.env.VITE_HAVDALAMINS
           ? parseInt(process.env.VITE_HAVDALAMINS)
           : 50;
@@ -169,4 +178,5 @@ const ScheduleService = {
     }
   },
 };
+
 export default ScheduleService;

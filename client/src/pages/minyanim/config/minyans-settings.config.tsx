@@ -62,25 +62,6 @@ export const getMinyansSettingsColumns = ({
   {
     formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
       getFormatWithActionsMessage({
-        value: row.blink?.secondsNum || '',
-        roomName: row.room?.name,
-        message: row.blink?.message,
-        id: row?.id,
-        field: 'blink',
-        index,
-        disabledEdit,
-      }),
-    valueForEdit: (row) => row.blink?.secondsNum,
-    editInputType: 'number',
-    name: 'Blink',
-    field: 'blink',
-    padding: 'none',
-    align: 'center',
-    tooltip: 'Time to start Blink before lights on',
-  },
-  {
-    formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
-      getFormatWithActionsMessage({
         value: dayjs(row.startDate?.time).format('hh:mm A'),
         roomName: row.room?.name,
         message: row.startDate?.message,
@@ -100,12 +81,31 @@ export const getMinyansSettingsColumns = ({
   {
     formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
       getFormatWithActionsMessage({
+        value: row.blink?.secondsNum || '',
+        roomName: row.room?.name,
+        message: row.blink?.message,
+        id: row?.id,
+        field: 'blink',
+        index,
+        disabledEdit,
+      }),
+    valueForEdit: (row) => row.blink?.secondsNum,
+    editInputType: 'number',
+    name: 'Blink',
+    field: 'blink',
+    padding: 'none',
+    align: 'center',
+    tooltip: 'Time to start Blink before lights off',
+  },
+  {
+    formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
+      getFormatWithActionsMessage({
         value: dayjs(row.endDate?.time).format('hh:mm A'),
         roomName: row.room?.name,
         message: row.endDate?.message,
         id: row?.id,
         field: 'endDate',
-        index: index,
+        index,
         disabledEdit,
       }),
     editInputType: 'time',
