@@ -61,7 +61,7 @@ const ScheduleService = {
           const endMinutes = endDate.getMinutes();
           const endSeconds = endDate.getSeconds();
           const blinkStartTime = new Date(
-            startDate.getTime() - blinkSeconds * 1000
+            endDate.getTime() - blinkSeconds * 1000
           );
           const blinkStartHours = blinkStartTime.getHours();
           const blinkStartMinutes = blinkStartTime.getMinutes();
@@ -74,10 +74,10 @@ const ScheduleService = {
                 (nowMinutes > blinkStartMinutes ||
                   (nowMinutes === blinkStartMinutes &&
                     nowSeconds >= blinkStartSeconds)))) &&
-            (nowHours < startHours ||
-              (nowHours === startHours &&
-                (nowMinutes < startMinutes ||
-                  (nowMinutes === startMinutes && nowSeconds < startSeconds))))
+            (nowHours < endHours ||
+              (nowHours === endHours &&
+                (nowMinutes < endMinutes ||
+                  (nowMinutes === endMinutes && nowSeconds < endSeconds))))
           ) {
             if (!minyan.steadyFlag) {
               roomStatusObj[roomId] = eBulbStatus.blink;
@@ -93,10 +93,19 @@ const ScheduleService = {
                 (nowMinutes < endMinutes ||
                   (nowMinutes === endMinutes && nowSeconds < endSeconds))))
           ) {
-            if (!minyan.steadyFlag) {
+            if (!roomStatusObj[roomId]) {
               roomStatusObj[roomId] = eBulbStatus.on;
             }
-          } else {
+            if (minyan.steadyFlag) {
+              roomStatusObj[roomId] = eBulbStatus.on;
+              await MinyanService.put("steadyFlag", "", true, minyan.id);
+            }
+          } else if (
+            (nowHours > endHours ||
+              (nowHours === endHours &&
+                (nowMinutes > endMinutes ||
+                  (nowMinutes === endMinutes && nowSeconds >= endSeconds))))
+          ) {
             if (!roomStatusObj[roomId]) {
               roomStatusObj[roomId] = eBulbStatus.off;
             }
@@ -187,5 +196,6 @@ const ScheduleService = {
     }
   },
 };
+
 
 export default ScheduleService;

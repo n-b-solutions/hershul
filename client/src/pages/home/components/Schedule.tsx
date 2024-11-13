@@ -13,8 +13,8 @@ import { ScheduleActionType } from '@/types/minyans.type';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/DataTable';
 
-import { columns } from '../config/schedule.config';
 import { MinyanType } from '../../../../../lib/types/minyan.type';
+import { columns } from '../config/schedule.config';
 
 export function Schedule(): React.JSX.Element {
   const [allScheduleActions, setAllScheduleActions] = useState<ScheduleActionType[]>([]);
@@ -23,37 +23,37 @@ export function Schedule(): React.JSX.Element {
   const mapMinyansToScheduleActions = (data: MinyanType[]) => {
     return data.reduce<ScheduleActionType[]>((acc, minyan) => {
       const roomName = minyan.room?.name;
-      const time = new Date(minyan.startDate.time);
-      const endDate = new Date(minyan.endDate.time);
+      const startTime = new Date(minyan.startDate.time);
+      const endTime = new Date(minyan.endDate.time);
+      const blinkTime = minyan.blink ? new Date(endTime.getTime() - minyan.blink.secondsNum * 1000) : endTime;
+
       const onAction = {
         minyanId: minyan.id,
         roomName,
         message: minyan.startDate.message?.name ?? '',
-        time,
+        time: startTime,
         action: 'on',
       };
+
+      const blinkAction = minyan.blink
+        ? {
+            minyanId: minyan.id,
+            roomName,
+            message: minyan.blink.message?.name ?? '',
+            time: blinkTime,
+            action: 'blink',
+          }
+        : null;
 
       const offAction = {
         minyanId: minyan.id,
         roomName,
         message: minyan.endDate.message?.name ?? '',
-        time: endDate,
+        time: endTime,
         action: 'off',
       };
 
-      const blinkActions = minyan.blink
-        ? [
-            {
-              minyanId: minyan.id,
-              roomName,
-              message: minyan.blink.message?.name ?? '',
-              time: new Date(time.getTime() - minyan.blink.secondsNum * 1000),
-              action: 'blink',
-            },
-          ]
-        : [];
-
-      return [...acc, onAction, offAction, ...blinkActions];
+      return blinkAction ? [...acc, onAction, blinkAction, offAction] : [...acc, onAction, offAction];
     }, []);
   };
 
@@ -61,19 +61,15 @@ export function Schedule(): React.JSX.Element {
     const now = dayjs();
     const currentMinutesOfDay = now.hour() * 60 + now.minute();
     const minutesInTwoHours = currentMinutesOfDay + 2 * 60;
-
     const filteredMinyans = scheduleActions.filter((scheduleAction) => {
       const minyanTime = dayjs(scheduleAction.time);
       const minyanMinutesOfDay = minyanTime.hour() * 60 + minyanTime.minute();
-
       return minyanMinutesOfDay > currentMinutesOfDay && minyanMinutesOfDay <= minutesInTwoHours;
     });
-
     const sortActions = (scheduleActions: ScheduleActionType[]) => {
       return scheduleActions.sort((a, b) => {
         const timeA = dayjs(a.time).hour() * 60 + dayjs(a.time).minute();
         const timeB = dayjs(b.time).hour() * 60 + dayjs(b.time).minute();
-
         if (timeA === timeB) {
           if (a.action === 'blink' && b.action === 'on') {
             return -1;
@@ -82,11 +78,9 @@ export function Schedule(): React.JSX.Element {
             return 1;
           }
         }
-
         return timeA - timeB;
       });
     };
-
     setNextScheduleActions(sortActions(filteredMinyans));
   }, []);
 
