@@ -39,7 +39,7 @@ const RoomController = {
       const { id } = req.params;
       const { bulbStatus, bulbColor } = req.body;
       if (bulbStatus === "off" && id) {
-        MinyanService.setSteadyFlagForActiveMinyans(id);
+        await MinyanService.setSteadyFlagForActiveMinyans(id);
       }
       const result = await RoomService.updateBulbStatus(
         bulbStatus,
