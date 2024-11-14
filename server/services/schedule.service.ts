@@ -52,7 +52,7 @@ const ScheduleService = {
           const roomId = minyan.roomId?.toString();
           const startDate = new Date(minyan.startDate.time);
           const endDate = new Date(minyan.endDate.time);
-          const blinkSeconds = Number(minyan.blink?.secondsNum);
+          const blinkSeconds = Number(minyan.blink?.secondsNum) || 0;
 
           const startHours = startDate.getHours();
           const startMinutes = startDate.getMinutes();
