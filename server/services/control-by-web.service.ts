@@ -3,6 +3,19 @@ import fs from "fs";
 import path from "path";
 import { eBulbStatus, eBulbColor } from "../../lib/types/room.type";
 import { eBulbColorNum, eBulbStatusNum } from "../types/room.type";
+import axiosRetry from "axios-retry";
+
+// Configure axios to use axios-retry
+axiosRetry(axios, {
+  retries: 10, // Number of retries
+  retryDelay: (retryCount) => {
+    return retryCount * 100; // Exponential backoff (1s, 2s, 3s, etc.)
+  },
+  retryCondition: (error) => {
+    // Retry on ECONNRESET errors
+    return error.code === "ECONNRESET";
+  },
+});
 
 const isProd = process.env.NODE_ENV === "production";
 const fakeUpdatesFilePath = path.join(process.cwd(), "fake-updates.json");
@@ -19,6 +32,9 @@ const writeFakeUpdates = (updates: any) => {
   fs.writeFileSync(fakeUpdatesFilePath, JSON.stringify(updates, null, 2));
 };
 
+// Store blink status
+const blinkStatusMap: { [ipAddress: string]: boolean } = {};
+
 const ControlByWebService = {
   /**
    * Updates the bulb status using ControlByWeb.
@@ -26,6 +42,7 @@ const ControlByWebService = {
    * @param ipAddress - The IP address of the ControlByWeb device.
    * @param bulbStatus - The status of the bulb, represented as a key of `eBulbStatusNum`.
    * @param color - (Optional) The color of the bulb, represented as a key of `eBulbColorNum`.
+   * @param blinkDuration - (Optional) The total duration in seconds for which the bulb should blink.
    * @returns A promise that resolves when the update is complete.
    * @throws {ApiError} If the update fails.
    */
@@ -34,9 +51,9 @@ const ControlByWebService = {
     bulbStatus: keyof typeof eBulbStatusNum,
     color?: keyof typeof eBulbColorNum
   ): Promise<void> => {
+    const bulbStatusNum = eBulbStatusNum[bulbStatus];
+    const colorNum = color ? eBulbColorNum[color] : 1;
     if (isProd) {
-      const bulbStatusNum = eBulbStatusNum[bulbStatus];
-      const colorNum = color ? eBulbColorNum[color] : 1;
       const url = `http://${ipAddress}/state.xml?relay${colorNum}=${bulbStatusNum}`;
       await axios.get(url);
       console.log(
@@ -50,6 +67,9 @@ const ControlByWebService = {
         `Fake update: Setting bulb status to ${bulbStatus} and color to ${color} for IP ${ipAddress}`
       );
     }
+
+    // Store blink status
+    blinkStatusMap[ipAddress] = bulbStatus === eBulbStatus.blink;
   },
 
   /**
@@ -91,6 +111,11 @@ const ControlByWebService = {
 
       if (!status) {
         status = eBulbStatus.off; // no relay is active
+      }
+
+      // Check blink status
+      if (blinkStatusMap[ipAddress]) {
+        status = eBulbStatus.blink;
       }
 
       return { status, color };
