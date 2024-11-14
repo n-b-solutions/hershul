@@ -34,7 +34,7 @@ const ScheduleService = {
     }
   },
 
-  updateRoomStatuses: async (): Promise<void> => {
+  updateRoomStatuses: async (isInitial?: boolean): Promise<void> => {
     try {
       const now = new Date();
       const nowHours = now.getHours();
@@ -122,6 +122,12 @@ const ScheduleService = {
           if (currentStatus) {
             await RoomService.updateBulbStatus(
               currentStatus,
+              eBulbColor.white,
+              roomId
+            );
+          } else if (isInitial) {
+            await RoomService.updateBulbStatus(
+              eBulbStatus.off,
               eBulbColor.white,
               roomId
             );
