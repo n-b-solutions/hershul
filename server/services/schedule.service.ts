@@ -34,7 +34,7 @@ const ScheduleService = {
     }
   },
 
-  updateRoomStatuses: async (): Promise<void> => {
+  updateRoomStatuses: async (isInitial?: boolean): Promise<void> => {
     try {
       const now = new Date();
       const nowHours = now.getHours();
@@ -52,7 +52,7 @@ const ScheduleService = {
           const roomId = minyan.roomId?.toString();
           const startDate = new Date(minyan.startDate.time);
           const endDate = new Date(minyan.endDate.time);
-          const blinkSeconds = Number(minyan.blink?.secondsNum);
+          const blinkSeconds = Number(minyan.blink?.secondsNum) || 0;
 
           const startHours = startDate.getHours();
           const startMinutes = startDate.getMinutes();
@@ -98,10 +98,9 @@ const ScheduleService = {
               roomStatusObj[roomId] = eBulbStatus.blink;
             }
           } else if (
-            nowHours > endHours ||
-            (nowHours === endHours &&
-              (nowMinutes > endMinutes ||
-                (nowMinutes === endMinutes && nowSeconds >= endSeconds)))
+            nowHours === endHours &&
+            nowMinutes === endMinutes &&
+            nowSeconds === endSeconds
           ) {
             if (!roomStatusObj[roomId]) {
               roomStatusObj[roomId] = eBulbStatus.off;
@@ -123,6 +122,12 @@ const ScheduleService = {
           if (currentStatus) {
             await RoomService.updateBulbStatus(
               currentStatus,
+              eBulbColor.white,
+              roomId
+            );
+          } else if (isInitial) {
+            await RoomService.updateBulbStatus(
+              eBulbStatus.off,
               eBulbColor.white,
               roomId
             );

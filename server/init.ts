@@ -8,6 +8,7 @@ import { initSocketio } from "./socketio";
 import { router } from "./router";
 import RoomService from "./services/room.service";
 import errorHandler from "./middlewares/error-handler.middleware";
+import ScheduleService from "./services/schedule.service";
 
 export const initializeApp = async (app: express.Application, server: any) => {
   try {
@@ -15,11 +16,15 @@ export const initializeApp = async (app: express.Application, server: any) => {
     axios.defaults.timeout = 5000; // 5 seconds timeout
 
     await connectDB();
-    // get the rooms for start polling for the room's ControlByWeb device
-    await RoomService.get();
 
     //connect to socket io
     initSocketio(server);
+
+    // get the rooms for start polling for the room's ControlByWeb device
+    await RoomService.get();
+
+    // update the room statuses according to the schedule
+    await ScheduleService.updateRoomStatuses(true);
 
     // set security HTTP headers
     app.use(helmet());
