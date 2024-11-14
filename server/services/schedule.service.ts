@@ -35,11 +35,12 @@ const ScheduleService = {
     }
   },
 
-  updateRoomStatuses: async (): Promise<void> => {
+  updateRoomStatuses: async (isInitial?: boolean): Promise<void> => {
     try {
       const now = new Date();
       const nowHours = now.getHours();
       const nowMinutes = now.getMinutes();
+      const nowSeconds = now.getSeconds();
 
       // Get all the minyans
       const conditions = await getMongoConditionForActiveMinyansByDate(now);
@@ -59,25 +60,50 @@ const ScheduleService = {
           const roomId = minyan.room.id?.toString();
           const startDate = new Date(minyan.startDate.time);
           const endDate = new Date(minyan.endDate.time);
-          const blinkMinutes = Number(minyan.blink?.secondsNum);
+          const blinkSeconds = Number(minyan.blink?.secondsNum) || 0;
 
           const startHours = startDate.getHours();
           const startMinutes = startDate.getMinutes();
+          const startSeconds = startDate.getSeconds();
           const endHours = endDate.getHours();
           const endMinutes = endDate.getMinutes();
+          const endSeconds = endDate.getSeconds();
           const blinkStartTime = new Date(
-            startDate.getTime() - blinkMinutes * 60000
+            endDate.getTime() - blinkSeconds * 1000
           );
           const blinkStartHours = blinkStartTime.getHours();
           const blinkStartMinutes = blinkStartTime.getMinutes();
+          const blinkStartSeconds = blinkStartTime.getSeconds();
 
           // Check if any action occurred in the current minute
           if (
+            (nowHours > startHours ||
+              (nowHours === startHours &&
+                (nowMinutes > startMinutes ||
+                  (nowMinutes === startMinutes &&
+                    nowSeconds >= startSeconds)))) &&
+            (nowHours < blinkStartHours ||
+              (nowHours === blinkStartHours &&
+                (nowMinutes < blinkStartMinutes ||
+                  (nowMinutes === blinkStartMinutes &&
+                    nowSeconds < blinkStartSeconds))))
+          ) {
+            if (!minyan.steadyFlag) {
+              roomStatusObj[roomId] = eBulbStatus.on;
+              if (minyan.startDate?.message?.audioUrl) {
+                audioUrls.push(minyan.startDate.message.audioUrl);
+              }
+            }
+          } else if (
             (nowHours > blinkStartHours ||
               (nowHours === blinkStartHours &&
-                nowMinutes >= blinkStartMinutes)) &&
-            (nowHours < startHours ||
-              (nowHours === startHours && nowMinutes < startMinutes))
+                (nowMinutes > blinkStartMinutes ||
+                  (nowMinutes === blinkStartMinutes &&
+                    nowSeconds >= blinkStartSeconds)))) &&
+            (nowHours < endHours ||
+              (nowHours === endHours &&
+                (nowMinutes < endMinutes ||
+                  (nowMinutes === endMinutes && nowSeconds < endSeconds))))
           ) {
             if (!minyan.steadyFlag) {
               roomStatusObj[roomId] = eBulbStatus.blink;
@@ -86,18 +112,10 @@ const ScheduleService = {
               }
             }
           } else if (
-            (nowHours > startHours ||
-              (nowHours === startHours && nowMinutes >= startMinutes)) &&
-            (nowHours < endHours ||
-              (nowHours === endHours && nowMinutes < endMinutes))
+            nowHours === endHours &&
+            nowMinutes === endMinutes &&
+            nowSeconds === endSeconds
           ) {
-            if (!minyan.steadyFlag) {
-              roomStatusObj[roomId] = eBulbStatus.on;
-              if (minyan.startDate?.message?.audioUrl) {
-                audioUrls.push(minyan.startDate.message.audioUrl);
-              }
-            }
-          } else {
             if (!roomStatusObj[roomId]) {
               roomStatusObj[roomId] = eBulbStatus.off;
               if (minyan.endDate?.message?.audioUrl) {
@@ -118,10 +136,15 @@ const ScheduleService = {
         rooms.map(async (room) => {
           const roomId = room.id?.toString();
           const currentStatus = roomStatusObj[roomId || ""];
-
           if (currentStatus) {
             await RoomService.updateBulbStatus(
               currentStatus,
+              eBulbColor.white,
+              roomId
+            );
+          } else if (isInitial) {
+            await RoomService.updateBulbStatus(
+              eBulbStatus.off,
               eBulbColor.white,
               roomId
             );
@@ -132,7 +155,7 @@ const ScheduleService = {
       // Play the audio messages
       audioUrls.forEach(playAudio);
     } catch (error) {
-      console.error("Error updating room statuses:", error);
+      console.error("Error updating room statuses:", (error as Error)?.message);
     }
   },
 
@@ -166,7 +189,6 @@ const ScheduleService = {
         const havdalahDate = new HDate();
         const mask = 0;
         const eventTime = new Date();
-
         const havdalahMins = process.env.VITE_HAVDALAMINS
           ? parseInt(process.env.VITE_HAVDALAMINS)
           : 50;
