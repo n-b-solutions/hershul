@@ -4,6 +4,7 @@ import { isMinyanInactiveForSelectedDate } from '@/helpers/time.helper';
 import {
   addSettingTimes,
   deleteMinyan,
+  setCurrentSelectedDate,
   setSettingTimes,
   sortSettingTimesItem,
   updateSettingTimesValue,
@@ -229,6 +230,7 @@ export function Calendar({
   const handleDateChange = (newDate: Dayjs | null) => {
     if (newDate) {
       setSelectedDate(newDate);
+      dispatch(setCurrentSelectedDate({ currentDate: newDate.toISOString() }));
     }
   };
 
