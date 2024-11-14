@@ -9,7 +9,7 @@ import { eDateType, EditMinyanValueType, MinyanType } from '../../../../lib/type
 export interface Istate {
   settingTimesItem: MinyanRowType[];
   dateType: eDateType;
-  currentDate?: Date;
+  currentDate?: string;
 }
 const initialState: Istate = {
   settingTimesItem: [],
@@ -54,7 +54,7 @@ const settingTimesSlice = createSlice({
       state.dateType = action.payload.currentType;
     },
     setCurrentSelectedDate: (state: Istate, action: PayloadAction<{ currentDate: string }>) => {
-      state.currentDate = new Date(action.payload.currentDate);
+      state.currentDate = action.payload.currentDate;
     },
   },
 });

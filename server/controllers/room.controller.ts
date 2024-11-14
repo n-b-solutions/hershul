@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import RoomService from "../services/room.service";
+import { eBulbStatus } from "../../lib/types/room.type";
 
 const RoomController = {
   get: async (
@@ -29,19 +30,6 @@ const RoomController = {
     }
   },
 
-  create: async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const result = await RoomService.create(req.body);
-      res.send(result);
-    } catch (error) {
-      next(error);
-    }
-  },
-
   update: async (
     req: Request,
     res: Response,
@@ -49,22 +37,13 @@ const RoomController = {
   ): Promise<void> => {
     try {
       const { id } = req.params;
-      const result = await RoomService.update(req.body, id);
-      res.send(result);
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  delete: async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const { id } = req.params;
-      await RoomService.delete(id);
-      res.sendStatus(204);
+      const { bulbStatus, bulbColor } = req.body;
+      if (bulbStatus === eBulbStatus.blink) {
+        await RoomService.updateBulbStatusToBlink(bulbColor, id);
+      } else {
+        await RoomService.updateBulbStatus(bulbStatus, bulbColor, id);
+      }
+      res.send();
     } catch (error) {
       next(error);
     }

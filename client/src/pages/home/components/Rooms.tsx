@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { AddMessageButton } from '@/components/message/AddMessageButton';
 
+import { BulbStatusUpdate } from '../../../../../lib/types/io.type';
 import { eBulbStatus } from '../../../../../lib/types/room.type';
 import { fetchRooms, setRoomStatusFromSocket, updateRoomStatus } from '../../../redux/room/room-slice'; // תעדכן את הנתיב
 import { AppDispatch, RootState } from '../../../redux/store';
@@ -19,7 +20,7 @@ export function Rooms(): React.JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
   const { rooms } = useSelector((state: RootState) => state.room);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const getRooms = async () => {
       if (!rooms.length) {
         await dispatch(fetchRooms());
@@ -27,14 +28,16 @@ export function Rooms(): React.JSX.Element {
     };
     getRooms();
 
-    socket.on('roomStatusUpdated', (updatedStatuses) => {
-      dispatch(setRoomStatusFromSocket(updatedStatuses));
-    });
+    const handleBulbStatusUpdated = (bulbStatusUpdated: BulbStatusUpdate) => {
+      dispatch(setRoomStatusFromSocket(bulbStatusUpdated));
+    };
+
+    socket.on('bulbStatusUpdated', handleBulbStatusUpdated);
 
     return () => {
-      socket.off('roomStatusUpdated');
+      socket.off('bulbStatusUpdated', handleBulbStatusUpdated);
     };
-  }, []);
+  }, [dispatch]);
 
   const handleStatusChange = (newStatus: eBulbStatus, id: string) => {
     dispatch(updateRoomStatus({ id, newStatus }));
@@ -100,3 +103,5 @@ export function Rooms(): React.JSX.Element {
     </Box>
   );
 }
+
+export default Rooms;

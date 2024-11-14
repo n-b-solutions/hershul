@@ -13,7 +13,6 @@ import {
 import { isRoshHodesh } from "../helpers/time.helper";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { convertMinyanDocument } from "../utils/convert-document.util";
-import { MinyanDocument } from "../types/minyan.type";
 import { CountType, IdType } from "../../lib/types/metadata.type";
 import {
   getMongoConditionForActiveMinyansByDate,
@@ -25,6 +24,7 @@ const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
     try {
       const minyans = await MinyanModel.find()
+        .lean(true)
         .populate("roomId")
         .populate("startDate.messageId")
         .populate("endDate.messageId")
@@ -191,13 +191,19 @@ const MinyanService = {
     specificDate,
   }: NewMinyanType): Promise<MinyanType> => {
     try {
+      // Convert strings to Date objects and set seconds to 00
+      const startDate = new Date(startTime);
+      const endDate = new Date(endTime);
+      startDate.setSeconds(0, 0);
+      endDate.setSeconds(0, 0);
+
       const convertedSpecificDate = specificDate
         ? convertToHebrewDate(new Date(specificDate.date))
         : undefined;
-      const newMinyan: Omit<MinyanDocument, "id"> = {
+      const newMinyan = {
         roomId: new ObjectId(roomId),
-        startDate: { time: startTime },
-        endDate: { time: endTime },
+        startDate: { time: startDate },
+        endDate: { time: endDate },
         ...(blinkNum ? { blink: { secondsNum: blinkNum } } : {}),
         dateType,
         specificDate: convertedSpecificDate,
@@ -211,7 +217,8 @@ const MinyanService = {
         .populate("blink.messageId")
         .lean(true);
 
-      io.emit("minyanUpdated", await MinyanModel.find());
+      const minyans = await MinyanService.get();
+      io.emit("minyanUpdated", minyans);
 
       return convertMinyanDocument(newMinyanDocument!);
     } catch (error) {
@@ -395,6 +402,25 @@ const MinyanService = {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");
       }
+
+      // Convert strings to Date objects and set seconds to 00
+      if (
+        field === "endDate" &&
+        internalField === "time" &&
+        typeof value === "string"
+      ) {
+        value = new Date(value);
+        value.setSeconds(0, 0);
+      }
+      if (
+        field === "startDate" &&
+        internalField === "time" &&
+        typeof value === "string"
+      ) {
+        value = new Date(value);
+        value.setSeconds(0, 0);
+      }
+
       const fieldForEdit = internalField ? `${field}.${internalField}` : field;
       const updatedMinyan = await MinyanModel.findByIdAndUpdate(
         id,
@@ -404,7 +430,8 @@ const MinyanService = {
       if (!updatedMinyan) {
         throw new ApiError(404, "Minyan not found");
       }
-      io.emit("minyanUpdated", await MinyanModel.find());
+      const minyans = await MinyanService.get();
+      io.emit("minyanUpdated", minyans);
       return {
         editedValue: internalField
           ? updatedMinyan?.[field]?.[internalField]
@@ -425,7 +452,8 @@ const MinyanService = {
       if (!deletedMinyan) {
         throw new ApiError(404, "Minyan not found");
       }
-      io.emit("minyanUpdated", await MinyanModel.find());
+      const minyans = await MinyanService.get();
+      io.emit("minyanUpdated", minyans);
       return { id: deletedMinyan._id?.toString() };
     } catch (error) {
       console.error(`Error deleting minyan with ID ${id}:`, error);

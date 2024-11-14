@@ -1,7 +1,7 @@
-import { Server as SocketioServer } from 'socket.io';
-import { CronJob } from 'cron';
+import { Server as SocketioServer } from "socket.io";
+import { CronJob } from "cron";
 
-import ScheduleService from './services/schedule.service';
+import ScheduleService from "./services/schedule.service";
 
 let io: SocketioServer;
 
@@ -9,24 +9,22 @@ export const initSocketio = (server) => {
   io = new SocketioServer(server, {
     cors: {
       origin: process.env.VITE_SITE_URL,
-      methods: ['GET', 'POST'],
+      methods: ["GET", "POST"],
     },
   });
 
-  io.on('connection', (socket) => {
-    console.log('A user connected' + socket.id);
-    socket.on('disconnect', () => {
-      console.log('User disconnected');
+  io.on("connection", (socket) => {
+    console.log("A user connected" + socket.id);
+    socket.on("disconnect", () => {
+      console.log("User disconnected");
     });
   });
 
   // TODO: Remove this cron job form here and move it to a separate file
-  const job = new CronJob('* * * * *', async () => {
-    console.log('Running cron job to update rooms...');
-    const updatedStatuses = await ScheduleService.updateRoomStatuses();
-
+  const job = new CronJob("*/2 * * * * *", async () => {
+    await ScheduleService.updateRoomStatuses();
+    // TODO: Add a new cron job to log before shkiah
     await ScheduleService.logBeforeShkiah();
-    io.emit('roomStatusUpdated', updatedStatuses);
   });
 
   job.start();

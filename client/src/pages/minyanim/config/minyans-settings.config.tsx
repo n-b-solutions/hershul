@@ -7,8 +7,8 @@ import { tFieldMinyanTable } from '@/types/minyans.type';
 import { Room } from '@/types/room.type';
 import { ColumnDef } from '@/types/table.type';
 
-import { ActionsMessage } from '../components/minyans-settings/ActionsMessage';
 import { MinyanType } from '../../../../../lib/types/minyan.type';
+import { ActionsMessage } from '../components/minyans-settings/ActionsMessage';
 
 const getFormatWithActionsMessage = (props: {
   value: number | string;
@@ -62,26 +62,6 @@ export const getMinyansSettingsColumns = ({
   {
     formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
       getFormatWithActionsMessage({
-        value: row.blink?.secondsNum || '',
-        roomName: row.room?.name,
-        message: row.blink?.message,
-        id: row?.id,
-        field: 'blink',
-        index,
-        disabledEdit,
-      }),
-    valueForEdit: (row) => row.blink?.secondsNum,
-    editInputType: 'number',
-    name: 'Blink',
-    width: '10px',
-    field: 'blink',
-    padding: 'none',
-    align: 'center',
-    tooltip: 'Time to start Blink before lights on',
-  },
-  {
-    formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
-      getFormatWithActionsMessage({
         value: dayjs(row.startDate?.time).format('hh:mm A'),
         roomName: row.room?.name,
         message: row.startDate?.message,
@@ -93,11 +73,29 @@ export const getMinyansSettingsColumns = ({
     editInputType: 'time',
     padding: 'none',
     name: 'Start Time',
-    width: '50px',
     field: 'startDate',
     align: 'center',
     tooltip: 'Lights On',
     valueForEdit: (row) => dayjs(row.startDate?.time),
+  },
+  {
+    formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
+      getFormatWithActionsMessage({
+        value: row.blink?.secondsNum || '',
+        roomName: row.room?.name,
+        message: row.blink?.message,
+        id: row?.id,
+        field: 'blink',
+        index,
+        disabledEdit,
+      }),
+    valueForEdit: (row) => row.blink?.secondsNum,
+    editInputType: 'number',
+    name: 'Blink',
+    field: 'blink',
+    padding: 'none',
+    align: 'center',
+    tooltip: 'Time to start Blink before lights off',
   },
   {
     formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
@@ -107,13 +105,12 @@ export const getMinyansSettingsColumns = ({
         message: row.endDate?.message,
         id: row?.id,
         field: 'endDate',
-        index: index,
+        index,
         disabledEdit,
       }),
     editInputType: 'time',
     padding: 'none',
     name: 'End Time',
-    width: '50px',
     field: 'endDate',
     align: 'center',
     tooltip: 'Lights Off',
@@ -127,7 +124,6 @@ export const getMinyansSettingsColumns = ({
     valueOption: roomArray,
     padding: 'none',
     name: 'Room',
-    width: '80px',
     field: 'room',
     align: 'center',
   },
