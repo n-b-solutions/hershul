@@ -102,6 +102,8 @@ const RoomService = {
     id?: string
   ): Promise<void> => {
     try {
+      await RoomService.updateBulbStatus(eBulbStatus.blink, bulbColor, id);
+
       const intervalId = setInterval(async () => {
         await RoomService.updateBulbStatus(eBulbStatus.blink, bulbColor, id);
       }, 2000);
