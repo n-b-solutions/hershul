@@ -9,7 +9,9 @@ import { startPolling } from "./polling.service";
 import { RoomServerType } from "../types/room.type";
 import { io } from "../socketio"; // Import the socket instance
 
-const pollingInterval = 1000; // Poll every 5 seconds
+const pollingInterval = 1000; // Poll every second
+
+const blinkDuration = 10; // seconds
 
 const roomCache: { [id: string]: RoomServerType } = {};
 
@@ -91,6 +93,25 @@ const RoomService = {
         `Error updating room with ID ${id}:`,
         (error as Error)?.message
       );
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
+  updateBulbStatusToBlink: async (
+    bulbColor?: eBulbColor,
+    id?: string
+  ): Promise<void> => {
+    try {
+      const intervalId = setInterval(async () => {
+        await RoomService.updateBulbStatus(eBulbStatus.blink, bulbColor, id);
+      }, 2000);
+
+      setTimeout(async () => {
+        clearInterval(intervalId);
+        await RoomService.updateBulbStatus(eBulbStatus.off, bulbColor, id);
+      }, blinkDuration * 1000);
+    } catch (error) {
+      console.error("Error updating bulb status to blink:", error);
       throw new ApiError(500, (error as Error).message);
     }
   },

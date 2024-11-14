@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import RoomService from "../services/room.service";
+import { eBulbStatus } from "../../lib/types/room.type";
 
 const RoomController = {
   get: async (
@@ -37,12 +38,12 @@ const RoomController = {
     try {
       const { id } = req.params;
       const { bulbStatus, bulbColor } = req.body;
-      const result = await RoomService.updateBulbStatus(
-        bulbStatus,
-        bulbColor,
-        id
-      );
-      res.send(result);
+      if (bulbStatus === eBulbStatus.blink) {
+        await RoomService.updateBulbStatusToBlink(bulbColor, id);
+      } else {
+        await RoomService.updateBulbStatus(bulbStatus, bulbColor, id);
+      }
+      res.send();
     } catch (error) {
       next(error);
     }
