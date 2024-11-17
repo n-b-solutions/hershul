@@ -8,12 +8,16 @@ import ControlByWebService from "./control-by-web.service";
 import { startPolling } from "./polling.service";
 import { RoomServerType } from "../types/room.type";
 import { io } from "../socketio"; // Import the socket instance
+import { FileLogger } from "../utils/file-logger.util"; // Import the FileLogger
 
 const pollingInterval = 1000; // Poll every second
 
 const blinkDuration = 10; // seconds
 
 const roomCache: { [id: string]: RoomServerType } = {};
+
+// Create an instance of FileLogger
+const logger = new FileLogger({ prefix: "RoomService", level: "ALL" });
 
 const RoomService = {
   get: async (): Promise<RoomType[]> => {
@@ -151,6 +155,11 @@ const RoomService = {
           bulbStatus,
           bulbColor,
         });
+
+        // Log the status change
+        logger.debug(
+          `Bulb status updated to ${bulbStatus} and color to ${bulbColor} for room with IP ${ipAddress}`
+        );
       }
 
       return convertRoomToClient(roomCache[roomId]!);

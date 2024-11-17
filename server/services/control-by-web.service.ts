@@ -4,6 +4,7 @@ import path from "path";
 import { eBulbStatus, eBulbColor } from "../../lib/types/room.type";
 import { eBulbColorNum, eBulbStatusNum } from "../types/room.type";
 import axiosRetry from "axios-retry";
+import { FileLogger } from "../utils/file-logger.util";
 
 // Configure axios to use axios-retry
 axiosRetry(axios, {
@@ -36,6 +37,9 @@ const writeFakeUpdates = (updates: any) => {
 const blinkStatusMap: { [ipAddress: string]: boolean } = {};
 const blinkTimeouts: { [key: string]: NodeJS.Timeout } = {};
 
+// Create an instance of FileLogger
+const logger = new FileLogger({ prefix: "ControlByWebService", level: "ALL" });
+
 const ControlByWebService = {
   /**
    * Updates the bulb status using ControlByWeb.
@@ -57,7 +61,7 @@ const ControlByWebService = {
     if (isProd) {
       const url = `http://${ipAddress}/state.xml?relay${colorNum}=${bulbStatusNum}`;
       await axios.get(url);
-      console.log(
+      logger.debug(
         `Updating bulb status to ${bulbStatusNum} for IP ${ipAddress}`
       );
       // Store blink status
@@ -81,7 +85,7 @@ const ControlByWebService = {
       const fakeUpdates = readFakeUpdates();
       fakeUpdates[ipAddress] = { status: bulbStatus, color };
       writeFakeUpdates(fakeUpdates);
-      console.log(
+      logger.debug(
         `Fake update: Setting bulb status to ${bulbStatus} and color to ${color} for IP ${ipAddress}`
       );
       if (bulbStatus === eBulbStatus.blink) {
@@ -96,7 +100,7 @@ const ControlByWebService = {
           if (fakeUpdates[ipAddress]?.status === eBulbStatus.blink) {
             fakeUpdates[ipAddress] = { status: eBulbStatus.off, color };
             writeFakeUpdates(fakeUpdates);
-            console.log(
+            logger.debug(
               `Fake update: Setting bulb status to off and color to ${color} for IP ${ipAddress}`
             );
           }
