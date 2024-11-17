@@ -9,11 +9,12 @@ import {
 } from "@hebcal/core";
 import { MinyanType } from "../../lib/types/minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
-import { convertMinyanDocument } from "../utils/convert-document.util";
-import RoomService from "./room.service";
-import { convertHDateToDate } from "../utils/convert-date.util";
-import MinyanService from "./minyan.service";
+import { playAudio } from "../utils/play-audio.util";
 import { getMongoConditionForActiveMinyansByDate } from "../helpers/minyan.helper";
+import { convertHDateToDate } from "../utils/convert-date.util";
+import { convertMinyanDocument } from "../utils/convert-document.util";
+import MinyanService from "./minyan.service";
+import RoomService from "./room.service";
 
 const ScheduleService = {
   get: async (): Promise<MinyanType[]> => {
@@ -41,15 +42,23 @@ const ScheduleService = {
       const nowMinutes = now.getMinutes();
       const nowSeconds = now.getSeconds();
 
-      // Get all the minyans
-      const conditions = await getMongoConditionForActiveMinyansByDate(now);
-      const minyans = await MinyanModel.find(conditions);
-      const roomStatusObj: { [key: string]: eBulbStatus } = {};
+      const getMinyans = async () => {
+        const conditions = await getMongoConditionForActiveMinyansByDate(now);
+        const minyansDocs = await MinyanModel.find(conditions)
+          .populate("roomId")
+          .populate("startDate.messageId")
+          .populate("endDate.messageId")
+          .populate("blink.messageId")
+          .lean(true);
+        return minyansDocs.map(convertMinyanDocument);
+      };
 
-      // Process minyans to determine room statuses
-      await Promise.all(
-        minyans.map(async (minyan) => {
-          const roomId = minyan.roomId?.toString();
+      const processMinyans = (minyans: MinyanType[]) => {
+        const roomStatusObj: { [key: string]: eBulbStatus } = {};
+        const audioUrls: string[] = [];
+
+        minyans.forEach(async (minyan) => {
+          const roomId = minyan.room.id?.toString();
           const startDate = new Date(minyan.startDate.time);
           const endDate = new Date(minyan.endDate.time);
           const blinkSeconds = Number(minyan.blink?.secondsNum) || 0;
@@ -110,30 +119,77 @@ const ScheduleService = {
               await MinyanService.put("steadyFlag", "", false, minyan.id);
             }
           }
-        })
-      );
 
-      // Update room statuses based on the roomStatusObj
-      const rooms = await RoomService.get();
-      await Promise.all(
-        rooms.map(async (room) => {
-          const roomId = room.id?.toString();
-          const currentStatus = roomStatusObj[roomId || ""];
-          if (currentStatus) {
-            await RoomService.updateBulbStatus(
-              currentStatus,
-              eBulbColor.white,
-              roomId
-            );
-          } else if (isInitial) {
-            await RoomService.updateBulbStatus(
-              eBulbStatus.off,
-              eBulbColor.white,
-              roomId
-            );
+          // Play audio exactly at the start time
+          if (
+            nowHours === startHours &&
+            nowMinutes === startMinutes &&
+            nowSeconds === startSeconds
+          ) {
+            if (minyan.startDate?.message?.audioUrl) {
+              audioUrls.push(minyan.startDate.message.audioUrl);
+            }
           }
-        })
-      );
+
+          // Play audio exactly at the blink start time
+          if (
+            nowHours === blinkStartHours &&
+            nowMinutes === blinkStartMinutes &&
+            nowSeconds === blinkStartSeconds
+          ) {
+            if (minyan.blink?.message?.audioUrl) {
+              audioUrls.push(minyan.blink.message.audioUrl);
+            }
+          }
+
+          // Play audio exactly at the end time
+          if (
+            nowHours === endHours &&
+            nowMinutes === endMinutes &&
+            nowSeconds === endSeconds
+          ) {
+            if (minyan.endDate?.message?.audioUrl) {
+              audioUrls.push(minyan.endDate.message.audioUrl);
+            }
+          }
+        });
+
+        return { roomStatusObj, audioUrls };
+      };
+
+      const updateRooms = async (roomStatusObj: {
+        [key: string]: eBulbStatus;
+      }) => {
+        const rooms = await RoomService.get();
+        await Promise.all(
+          rooms.map(async (room) => {
+            const roomId = room.id?.toString();
+            const currentStatus = roomStatusObj[roomId || ""];
+            if (currentStatus) {
+              await RoomService.updateBulbStatus(
+                currentStatus,
+                eBulbColor.white,
+                roomId
+              );
+            } else if (isInitial) {
+              await RoomService.updateBulbStatus(
+                eBulbStatus.off,
+                eBulbColor.white,
+                roomId
+              );
+            }
+          })
+        );
+      };
+
+      const playAudioMessages = (audioUrls: string[]) => {
+        audioUrls.forEach(playAudio);
+      };
+
+      const minyans = await getMinyans();
+      const { roomStatusObj, audioUrls } = processMinyans(minyans);
+      await updateRooms(roomStatusObj);
+      playAudioMessages(audioUrls);
     } catch (error) {
       console.error("Error updating room statuses:", (error as Error)?.message);
     }
