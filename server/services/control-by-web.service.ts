@@ -34,6 +34,7 @@ const writeFakeUpdates = (updates: any) => {
 
 // Store blink status
 const blinkStatusMap: { [ipAddress: string]: boolean } = {};
+const blinkTimeouts: { [key: string]: NodeJS.Timeout } = {};
 
 const ControlByWebService = {
   /**
@@ -59,6 +60,23 @@ const ControlByWebService = {
       console.log(
         `Updating bulb status to ${bulbStatusNum} for IP ${ipAddress}`
       );
+      // Store blink status
+      blinkStatusMap[ipAddress] = bulbStatus === eBulbStatus.blink;
+
+      // If there is an existing timer, cancel it
+      if (blinkTimeouts[ipAddress]) {
+        clearTimeout(blinkTimeouts[ipAddress]);
+      }
+
+      // Set a new timer for 2 seconds
+      if (bulbStatus === eBulbStatus.blink) {
+        blinkTimeouts[ipAddress] = setTimeout(() => {
+          // Check if the status has not changed for 2 seconds
+          if (blinkStatusMap[ipAddress] === true) {
+            blinkStatusMap[ipAddress] = false;
+          }
+        }, 2000);
+      }
     } else {
       const fakeUpdates = readFakeUpdates();
       fakeUpdates[ipAddress] = { status: bulbStatus, color };
@@ -66,10 +84,25 @@ const ControlByWebService = {
       console.log(
         `Fake update: Setting bulb status to ${bulbStatus} and color to ${color} for IP ${ipAddress}`
       );
-    }
+      if (bulbStatus === eBulbStatus.blink) {
+        // If there is an existing timer, cancel it
+        if (blinkTimeouts[ipAddress]) {
+          clearTimeout(blinkTimeouts[ipAddress]);
+        }
 
-    // Store blink status
-    blinkStatusMap[ipAddress] = bulbStatus === eBulbStatus.blink;
+        // Set a new timer for 2 seconds
+        blinkTimeouts[ipAddress] = setTimeout(() => {
+          // Check if the status has not changed for 2 seconds
+          if (fakeUpdates[ipAddress]?.status === eBulbStatus.blink) {
+            fakeUpdates[ipAddress] = { status: eBulbStatus.off, color };
+            writeFakeUpdates(fakeUpdates);
+            console.log(
+              `Fake update: Setting bulb status to off and color to ${color} for IP ${ipAddress}`
+            );
+          }
+        }, 2000);
+      }
+    }
   },
 
   /**
