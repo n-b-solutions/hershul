@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { messageLoading, messages } from '../../redux/message/messageSlice';
 import type { AppDispatch } from '../../redux/store';
 import { CreateMessagePopup } from './CreateMessagePopup';
+import RepeatAnnounce from './RepeatAnnounce';
 
 export function MessagesPopup(props: {
   open: boolean;
@@ -30,6 +31,7 @@ export function MessagesPopup(props: {
 
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState<boolean>(false);
+  const [showRepeatAnnounce, setShowRepeatAnnounce] = React.useState<boolean>(false); // הוספת משתנה showRepeatAnnounce
 
   React.useEffect(() => {
     if (open) {
@@ -43,17 +45,24 @@ export function MessagesPopup(props: {
 
   const handleCreateDialogClose = (messageId?: string) => {
     setIsCreateDialogOpen(false);
-    handleClose(messageId);
+    if (messageId) {
+      setShowRepeatAnnounce(true);
+    }
   };
 
   const handleItemClick = (message: string, messageId?: string) => {
-    handleClose(messageId);
+    setShowRepeatAnnounce(true); // הצג את הקומפוננטה RepeatAnnounce
+    // handleClose(messageId);
   };
 
   const filteredMessages = messagesSlice.filter(
     (contact) =>
       contact.name && contact.selectedRoom === room && contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (showRepeatAnnounce) {
+    return         <RepeatAnnounce open={showRepeatAnnounce} handleClose={() => setShowRepeatAnnounce(false)} />
+  }
 
   return (
     <>
