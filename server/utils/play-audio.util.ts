@@ -38,6 +38,7 @@ export const playAudio = (audioUrl: string) => {
           : process.platform === "darwin"
           ? "afplay"
           : getLinuxAudioPlayer(),
+      args: process.platform === "win32" ? ["-ao", "dsound"] : [], // Here you can add additional parameters according to the player and the operating system
     });
 
     audioPlayer.play(audioPath, (error) => {
