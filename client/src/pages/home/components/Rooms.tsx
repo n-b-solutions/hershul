@@ -22,9 +22,7 @@ export function Rooms(): React.JSX.Element {
 
   useEffect(() => {
     const getRooms = async () => {
-      if (!rooms.length) {
-        await dispatch(fetchRooms());
-      }
+      await dispatch(fetchRooms());
     };
     getRooms();
 
