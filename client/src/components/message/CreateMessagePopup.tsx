@@ -1,14 +1,16 @@
 import React from 'react';
-import { Dialog, Paper, Box, Button, Grid } from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
 import { createMessage } from '@/redux/message/messageThunk';
 import type { AppDispatch } from '@/redux/store';
+import { Box, Button, Dialog, Grid, Paper } from '@mui/material';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { ArrowCounterClockwise as RedoIcon, FloppyDisk as SaveIcon } from '@phosphor-icons/react';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { tFieldMinyanTable } from '@/types/minyans.type';
 
 import { fetchRooms, selectRooms, selectRoomsLoading } from '../../redux/room/room-slice';
 import AudioRecorder from './AudioRecorder';
@@ -18,10 +20,12 @@ export const CreateMessagePopup = ({
   open,
   handleClose,
   room,
+  fieldName,
 }: {
   open: boolean;
   handleClose: (id?: string) => void;
   room?: string;
+  fieldName: tFieldMinyanTable;
 }): React.JSX.Element => {
   const [selectedRoom, setSelectedRoom] = React.useState<string>(room || '');
   const [name, setName] = React.useState<string>('');
@@ -30,7 +34,6 @@ export const CreateMessagePopup = ({
 
   const dispatch = useDispatch<AppDispatch>();
   const rooms = useSelector(selectRooms);
-  // const loading = useSelector(messageLoading);
   const roomsLoading = useSelector(selectRoomsLoading);
   const isSaveDisabled = !name || !audioBlob;
 
@@ -46,7 +49,10 @@ export const CreateMessagePopup = ({
         audioBlob,
       };
       const newMessage = await dispatch(createMessage(newRoom));
+
       handleClose(newMessage?.id);
+    }
+    if (fieldName === 'blink') {
       setShowRepeatAnnounce(true);
     }
   };
@@ -106,7 +112,7 @@ export const CreateMessagePopup = ({
                 <Grid container spacing={3} justifyContent="center">
                   {audioBlob && (
                     <>
-                      <Grid sm={6} xs={12}>
+                      <Grid item sm={6} xs={12}>
                         <FormControl fullWidth>
                           <InputLabel>Name</InputLabel>
                           <OutlinedInput name="name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -146,13 +152,11 @@ export const CreateMessagePopup = ({
                         color="primary"
                         onClick={handleSave}
                         disabled={isSaveDisabled}
-                        // startIcon={<SaveIcon />}
+                        startIcon={<SaveIcon />}
                       >
                         Save
                       </Button>
-                      <Button variant="outlined" color="secondary" onClick={handleRedo}
-                      //  startIcon={<RedoIcon />}
-                       >
+                      <Button variant="outlined" color="secondary" onClick={handleRedo} startIcon={<RedoIcon />}>
                         Redo
                       </Button>
                     </Box>

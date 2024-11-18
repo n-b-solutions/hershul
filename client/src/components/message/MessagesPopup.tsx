@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { fetchMessages } from '@/redux/message/messageThunk';
 import { Dialog, IconButton, InputAdornment, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -13,6 +13,8 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { X as CloseIcon } from '@phosphor-icons/react/dist/ssr/X';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { tFieldMinyanTable } from '@/types/minyans.type';
+
 import { messageLoading, messages } from '../../redux/message/messageSlice';
 import type { AppDispatch } from '../../redux/store';
 import { CreateMessagePopup } from './CreateMessagePopup';
@@ -22,8 +24,9 @@ export function MessagesPopup(props: {
   open: boolean;
   handleClose: (messageId?: string) => void;
   room: string;
+  fieldName: tFieldMinyanTable;
 }): React.JSX.Element {
-  const { open, handleClose, room } = props;
+  const { open, handleClose, room, fieldName } = props;
   const dispatch = useDispatch<AppDispatch>();
 
   const messagesSlice = useSelector(messages);
@@ -31,7 +34,7 @@ export function MessagesPopup(props: {
 
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState<boolean>(false);
-  const [showRepeatAnnounce, setShowRepeatAnnounce] = React.useState<boolean>(false); // הוספת משתנה showRepeatAnnounce
+  const [showRepeatAnnounce, setShowRepeatAnnounce] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     if (open) {
@@ -45,24 +48,20 @@ export function MessagesPopup(props: {
 
   const handleCreateDialogClose = (messageId?: string) => {
     setIsCreateDialogOpen(false);
-    if (messageId) {
-      setShowRepeatAnnounce(true);
-    }
   };
 
   const handleItemClick = (message: string, messageId?: string) => {
-    setShowRepeatAnnounce(true); // הצג את הקומפוננטה RepeatAnnounce
-    // handleClose(messageId);
+    if (fieldName === 'blink') {
+      setShowRepeatAnnounce(true);
+    } else {
+      handleClose(messageId);
+    }
   };
 
   const filteredMessages = messagesSlice.filter(
     (contact) =>
       contact.name && contact.selectedRoom === room && contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  if (showRepeatAnnounce) {
-    return         <RepeatAnnounce open={showRepeatAnnounce} handleClose={() => setShowRepeatAnnounce(false)} />
-  }
 
   return (
     <>
@@ -157,7 +156,10 @@ export function MessagesPopup(props: {
         open={isCreateDialogOpen}
         handleClose={(messageId?: string) => handleCreateDialogClose(messageId)}
         room={room}
+        fieldName={fieldName}
       />
+
+      <RepeatAnnounce open={showRepeatAnnounce} handleClose={() => setShowRepeatAnnounce(false)} />
     </>
   );
 }

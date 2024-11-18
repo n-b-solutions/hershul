@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { MessageTab } from '@/types/message.type';
 import { tFieldMinyanTable } from '@/types/minyans.type';
 import { AddMessageButton } from '@/components/message/AddMessageButton';
+
 import { EditedType } from '../../../../../../lib/types/minyan.type';
 
 export function ActionsMessage(props: {
@@ -74,6 +75,7 @@ export function ActionsMessage(props: {
             isSettingPage={true}
             onClick={(messageId?: string) => handleClick(messageId)}
             disabledEdit={disabledEdit}
+            fieldName={field}
           />
         )}
       </Grid>

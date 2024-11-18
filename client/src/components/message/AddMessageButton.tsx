@@ -4,6 +4,7 @@ import { CardActions, IconButton } from '@mui/material';
 import { Plus } from '@phosphor-icons/react';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import { useSelector } from 'react-redux';
+import { tFieldMinyanTable } from '@/types/minyans.type';
 
 import { MessagesPopup } from './MessagesPopup';
 
@@ -12,8 +13,9 @@ export function AddMessageButton(props: {
   isSettingPage?: boolean;
   onClick?: (messageId?: string) => void;
   disabledEdit?: boolean;
+  fieldName: tFieldMinyanTable;
 }): React.JSX.Element {
-  const { roomName, isSettingPage, onClick, disabledEdit } = props;
+  const { roomName, isSettingPage, onClick, disabledEdit, fieldName } = props;
   const messagesSlice = useSelector(messages);
   const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({});
 
@@ -57,6 +59,7 @@ export function AddMessageButton(props: {
         open={displayMessages[roomName] || false}
         handleClose={(messageId?: string) => handleCloseMessage(roomName, messageId)}
         room={roomName}
+        fieldName={fieldName}
       />
     </>
   );
