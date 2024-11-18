@@ -72,14 +72,14 @@ const ControlByWebService = {
         clearTimeout(blinkTimeouts[ipAddress]);
       }
 
-      // Set a new timer for 2 seconds
+      // Set a new timer for 3 seconds
       if (bulbStatus === eBulbStatus.blink) {
         blinkTimeouts[ipAddress] = setTimeout(() => {
-          // Check if the status has not changed for 2 seconds
+          // Check if the status has not changed for 3 seconds
           if (blinkStatusMap[ipAddress] === true) {
             blinkStatusMap[ipAddress] = false;
           }
-        }, 2000);
+        }, 3000);
       }
     } else {
       const fakeUpdates = readFakeUpdates();
@@ -88,15 +88,15 @@ const ControlByWebService = {
       logger.debug(
         `Fake update: Setting bulb status to ${bulbStatus} and color to ${color} for IP ${ipAddress}`
       );
-      if (bulbStatus === eBulbStatus.blink) {
-        // If there is an existing timer, cancel it
-        if (blinkTimeouts[ipAddress]) {
-          clearTimeout(blinkTimeouts[ipAddress]);
-        }
 
-        // Set a new timer for 2 seconds
+      // If there is an existing timer, cancel it
+      if (blinkTimeouts[ipAddress]) {
+        clearTimeout(blinkTimeouts[ipAddress]);
+      }
+      if (bulbStatus === eBulbStatus.blink) {
+        // Set a new timer for 3 seconds
         blinkTimeouts[ipAddress] = setTimeout(() => {
-          // Check if the status has not changed for 2 seconds
+          // Check if the status has not changed for 3 seconds
           if (fakeUpdates[ipAddress]?.status === eBulbStatus.blink) {
             fakeUpdates[ipAddress] = { status: eBulbStatus.off, color };
             writeFakeUpdates(fakeUpdates);
@@ -104,7 +104,7 @@ const ControlByWebService = {
               `Fake update: Setting bulb status to off and color to ${color} for IP ${ipAddress}`
             );
           }
-        }, 2000);
+        }, 3000);
       }
     }
   },

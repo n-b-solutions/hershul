@@ -39,15 +39,14 @@ const RoomController = {
     try {
       const { id } = req.params;
       const { bulbStatus, bulbColor } = req.body;
-      if (bulbStatus === eBulbStatus.off && id) {
-        // If the bulb status is 'off' and an ID is provided, set the steady flag for active minyans in the specified room
-        await MinyanService.setSteadyFlagForActiveMinyans(id);
-      }
       if (bulbStatus === eBulbStatus.blink) {
         // If the bulb status is 'blink', update the bulb status to blink with the specified color in the specified room
         await RoomService.updateBulbStatusToBlink(bulbColor, id);
       } else {
         // For any other bulb status, update the bulb status with the specified status and color in the specified room
+        if (id) {
+          await MinyanService.setSteadyFlagForActiveMinyans(id);
+        }
         await RoomService.updateBulbStatus(bulbStatus, bulbColor, id);
       }
       res.send();
