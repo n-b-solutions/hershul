@@ -17,6 +17,7 @@ import {
   getMongoConditionForActiveMinyansByDate,
   getQueryDateType,
 } from "../helpers/minyan.helper";
+import ScheduleService from "./schedule.service";
 
 const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
@@ -198,7 +199,7 @@ const MinyanService = {
         .populate("blink.messageId")
         .lean(true);
 
-      const minyans = await MinyanService.get();
+      const minyans = await ScheduleService.get();
       io.emit("minyanUpdated", minyans);
 
       return convertMinyanDocument(newMinyanDocument!);
@@ -372,7 +373,7 @@ const MinyanService = {
       throw new ApiError(500, (error as Error).message);
     }
   },
-  
+
   setSteadyFlagForActiveMinyans: async (roomId: string): Promise<void> => {
     try {
       const now = new Date();
@@ -434,7 +435,7 @@ const MinyanService = {
       if (!updatedMinyan) {
         throw new ApiError(404, "Minyan not found");
       }
-      const minyans = await MinyanService.get();
+      const minyans = await ScheduleService.get();
       io.emit("minyanUpdated", minyans);
       return {
         editedValue: internalField
@@ -456,7 +457,7 @@ const MinyanService = {
       if (!deletedMinyan) {
         throw new ApiError(404, "Minyan not found");
       }
-      const minyans = await MinyanService.get();
+      const minyans = await ScheduleService.get();
       io.emit("minyanUpdated", minyans);
       return { id: deletedMinyan._id?.toString() };
     } catch (error) {
