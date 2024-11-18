@@ -1,5 +1,6 @@
 import { RoomType } from "./room.type";
 import { MessageType } from "./message.type";
+import { HDate } from "@hebcal/core";
 
 export enum eDateType {
   sunday = "sunday",
@@ -21,6 +22,8 @@ export interface BlinkAlertType {
 export interface SpecificDateType {
   date: Date | string;
   isRoutine?: boolean;
+  hebrewMonth?: string;
+  hebrewDayMonth?: string;
 }
 export interface MinyanType {
   id: string;
@@ -41,6 +44,16 @@ export interface NewMinyanType {
   blinkNum?: number;
   dateType: eDateType;
   specificDate?: SpecificDateType;
+}
+
+// Function to convert Gregorian date to Hebrew date
+export function convertToHebrewDate(date: Date): SpecificDateType {
+  const hDate = new HDate(date);
+  return {
+    date,
+    hebrewMonth: hDate.getMonthName(),
+    hebrewDayMonth: hDate.getDate().toString(),
+  };
 }
 
 export type EditMinyanValueType =
