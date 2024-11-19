@@ -6,6 +6,8 @@ import { convertObjectIdTostring } from "./convert-object-id.util";
 import { convertIdsKeys } from "./convert-keys.util";
 import { MessageDocument } from "../types/message.type";
 import { MessageType } from "../../lib/types/message.type";
+import { LuachMinyanDocument } from "../types/luach-minyan.type";
+import { LuachMinyanType } from "../../lib/types/luach-minyan.type";
 
 export const convertDocument = <TDocument, T>(document: TDocument): T =>
   convertObjectIdTostring(convertIdsKeys(document));
@@ -33,3 +35,8 @@ export const convertMessageDocument = (
   messageDocument: MessageDocument
 ): MessageType =>
   convertDocument<MessageDocument, MessageType>(messageDocument);
+
+export const convertLuachMinyanDocument = (
+  luachMinyanDocument: LuachMinyanDocument
+): LuachMinyanType =>
+  convertDocument<LuachMinyanDocument, LuachMinyanType>(luachMinyanDocument);

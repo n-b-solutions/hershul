@@ -5,6 +5,7 @@ import RoomRouter from "./room.router";
 import MessageRouter from "./message.router";
 import ScheduleRouter from "./schedule.router";
 import GeonameidRouter from "./geonameid.router";
+import LuachMinyanRouter from "./luach-minyan.router";
 
 export const router = Router();
 
@@ -14,6 +15,7 @@ const defaultRoutes = [
   { path: "/message", route: MessageRouter },
   { path: "/schedule", route: ScheduleRouter },
   { path: "/geonameid", route: GeonameidRouter },
+  { path: "/luach-minyan", route: LuachMinyanRouter },
 ];
 
 defaultRoutes.forEach((route) => {

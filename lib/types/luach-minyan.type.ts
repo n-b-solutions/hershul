@@ -1,4 +1,4 @@
-import { MinyanType } from "./minyan.type";
+import { MinyanType, NewMinyanType, SpecificDateType } from "./minyan.type";
 import { MessageType } from "./message.type";
 
 export enum eJewishTimeOfDay {
@@ -35,4 +35,11 @@ export interface LuachMinyanType
     value: number;
     message?: MessageType;
   };
+}
+
+export interface NewLuachMinyanType
+  extends Omit<NewMinyanType, "startTime" | "endTime"> {
+  timeOfDay: eJewishTimeOfDay;
+  relativeTime: eRelativeTime;
+  duration: number;
 }
