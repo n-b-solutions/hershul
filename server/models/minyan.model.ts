@@ -15,7 +15,7 @@ const alertSchema: Schema<AlertTypeDocument> = new Schema(
   { _id: false }
 );
 
-const blinkAlertSchema: Schema<BlinkAlertTypeDocument> = new Schema(
+export const blinkAlertSchema: Schema<BlinkAlertTypeDocument> = new Schema(
   {
     secondsNum: { type: Number },
     messageId: { type: SchemaTypes.ObjectId, ref: "messages" },
@@ -23,7 +23,7 @@ const blinkAlertSchema: Schema<BlinkAlertTypeDocument> = new Schema(
   { _id: false }
 );
 
-const specificDateSchema: Schema<SpecificDateType> = new Schema(
+export const specificDateSchema: Schema<SpecificDateType> = new Schema(
   {
     date: { type: SchemaTypes.Date },
     isRoutine: { type: SchemaTypes.Boolean, default: false },
