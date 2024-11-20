@@ -46,15 +46,7 @@ export interface NewMinyanType {
   specificDate?: SpecificDateType;
 }
 
-// Function to convert Gregorian date to Hebrew date
-export function convertToHebrewDate(date: Date): SpecificDateType {
-  const hDate = new HDate(date);
-  return {
-    date,
-    hebrewMonth: hDate.getMonthName(),
-    hebrewDayMonth: hDate.getDate().toString(),
-  };
-}
+
 
 export type EditMinyanValueType =
   | string

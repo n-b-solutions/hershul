@@ -3,7 +3,6 @@ import { ObjectId } from "mongodb";
 import MinyanModel from "../models/minyan.model";
 import { io } from "../socketio";
 import {
-  convertToHebrewDate,
   eDateType,
   EditedType,
   MinyanType,
@@ -19,6 +18,7 @@ import {
   getQueryDateType,
 } from "../helpers/minyan.helper";
 import { HDate } from "@hebcal/core";
+import { convertToHebrewDayAndMonth } from "../utils/convert-date.util";
 
 const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
@@ -198,7 +198,7 @@ const MinyanService = {
       endDate.setSeconds(0, 0);
 
       const convertedSpecificDate = specificDate
-        ? convertToHebrewDate(new Date(specificDate.date))
+        ? convertToHebrewDayAndMonth(new Date(specificDate.date))
         : undefined;
       const newMinyan = {
         roomId: new ObjectId(roomId),
@@ -461,23 +461,28 @@ const MinyanService = {
     }
   },
 
-  deleteExpiredMinyan: async (): Promise<void> => {
-    try {
-      const minyans = await MinyanModel.find();
-      const now = new Date();
+  deleteExpiredMinyan: async () => {
+  try {
+    const minyans = await MinyanModel.find();
+    const now = new Date();
+    const hebrewDate = convertToHebrewDayAndMonth(now);
 
-      for (const minyan of minyans) {
-        if (minyan.endDate.time < now) {
+    for (const minyan of minyans) {
+      if (minyan.specificDate && minyan.specificDate.isRoutine === false) {
+        const { hebrewDayMonth, hebrewMonth } = minyan.specificDate;
+        const isExpiredDay = hebrewDayMonth && hebrewDate.hebrewDayMonth && hebrewDayMonth < hebrewDate.hebrewDayMonth;
+        const isExpiredMonth = hebrewMonth && hebrewDate.hebrewMonth && hebrewMonth < hebrewDate.hebrewMonth;
+
+        if (isExpiredDay || isExpiredMonth) {
           await MinyanModel.findByIdAndDelete(minyan._id);
         }
       }
-
-      io.emit("minyanUpdated", await MinyanModel.find());
-    } catch (error) {
-      console.error("Error deleting expired minyans:", error);
-      throw new ApiError(500, (error as Error).message);
     }
-  },
+  } catch (error) {
+    console.error("Error deleting expired minyan:", error);
+    throw new ApiError(500, (error as Error).message);
+  }
+},
 };
 
 export default MinyanService;
