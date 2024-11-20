@@ -5,7 +5,8 @@ import axios from 'axios';
 import { Message } from '@/types/message.type';
 
 import { AppThunk } from '../store';
-import { deleteMessage as deleteMessageSlice, setMessage, setMessages } from './messageSlice';
+import { deleteMessage as deleteMessageSlice, setMessage, setMessages, setPopupOpen } from './messageSlice';
+import { saveMessage } from '@/services/messages.service';
 
 export const fetchMessages = (): AppThunk<Message[]> => async (dispatch) => {
   const response = await axios.get<Message[]>(`${API_BASE_URL}/message`);
@@ -54,3 +55,15 @@ export const deleteMessage =
     dispatch(deleteMessageSlice(id));
     return id;
   };
+export const closePopup = (messageId: string) : AppThunk<void>=>  (dispatch, getState) => {
+  const state = getState();
+  dispatch(setPopupOpen({ 
+    open: false, 
+    roomName: state.message.popup.roomName, 
+    minyanId: state.message.popup.minyanId, 
+    field: state.message.popup.field, 
+    index: state.message.popup.index, 
+    messageId: messageId 
+  }));
+  saveMessage(messageId?? '', state.message.popup.minyanId, state.message.popup.field, state.message.popup.index);
+};

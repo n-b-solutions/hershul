@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
-import { messages } from '@/redux/message/messageSlice';
+import { selectPopupState, setPopupOpen } from '@/redux/message/messageSlice';
 import { CardActions, IconButton } from '@mui/material';
 import { Plus } from '@phosphor-icons/react';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { MessagesPopup } from './MessagesPopup';
 
@@ -12,24 +12,14 @@ export function AddMessageButton(props: {
   isSettingPage?: boolean;
   onClick?: (messageId?: string) => void;
   disabledEdit?: boolean;
+  openPopup: () => void;
 }): React.JSX.Element {
-  const { roomName, isSettingPage, onClick, disabledEdit } = props;
-  const messagesSlice = useSelector(messages);
-  const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({});
+  const { roomName, isSettingPage, onClick, disabledEdit, openPopup } = props;
+  const dispatch = useDispatch();
+  const popupState = useSelector(selectPopupState);
 
-  const handleMessageClick = (roomName: string) => {
-    setDisplayMessages((prevState) => ({
-      ...prevState,
-      [roomName]: true,
-    }));
-  };
-
-  const handleCloseMessage = (roomName: string, messageId?: string) => {
-    setDisplayMessages((prevState) => ({
-      ...prevState,
-      [roomName]: false,
-    }));
-    onClick && onClick(messageId);
+  const handleMessageClick = () => {
+    openPopup();
   };
 
   return (
@@ -40,7 +30,7 @@ export function AddMessageButton(props: {
           size="small"
           onClick={(event) => {
             event.stopPropagation();
-            handleMessageClick(roomName);
+            handleMessageClick();
           }}
           disabled={disabledEdit}
         >
@@ -48,16 +38,12 @@ export function AddMessageButton(props: {
         </IconButton>
       ) : (
         <CardActions sx={{ justifyContent: 'center' }}>
-          <IconButton color="secondary" size="small" onClick={() => handleMessageClick(roomName)}>
+          <IconButton color="secondary" size="small" onClick={() => handleMessageClick()}>
             <SpeakerIcon />
           </IconButton>
         </CardActions>
       )}
-      <MessagesPopup
-        open={displayMessages[roomName] || false}
-        handleClose={(messageId?: string) => handleCloseMessage(roomName, messageId)}
-        room={roomName}
-      />
+      {popupState.open && <MessagesPopup />}
     </>
   );
 }

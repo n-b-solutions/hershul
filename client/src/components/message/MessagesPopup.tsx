@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { fetchMessages } from '@/redux/message/messageThunk';
+import { messageLoading, selectMessages, selectPopupState } from '@/redux/message/messageSlice';
+import { closePopup, fetchMessages } from '@/redux/message/messageThunk';
+import type { AppDispatch } from '@/redux/store';
 import { Dialog, IconButton, InputAdornment, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -13,46 +15,40 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { X as CloseIcon } from '@phosphor-icons/react/dist/ssr/X';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { messageLoading, messages } from '../../redux/message/messageSlice';
-import type { AppDispatch } from '../../redux/store';
 import { CreateMessagePopup } from './CreateMessagePopup';
 
-export function MessagesPopup(props: {
-  open: boolean;
-  handleClose: (messageId?: string) => void;
-  room: string;
-}): React.JSX.Element {
-  const { open, handleClose, room } = props;
+export function MessagesPopup(): React.JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
-
-  const messagesSlice = useSelector(messages);
+  const messagesSlice = useSelector(selectMessages);
+  const popupState = useSelector(selectPopupState);
   const loading = useSelector(messageLoading);
 
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState<boolean>(false);
 
   React.useEffect(() => {
-    if (open) {
+    if (popupState.open) {
       dispatch(fetchMessages());
     }
-  }, [dispatch, open]);
+  }, [dispatch, popupState.open]);
 
   const handleCreateDialogOpen = () => {
     setIsCreateDialogOpen(true);
   };
 
   const handleCreateDialogClose = (messageId?: string) => {
-    setIsCreateDialogOpen(false);
-    handleClose(messageId);
+    dispatch(closePopup(messageId ?? ''));
   };
 
   const handleItemClick = (message: string, messageId?: string) => {
-    handleClose(messageId);
+    dispatch(closePopup(messageId ?? ''));
   };
 
   const filteredMessages = messagesSlice.filter(
     (contact) =>
-      contact.name && contact.selectedRoom === room && contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+      contact.name &&
+      contact.selectedRoom === popupState.roomName &&
+      contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -68,8 +64,8 @@ export function MessagesPopup(props: {
           },
         }}
         BackdropProps={{ invisible: true }}
-        open={open}
-        onClose={(messageId: string) => handleClose(messageId)}
+        open={popupState.open}
+        onClose={() => handleCreateDialogClose()}
         onClick={(event) => event.stopPropagation()}
       >
         <Box sx={{ bgcolor: 'transparent', p: 0, display: 'flex', justifyContent: 'center' }}>
@@ -84,7 +80,7 @@ export function MessagesPopup(props: {
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
               <Typography variant="h6">Messages</Typography>
-              <IconButton sx={{ color: 'red', fontSize: '1rem' }} onClick={() => handleClose()}>
+              <IconButton sx={{ color: 'red', fontSize: '1rem' }} onClick={() => handleCreateDialogClose()}>
                 <CloseIcon />
               </IconButton>
             </Box>
@@ -147,7 +143,7 @@ export function MessagesPopup(props: {
       <CreateMessagePopup
         open={isCreateDialogOpen}
         handleClose={(messageId?: string) => handleCreateDialogClose(messageId)}
-        room={room}
+        room={popupState.roomName}
       />
     </>
   );

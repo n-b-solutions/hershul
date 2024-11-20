@@ -1,7 +1,9 @@
 import { API_BASE_URL } from '@/const/api.const';
 import { MESSAGE_ID } from '@/const/minyans.const';
+import { setPopupOpen } from '@/redux/message/messageSlice';
 import { updateSettingTimesValue } from '@/redux/minyans/setting-times-slice';
 import { AppDispatch } from '@/redux/store';
+import { saveMessage } from '@/services/messages.service';
 import { Grid, IconButton, Tooltip } from '@mui/material';
 import { Trash } from '@phosphor-icons/react';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
@@ -11,6 +13,7 @@ import { useDispatch } from 'react-redux';
 import { MessageTab } from '@/types/message.type';
 import { tFieldMinyanTable } from '@/types/minyans.type';
 import { AddMessageButton } from '@/components/message/AddMessageButton';
+
 import { EditedType } from '../../../../../../lib/types/minyan.type';
 
 export function ActionsMessage(props: {
@@ -26,23 +29,11 @@ export function ActionsMessage(props: {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleClick = (messageId?: string) => {
-    axios
-      .put<EditedType>(`${API_BASE_URL}/minyan/${minyanId}`, {
-        value: messageId ?? null,
-        field,
-        internalField: MESSAGE_ID,
-      })
-      .then((res) => {
-        dispatch(
-          updateSettingTimesValue({
-            index,
-            field,
-            value: res.data.editedValue ?? undefined,
-            internalField: 'message',
-          })
-        );
-      })
-      .catch((err) => console.log('Error fetching data:', err));
+    saveMessage(messageId ?? '', minyanId, field, index);
+  };
+
+  const openPopup = () => {
+    dispatch(setPopupOpen({ open: true, roomName, minyanId, field, index, messageId: message?.id }));
   };
 
   return (
@@ -74,6 +65,7 @@ export function ActionsMessage(props: {
             isSettingPage={true}
             onClick={(messageId?: string) => handleClick(messageId)}
             disabledEdit={disabledEdit}
+            openPopup={openPopup}
           />
         )}
       </Grid>
