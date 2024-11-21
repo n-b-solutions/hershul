@@ -15,22 +15,17 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { X as CloseIcon } from '@phosphor-icons/react/dist/ssr/X';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { CreateMessagePopup } from './CreateMessagePopup';
-
-export function MessagesPopup(): React.JSX.Element {
+export function MessagesPopup({ children }: { children?: React.ReactNode }): React.JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
-  const messagesSlice = useSelector(selectMessages);
   const popupState = useSelector(selectPopupState);
+  const messagesSlice = useSelector(selectMessages);
   const loading = useSelector(messageLoading);
-
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState<boolean>(false);
 
-  React.useEffect(() => {
-    if (popupState.open) {
-      dispatch(fetchMessages());
-    }
-  }, [dispatch, popupState.open]);
+  const handleClose = () => {
+    dispatch(closePopup(''));
+  };
 
   const handleCreateDialogOpen = () => {
     setIsCreateDialogOpen(true);
@@ -43,6 +38,12 @@ export function MessagesPopup(): React.JSX.Element {
   const handleItemClick = (message: string, messageId?: string) => {
     dispatch(closePopup(messageId ?? ''));
   };
+
+  React.useEffect(() => {
+    if (popupState.open) {
+      dispatch(fetchMessages());
+    }
+  }, [dispatch, popupState.open]);
 
   const filteredMessages = messagesSlice.filter(
     (contact) =>
@@ -65,7 +66,7 @@ export function MessagesPopup(): React.JSX.Element {
         }}
         BackdropProps={{ invisible: true }}
         open={popupState.open}
-        onClose={() => handleCreateDialogClose()}
+        onClose={handleClose}
         onClick={(event) => event.stopPropagation()}
       >
         <Box sx={{ bgcolor: 'transparent', p: 0, display: 'flex', justifyContent: 'center' }}>
@@ -78,73 +79,73 @@ export function MessagesPopup(): React.JSX.Element {
               position: 'relative',
             }}
           >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
-              <Typography variant="h6">Messages</Typography>
-              <IconButton sx={{ color: 'red', fontSize: '1rem' }} onClick={() => handleCreateDialogClose()}>
-                <CloseIcon />
-              </IconButton>
-            </Box>
-            <Box sx={{ px: 3, py: 2 }}>
-              <TextField
-                fullWidth
-                placeholder="Search..."
-                variant="outlined"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{ mt: 2 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <MagnifyingGlassIcon size={20} />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Box>
-            <Box sx={{ height: '320px', overflowY: 'auto', px: 1, pb: 2 }}>
-              {loading ? (
-                <Typography sx={{ px: 2, py: 1 }} variant="subtitle2" color="textSecondary">
-                  Loading...
-                </Typography>
-              ) : (
-                <List disablePadding sx={{ '& .MuiListItemButton-root': { borderRadius: 1 } }}>
-                  {filteredMessages.length > 0 ? (
-                    filteredMessages.map((contact) => (
-                      <ListItem disablePadding key={contact.id}>
-                        <ListItemButton onClick={() => handleItemClick(contact.name, contact.id)}>
-                          <ListItemText
-                            disableTypography
-                            primary={
-                              <Typography noWrap variant="subtitle2">
-                                {contact.name}
-                              </Typography>
-                            }
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                    ))
-                  ) : (
+            {children ? (
+              children
+            ) : (
+              <>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
+                  <Typography variant="h6">Messages</Typography>
+                  <IconButton sx={{ color: 'red', fontSize: '1rem' }} onClick={handleCreateDialogClose}>
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+                <Box sx={{ px: 3, py: 2 }}>
+                  <TextField
+                    fullWidth
+                    placeholder="Search..."
+                    variant="outlined"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    sx={{ mt: 2 }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <MagnifyingGlassIcon size={20} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                <Box sx={{ height: '320px', overflowY: 'auto', px: 1, pb: 2 }}>
+                  {loading ? (
                     <Typography sx={{ px: 2, py: 1 }} variant="subtitle2" color="textSecondary">
-                      No matching results
+                      Loading...
                     </Typography>
+                  ) : (
+                    <List disablePadding sx={{ '& .MuiListItemButton-root': { borderRadius: 1 } }}>
+                      {filteredMessages.length > 0 ? (
+                        filteredMessages.map((contact) => (
+                          <ListItem disablePadding key={contact.id}>
+                            <ListItemButton onClick={() => handleItemClick(contact.name, contact.id)}>
+                              <ListItemText
+                                disableTypography
+                                primary={
+                                  <Typography noWrap variant="subtitle2">
+                                    {contact.name}
+                                  </Typography>
+                                }
+                              />
+                            </ListItemButton>
+                          </ListItem>
+                        ))
+                      ) : (
+                        <Typography sx={{ px: 2, py: 1 }} variant="subtitle2" color="textSecondary">
+                          No matching results
+                        </Typography>
+                      )}
+                    </List>
                   )}
-                </List>
-              )}
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-              <IconButton onClick={handleCreateDialogOpen}>
-                <PlusIcon />
-              </IconButton>
-            </Box>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+                  <IconButton onClick={handleCreateDialogOpen}>
+                    <PlusIcon />
+                  </IconButton>
+                </Box>
+              </>
+            )}
           </Paper>
         </Box>
       </Dialog>
-
-      <CreateMessagePopup
-        open={isCreateDialogOpen}
-        handleClose={(messageId?: string) => handleCreateDialogClose(messageId)}
-        room={popupState.roomName}
-      />
     </>
   );
 }
