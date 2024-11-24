@@ -11,7 +11,7 @@ const timeOfDaySchema: Schema = new Schema(
   {
     value: {
       type: String,
-      enum: Object.values(eJewishTimeOfDay),
+      enum: Object.keys(eJewishTimeOfDay),
       required: true,
     },
     messageId: { type: SchemaTypes.ObjectId, ref: "messages" },
@@ -29,11 +29,11 @@ const durationSchema: Schema = new Schema(
 
 const LuachMinyanSchema: Schema<LuachMinyanDocument> = new Schema({
   roomId: { type: SchemaTypes.ObjectId, required: true, ref: "rooms" },
-  dateType: { type: String, enum: Object.values(eDateType), required: true },
+  dateType: { type: String, enum: Object.keys(eDateType), required: true },
   timeOfDay: { type: timeOfDaySchema, required: true },
   relativeTime: {
     type: String,
-    enum: Object.values(eRelativeTime),
+    enum: Object.keys(eRelativeTime),
     required: true,
   },
   duration: { type: durationSchema, required: true },

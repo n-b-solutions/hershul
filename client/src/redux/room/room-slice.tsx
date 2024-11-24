@@ -57,7 +57,7 @@ const roomsSlice = createSlice({
   name: 'rooms',
   initialState,
   reducers: {
-    updateRoomState: (state, action: PayloadAction<{ roomName: string; newStatus: 'on' | 'off' | 'blink' }>) => {
+    updateRoomState: (state, action: PayloadAction<{ roomName: string; newStatus: eBulbStatus }>) => {
       const { roomName, newStatus } = action.payload;
       state.rooms = state.rooms.map((room) => (room.name === roomName ? { ...room, status: newStatus } : room));
     },

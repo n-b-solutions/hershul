@@ -278,6 +278,7 @@ export function DataTable<
                         editType={column.editInputType}
                         valueOption={column.valueOption && column.valueOption}
                         selectOptions={column.selectOptions && column.selectOptions}
+                        internalField={column.internalField}
                       />
                     ) : (
                       ((column.formatter

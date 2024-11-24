@@ -2,19 +2,19 @@ import { Types } from "mongoose";
 import LuachMinyanModel from "../models/luach-minyan.model";
 import { io } from "../socketio";
 import {
-  eDateType,
+  EditedLuachType,
   LuachMinyanType,
   NewLuachMinyanType,
-  SpecificDateType,
 } from "../../lib/types/luach-minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { convertLuachMinyanDocument } from "../utils/convert-document.util";
-import { CountType, EditedType } from "../../lib/types/metadata.type";
+import { CountType } from "../../lib/types/metadata.type";
 import {
   getMongoConditionForActiveMinyansByDate,
   getQueryDateType,
 } from "../helpers/minyan.helper";
 import ScheduleService from "./schedule.service";
+import { eDateType, SpecificDateType } from "../../lib/types/minyan.type";
 
 const LuachMinyanService = {
   get: async (): Promise<LuachMinyanType[]> => {
@@ -134,8 +134,19 @@ const LuachMinyanService = {
         blink: blinkNum ? { secondsNum: blinkNum } : undefined,
         specificDate,
       });
-      const savedMinyan = await newMinyan.save();
-      return convertLuachMinyanDocument(savedMinyan);
+      const minyanRecord = await newMinyan.save();
+
+      const newMinyanDocument = await LuachMinyanModel.findById(minyanRecord.id)
+        .populate("roomId")
+        .populate("timeOfDay.messageId")
+        .populate("duration.messageId")
+        .populate("blink.messageId")
+        .lean(true);
+
+      // const minyans = await ScheduleService.get();
+      // io.emit("minyanUpdated", minyans);
+
+      return convertLuachMinyanDocument(newMinyanDocument!);
     } catch (error) {
       console.error("Error creating new minyan:", error);
       throw new ApiError(500, (error as Error).message);
@@ -350,7 +361,7 @@ const LuachMinyanService = {
     internalField: string,
     value: any,
     id?: string
-  ): Promise<EditedType> => {
+  ): Promise<EditedLuachType> => {
     try {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");

@@ -1,4 +1,4 @@
-import { MinyanType, NewMinyanType, SpecificDateType } from "./minyan.type";
+import { EditMinyanValueType, MinyanType, NewMinyanType } from "./minyan.type";
 import { MessageType } from "./message.type";
 
 export enum eJewishTimeOfDay {
@@ -19,18 +19,18 @@ export enum eJewishTimeOfDay {
 }
 
 export enum eRelativeTime {
-  on = "on",
-  before = "before",
-  after = "after",
+  on = "On",
+  before = "Before",
+  after = "After",
 }
 
 export interface LuachMinyanType
   extends Omit<MinyanType, "startDate" | "endDate"> {
   timeOfDay: {
-    value: eJewishTimeOfDay;
+    value: keyof typeof eJewishTimeOfDay;
     message?: MessageType;
   };
-  relativeTime: eRelativeTime;
+  relativeTime: keyof typeof eRelativeTime;
   duration: {
     value: number;
     message?: MessageType;
@@ -39,7 +39,16 @@ export interface LuachMinyanType
 
 export interface NewLuachMinyanType
   extends Omit<NewMinyanType, "startTime" | "endTime"> {
-  timeOfDay: eJewishTimeOfDay;
-  relativeTime: eRelativeTime;
+  timeOfDay: keyof typeof eJewishTimeOfDay;
+  relativeTime: keyof typeof eRelativeTime;
   duration: number;
+}
+
+export type EditLuachMinyanValueType =
+  | Exclude<EditMinyanValueType, Date>
+  | eJewishTimeOfDay
+  | eRelativeTime;
+
+export interface EditedLuachType {
+  editedValue: EditLuachMinyanValueType;
 }
