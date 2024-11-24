@@ -29,7 +29,7 @@ export function ActionsMessage(props: {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleClick = (messageId?: string) => {
-    saveMessage(messageId ?? '', minyanId, field, index);
+    saveMessage(dispatch, minyanId, field, index, messageId);
   };
 
   const openPopup = () => {

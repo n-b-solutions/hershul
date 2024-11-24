@@ -4,6 +4,8 @@ import { AppDispatch } from '@/redux/store';
 import Box from '@mui/material/Box';
 import { useDispatch } from 'react-redux';
 
+import ManagingSteps from '@/components/message/ManagingSteps';
+
 import { eDateType } from '../../../../../../lib/types/minyan.type';
 import { Calendar } from './Calendar';
 import { MinyansTable } from './MinyansTable';
@@ -15,17 +17,20 @@ export const MinyansSettings = ({ dateType }: { dateType: eDateType }): React.JS
   React.useEffect(() => {
     const getRooms = async () => await dispatch(fetchRooms());
     getRooms();
-  }, []);
+  }, [dispatch]);
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
-      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }} onScroll={() => setIsScroll(true)}>
-        {dateType === eDateType.calendar ? (
-          <Calendar scrollAction={{ isScroll, setIsScroll }} />
-        ) : (
-          <MinyansTable dateType={dateType} scrollAction={{ isScroll, setIsScroll }} />
-        )}
+    <>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
+        <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }} onScroll={() => setIsScroll(true)}>
+          {dateType === eDateType.calendar ? (
+            <Calendar scrollAction={{ isScroll, setIsScroll }} />
+          ) : (
+            <MinyansTable dateType={dateType} scrollAction={{ isScroll, setIsScroll }} />
+          )}
+        </Box>
       </Box>
-    </Box>
+      <ManagingSteps />
+    </>
   );
 };

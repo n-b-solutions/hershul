@@ -16,7 +16,6 @@ export function AddMessageButton(props: {
 }): React.JSX.Element {
   const { roomName, isSettingPage, onClick, disabledEdit, openPopup } = props;
   const dispatch = useDispatch();
-  const popupState = useSelector(selectPopupState);
 
   const handleMessageClick = () => {
     openPopup();
@@ -43,7 +42,6 @@ export function AddMessageButton(props: {
           </IconButton>
         </CardActions>
       )}
-      {popupState.open && <MessagesPopup />}
     </>
   );
 }
