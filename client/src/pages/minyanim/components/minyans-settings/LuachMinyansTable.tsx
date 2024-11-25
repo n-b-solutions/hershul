@@ -164,7 +164,7 @@ const LuachMinyansTable: React.FC<LuachMinyansTableProps> = ({ dateType, scrollA
           rows={luachMinyanTimesItem}
           stickyHeader
           scrollAction={scrollAction}
-          title="Luach Minyans Table"
+          title="Luach Minyans"
         />
       )}
     </>

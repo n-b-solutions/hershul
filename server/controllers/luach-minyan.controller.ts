@@ -36,7 +36,7 @@ const LuachMinyanController = {
   ): Promise<void> => {
     try {
       const { dateType } = req.query;
-      const result = await LuachMinyanService.getByDateType(dateType as string);
+      const result = await LuachMinyanService.getByDateType(dateType);
       res.send(result);
     } catch (error) {
       next(error);
@@ -81,7 +81,7 @@ const LuachMinyanController = {
     try {
       const { category } = req.params;
       const result = await LuachMinyanService.getCountMinyanByCategory(
-        category as string
+        category
       );
       res.send(result);
     } catch (error) {
