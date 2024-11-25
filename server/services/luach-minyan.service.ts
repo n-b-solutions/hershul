@@ -15,6 +15,7 @@ import {
 } from "../helpers/minyan.helper";
 import ScheduleService from "./schedule.service";
 import { eDateType, SpecificDateType } from "../../lib/types/minyan.type";
+import { isRoshHodesh } from "../helpers/time.helper";
 
 const LuachMinyanService = {
   get: async (): Promise<LuachMinyanType[]> => {
@@ -60,6 +61,54 @@ const LuachMinyanService = {
       return minyans.map(convertLuachMinyanDocument);
     } catch (error) {
       console.error("Error fetching calendar minyan list:", error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
+  getByDateType: async (dateType?: eDateType): Promise<LuachMinyanType[]> => {
+    let queryDateType: string;
+
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+    try {
+      if (dateType) queryDateType = dateType;
+      else {
+        const roshHodesh = await isRoshHodesh();
+        if (roshHodesh) {
+          queryDateType = eDateType.roshHodesh;
+        } else {
+          switch (dayOfWeek) {
+            case 0: // Sunday
+            case 2: // Tuesday
+            case 3: // Thursday
+              queryDateType = eDateType.sunday;
+              break;
+            case 1: // Monday
+            case 4: // Wednesday
+              queryDateType = eDateType.monday;
+              break;
+            case 5: // Friday
+              queryDateType = eDateType.friday;
+              break;
+            case 6: // Saturday
+              queryDateType = eDateType.saturday;
+              break;
+            default:
+              queryDateType = eDateType.calendar; // Fallback default value
+          }
+        }
+      }
+      const minyans = await LuachMinyanModel.find({
+        dateType: queryDateType,
+      })
+        .populate("roomId")
+        .populate("timeOfDay.messageId")
+        .populate("duration.messageId")
+        .populate("blink.messageId")
+        .lean(true);
+      return minyans.map(convertLuachMinyanDocument);
+    } catch (error) {
+      console.error(`Error fetching minyan for date type ${dateType}:`, error);
       throw new ApiError(500, (error as Error).message);
     }
   },

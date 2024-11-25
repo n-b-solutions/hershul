@@ -1,4 +1,4 @@
-import { sortByTime } from '@/helpers/time.helper';
+import { sortByTime, sortLuachMinyanTimes } from '@/helpers/time.helper';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
@@ -83,7 +83,7 @@ const settingTimesSlice = createSlice({
       state.luachMinyanTimesItem = state.luachMinyanTimesItem.filter((m) => m.id !== action.payload.minyanId);
     },
     sortLuachMinyanTimesItem: (state: Istate) => {
-      state.luachMinyanTimesItem = sortByTime(state.luachMinyanTimesItem);
+      state.luachMinyanTimesItem = sortLuachMinyanTimes(state.luachMinyanTimesItem);
     },
     setCurrentDateType: (state: Istate, action: PayloadAction<{ currentType: eDateType }>) => {
       state.dateType = action.payload.currentType;

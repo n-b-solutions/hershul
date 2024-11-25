@@ -19,8 +19,8 @@ export enum eJewishTimeOfDay {
 }
 
 export enum eRelativeTime {
-  on = "On",
   before = "Before",
+  on = "On",
   after = "After",
 }
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import { API_BASE_URL } from '@/const/api.const';
-import { getMiddleTime } from '@/helpers/time.helper';
 import {
   addLuachMinyanTimes,
   deleteLuachMinyan,
@@ -11,13 +10,11 @@ import {
 import { RootState } from '@/redux/store';
 import { getNewLuachMinyanObj } from '@/services/minyans.service';
 import { Typography } from '@mui/material';
-import Box from '@mui/material/Box';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick } from '@/types/enums';
-import { LuachMinyanRowType } from '@/types/luach-minyan.type';
-import { SelectOption } from '@/types/metadata.type';
+import { eFieldLuachMinyanTable, LuachMinyanRowType } from '@/types/luach-minyan.type';
 import { DataTable } from '@/components/core/DataTable';
 
 import {
@@ -41,13 +38,22 @@ const LuachMinyansTable: React.FC<LuachMinyansTableProps> = ({ dateType, scrollA
   const [loading, setLoading] = React.useState<boolean>(true);
 
   React.useEffect(() => {
+    setLoading(true);
     axios
-      .get<LuachMinyanType[]>(`${API_BASE_URL}/luach-minyan?dateType=${dateType}`)
-      .then((res) => {
-        dispatch(setLuachMinyanTimes({ setting: res.data }));
-        setLoading(false);
+      .get<LuachMinyanType[]>(`${API_BASE_URL}/luach-minyan/getMinyanimByDateType`, {
+        params: { dateType },
       })
-      .catch((err) => console.log('Error fetching data:', err));
+      .then((res) => {
+        const setting = res.data.map((minyan: LuachMinyanType) => {
+          return { ...minyan, isEdited: false };
+        });
+        dispatch(setLuachMinyanTimes({ setting }));
+      })
+      .then(() => {
+        dispatch(sortLuachMinyanTimesItem());
+      })
+      .catch((err) => console.log('Error fetching data:', err))
+      .finally(() => setLoading(false));
   }, [dateType, dispatch]);
 
   const handlePlusClick = async (index: number, location?: eLocationClick): Promise<any> => {
@@ -127,6 +133,15 @@ const LuachMinyansTable: React.FC<LuachMinyansTableProps> = ({ dateType, scrollA
           setTimeout(() => {
             setFalseEdited();
           }, 1000);
+          if (
+            [
+              eFieldLuachMinyanTable.timeOfDay.toString(),
+              eFieldLuachMinyanTable.relativeTime.toString(),
+              eFieldLuachMinyanTable.duration.toString(),
+            ].includes(field.toString())
+          ) {
+            dispatch(sortLuachMinyanTimesItem());
+          }
         }
       })
       .catch((err) => console.log('Error fetching data:', err));
