@@ -117,7 +117,7 @@ export const getMinyansSettingsColumns = ({
     field: 'blink',
     internalField: 'secondsNum',
     align: 'center',
-    tooltip: 'Time to start Blink before lights off',
+    tooltip: 'Number of seconds to blink before turning off',
     valueForEdit: (row) => row.blink?.secondsNum,
   },
   {
@@ -182,6 +182,7 @@ export const getLuachMinyansSettingsColumns = ({
     internalField: 'value',
     editable: true,
     padding: 'none',
+    tooltip: 'Turn on the light at the time of day',
   },
   {
     formatter: (row): string => eRelativeTime[row.relativeTime] || '',
@@ -192,6 +193,7 @@ export const getLuachMinyansSettingsColumns = ({
     field: 'relativeTime',
     editable: true,
     padding: 'none',
+    tooltip: 'Relative time to turn on the light',
   },
   {
     formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
@@ -212,6 +214,7 @@ export const getLuachMinyansSettingsColumns = ({
     internalField: 'secondsNum',
     editable: true,
     padding: 'none',
+    tooltip: 'Number of seconds to blink before turning off',
   },
   {
     formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
@@ -232,6 +235,7 @@ export const getLuachMinyansSettingsColumns = ({
     internalField: 'value',
     editable: true,
     padding: 'none',
+    tooltip: 'Total duration the light will be on (in minutes)',
   },
   {
     formatter: (row): string => row.room?.name || '',

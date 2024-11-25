@@ -169,6 +169,7 @@ export const MinyansTable = ({
           rows={settingTimesItem}
           stickyHeader
           scrollAction={scrollAction}
+          title="Minyans Table"
         />
       )}
     </>

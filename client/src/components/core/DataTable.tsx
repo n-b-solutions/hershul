@@ -38,6 +38,7 @@ interface DataTableProps<TRowModel, TEdit> extends Omit<TableProps, 'onClick'> {
   onDeleteClick?: (index: number) => void;
   scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
   getRowProps?: (row: TRowModel) => RowProps;
+  title?: string;
 }
 
 export function DataTable<
@@ -63,6 +64,7 @@ export function DataTable<
   onDeleteClick,
   scrollAction,
   getRowProps,
+  title,
   ...props
 }: DataTableProps<TRowModel, TEdit>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
@@ -150,6 +152,15 @@ export function DataTable<
         ))}
       </colgroup>
       <TableHead sx={{ ...(hideHead && { visibility: 'collapse', '--TableCell-borderWidth': 0 }) }}>
+        {title && (
+          <TableRow>
+            <TableCell colSpan={columns.length}>
+              <Typography variant="h6" >
+                {title}
+              </Typography>
+            </TableCell>
+          </TableRow>
+        )}
         <TableRow>
           {selectable ? (
             <TableCell padding="checkbox" sx={{ width: '40px', minWidth: '40px', maxWidth: '40px' }}>
