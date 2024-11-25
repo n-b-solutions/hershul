@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid, Tooltip, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 
 import { tFieldLuachMinyanTable } from '@/types/luach-minyan.type';
@@ -25,9 +25,24 @@ const getFormatWithActionsMessage = (props: {
   return (
     <Grid container direction="row" justifyContent="center" spacing={2}>
       <Grid item>
-        <Typography component="span" position="relative" sx={{ ...styleTypography }} variant="inherit">
-          {props.value}
-        </Typography>
+        <Tooltip title={props.value}>
+          <Typography
+            component="span"
+            position="relative"
+            sx={{
+              ...styleTypography,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              minWidth: '30px',
+              width: '60px',
+              maxWidth: '60px',
+            }}
+            variant="inherit"
+          >
+            {props.value}
+          </Typography>
+        </Tooltip>
       </Grid>
       {props.value && (
         <Grid item>
