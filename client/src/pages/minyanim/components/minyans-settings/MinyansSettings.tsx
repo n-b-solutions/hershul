@@ -20,20 +20,29 @@ export const MinyansSettings = ({ dateType }: { dateType: eDateType }): React.JS
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
-      <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }} onScroll={() => setIsScroll(true)}>
-        <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2 }}>
-          {dateType === eDateType.calendar ? (
-            <>
+      <Box sx={{ flex: 1, display: 'flex', height: '100%', flexDirection: 'row', gap: 2 }}>
+        {dateType === eDateType.calendar ? (
+          <>
+            <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
               <Calendar scrollAction={{ isScroll, setIsScroll }} />
-              <Calendar scrollAction={{ isScroll, setIsScroll }} />
-            </>
-          ) : (
-            <>
+            </Box>
+          </>
+        ) : (
+          <>
+            <Box
+              sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}
+              onScroll={() => setIsScroll(true)}
+            >
               <MinyansTable dateType={dateType} scrollAction={{ isScroll, setIsScroll }} />
+            </Box>
+            <Box
+              sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}
+              onScroll={() => setIsScroll(true)}
+            >
               <LuachMinyansTable dateType={dateType} scrollAction={{ isScroll, setIsScroll }} />
-            </>
-          )}
-        </Box>
+            </Box>
+          </>
+        )}
       </Box>
     </Box>
   );
