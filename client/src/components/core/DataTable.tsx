@@ -196,7 +196,7 @@ export function DataTable<
                       </Typography>
                     }
                   >
-                    <WarningIcon color="#635bff" display="inline" size={20} />
+                    <WarningIcon color="#635bff" display="inline" size={15} />
                   </Tooltip>
                 ) : null}
               </TableCell>
