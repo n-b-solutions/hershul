@@ -1,5 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Button, CircularProgress, IconButton, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
+  Typography,
+} from '@mui/material';
 import {
   Microphone as MicrophoneIcon,
   ArrowCounterClockwise as RedoIcon,
@@ -10,9 +21,26 @@ import {
 interface AudioRecorderProps {
   onSave: (audioBlob: Blob | null) => void;
   onRedo: () => void;
+  showInputs: boolean;
+  name: string;
+  setName: (name: string) => void;
+  selectedRoom: string;
+  setSelectedRoom: (room: string) => void;
+  rooms: { id: string; name: string }[];
+  roomsLoading: boolean;
 }
 
-const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
+const AudioRecorder: React.FC<AudioRecorderProps> = ({
+  onSave,
+  onRedo,
+  showInputs,
+  name,
+  setName,
+  selectedRoom,
+  setSelectedRoom,
+  rooms,
+  roomsLoading,
+}) => {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioURL, setAudioURL] = useState<string | null>(null);
@@ -62,6 +90,12 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
     onRedo();
   };
 
+  const handleSave = () => {
+    if (audioBlob) {
+      onSave(audioBlob);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
@@ -77,7 +111,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2 }}>
+    <Box>
       <Box sx={{ position: 'relative', display: 'inline-flex' }}>
         <IconButton
           onClick={isRecording ? stopRecording : audioBlob ? handleRedo : startRecording}
@@ -116,17 +150,45 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onSave, onRedo }) => {
           {formatDuration(recordingDuration)}
         </Typography>
       )}
-      {audioURL && (
+      {audioBlob && (
         <>
           <Typography variant="h6" sx={{ mt: 2 }}>
             {formatDuration(recordingDuration)}
           </Typography>
-          <audio controls src={audioURL} style={{ marginTop: 16, width: '75%' }} />
-          <Box sx={{ display: 'flex', gap: 13, marginTop: '64%' }}>
-            <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={() => onSave(audioBlob)}>
+          <audio controls src={audioURL || undefined} style={{ marginTop: 16, width: '75%' }} />
+          <Box>
+            {showInputs && (
+              <Box>
+                <FormControl fullWidth>
+                  <InputLabel>Name</InputLabel>
+                  <OutlinedInput name="name" value={name} onChange={(e) => setName(e.target.value)} />
+                </FormControl>
+                <FormControl fullWidth disabled={!!selectedRoom}>
+                  <InputLabel>Room</InputLabel>
+                  <Select
+                    value={selectedRoom}
+                    onChange={(e) => setSelectedRoom(e.target.value)}
+                    input={<OutlinedInput label="Room" />}
+                  >
+                    {roomsLoading ? (
+                      <MenuItem value="" disabled>
+                        Loading rooms...
+                      </MenuItem>
+                    ) : (
+                      rooms.map((room) => (
+                        <MenuItem key={room.id} value={room.name}>
+                          {room.name}
+                        </MenuItem>
+                      ))
+                    )}
+                  </Select>
+                </FormControl>
+              </Box>
+            )}
+            <Button onClick={handleSave} startIcon={<SaveIcon />}>
               Save
             </Button>
-            <Button variant="outlined" color="secondary" startIcon={<RedoIcon />} onClick={handleRedo}>
+            <Button onClick={handleRedo} startIcon={<RedoIcon />}>
               Redo
             </Button>
           </Box>
