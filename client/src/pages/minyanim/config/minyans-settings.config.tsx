@@ -166,6 +166,7 @@ export const getLuachMinyansSettingsColumns = ({
     field: 'timeOfDay',
     internalField: 'value',
     editable: true,
+    padding: 'none',
   },
   {
     formatter: (row): string => eRelativeTime[row.relativeTime] || '',
@@ -175,6 +176,7 @@ export const getLuachMinyansSettingsColumns = ({
     name: 'Relative Time',
     field: 'relativeTime',
     editable: true,
+    padding: 'none',
   },
   {
     formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
@@ -194,6 +196,7 @@ export const getLuachMinyansSettingsColumns = ({
     field: 'blink',
     internalField: 'secondsNum',
     editable: true,
+    padding: 'none',
   },
   {
     formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>
@@ -213,6 +216,7 @@ export const getLuachMinyansSettingsColumns = ({
     field: 'duration',
     internalField: 'value',
     editable: true,
+    padding: 'none',
   },
   {
     formatter: (row): string => row.room?.name || '',
@@ -223,5 +227,6 @@ export const getLuachMinyansSettingsColumns = ({
     name: 'Room',
     field: 'room',
     align: 'center',
+    padding: 'none',
   },
 ];
