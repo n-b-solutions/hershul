@@ -155,9 +155,7 @@ export function DataTable<
         {title && (
           <TableRow>
             <TableCell colSpan={columns.length}>
-              <Typography variant="h6" >
-                {title}
-              </Typography>
+              <Typography variant="h6">{title}</Typography>
             </TableCell>
           </TableRow>
         )}
@@ -346,6 +344,7 @@ export function DataTable<
           <TableRow
             onMouseOver={() => setPlusMode({ mode: null, index: -1 })}
             onMouseLeave={() => setPlusMode({ mode: null })}
+            sx={{ position: 'relative' }}
           >
             <TableCell sx={{ padding: '15px' }} colSpan={columns.length}>
               <Grid container display="grid">
@@ -357,7 +356,7 @@ export function DataTable<
                     color: '#635bff',
                     zIndex: '999',
                     right: '50%',
-                    top: '152px',
+                    bottom: '73px',
                   }}
                 >
                   {plusMode.index === -1 && <PlusCircle size={32} />}
