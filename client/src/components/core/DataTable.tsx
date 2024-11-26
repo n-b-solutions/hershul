@@ -85,7 +85,7 @@ export function DataTable<
     right?: number;
     height?: number;
   }>({
-    mode: eLocationClick.bottom,
+    mode: null,
   });
   const [isShowDelete, setIsToShowDelete] = React.useState<{ hover: boolean; index: number }>({
     hover: false,
