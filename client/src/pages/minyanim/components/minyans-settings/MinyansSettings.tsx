@@ -22,20 +22,18 @@ export const MinyansSettings = ({ dateType }: { dateType: eDateType }): React.JS
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 3 }}>
       {dateType === eDateType.calendar ? (
         <>
-          {/* <Box sx={{ flex: 1, maxHeight: '100%', height: '100%' }}> */}
           <CalendarContainer scrollAction={{ isScroll, setIsScroll }} />
-          {/* </Box> */}
         </>
       ) : (
         <Box sx={{ flex: 1, display: 'flex', height: '100%', flexDirection: 'row', gap: 2 }}>
           <Box
-            sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}
+            sx={{ flex: 9, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}
             onScroll={() => setIsScroll(true)}
           >
             <MinyansTable dateType={dateType} scrollAction={{ isScroll, setIsScroll }} />
           </Box>
           <Box
-            sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}
+            sx={{ flex: 11, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}
             onScroll={() => setIsScroll(true)}
           >
             <LuachMinyansTable dateType={dateType} scrollAction={{ isScroll, setIsScroll }} />

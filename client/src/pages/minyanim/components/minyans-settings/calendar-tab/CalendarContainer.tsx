@@ -65,10 +65,10 @@ const CalendarContainer: React.FC<CalendarContainerProps> = ({ scrollAction }) =
           gap: 2,
         }}
       >
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}>
+        <Box sx={{ flex: 9, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}>
           <CalendarMinyansTable selectedDate={selectedDate} scrollAction={scrollAction} />
         </Box>
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}>
+        <Box sx={{ flex: 11, display: 'flex', flexDirection: 'column', overflowY: 'auto', maxHeight: '100%' }}>
           <CalendarLuachMinyansTable selectedDate={selectedDate} scrollAction={scrollAction} />
         </Box>
       </Box>
