@@ -305,6 +305,7 @@ const CalendarMinyansTable: React.FC<CalendarTableProps> = ({ selectedDate, scro
             getRowProps={getRowProps} // Call getRowProps for each row
             title="Minyans"
             noDataOption={<ImportMinyans tableType={eMinyanType.minyan} />}
+            stickyHeader
           />
         </Box>
       )}

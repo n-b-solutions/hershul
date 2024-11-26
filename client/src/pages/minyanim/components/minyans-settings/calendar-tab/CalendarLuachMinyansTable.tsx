@@ -317,6 +317,7 @@ const CalendarLuachMinyansTable: React.FC<CalendarTableProps> = ({ selectedDate,
             getRowProps={getRowProps}
             title="Luach Minyans"
             noDataOption={<ImportMinyans tableType={eMinyanType.luachMinyan} />}
+            stickyHeader
           />
         </Box>
       )}
