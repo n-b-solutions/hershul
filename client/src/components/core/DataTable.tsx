@@ -79,8 +79,13 @@ export function DataTable<
     isClicked: false,
     id: '',
   });
-  const [plusMode, setPlusMode] = React.useState<{ mode: eLocationClick | null; index?: number; right?: number }>({
-    mode: null,
+  const [plusMode, setPlusMode] = React.useState<{
+    mode: eLocationClick | null;
+    index?: number;
+    right?: number;
+    height?: number;
+  }>({
+    mode: eLocationClick.bottom,
   });
   const [isShowDelete, setIsToShowDelete] = React.useState<{ hover: boolean; index: number }>({
     hover: false,
@@ -126,15 +131,24 @@ export function DataTable<
       const { width: rowWidth, height: rowHeight, y: rowY } = currentRowElement;
       const middleY = rowY + rowHeight / 2;
       if (mouseY < middleY) {
-        setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2 });
+        setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2, height: rowHeight });
       } else {
-        setPlusMode({ mode: eLocationClick.bottom, index, right: rowWidth / 2 });
+        setPlusMode({ mode: eLocationClick.bottom, index, right: rowWidth / 2, height: rowHeight });
       }
     }
   };
 
-  const getPlusYPosition = () => {
-    return plusMode.mode === eLocationClick.bottom ? { top: '39px' } : { bottom: '33px' };
+  const interpolate = (x1: number, y1: number, x2: number, y2: number, x: number) => {
+    return y1 + ((x - x1) * (y2 - y1)) / (x2 - x1);
+  };
+
+  const getPlusYPosition = (rowHeight: number) => {
+    const topOffset = interpolate(54.8, 38, 102.8, 86, rowHeight);
+    const bottomOffset = interpolate(54.8, 33, 102.8, 81, rowHeight);
+    console.log('rowHeight', rowHeight);
+    console.log('topOffset', topOffset);
+    console.log('bottomOffset', bottomOffset);
+    return plusMode.mode === eLocationClick.bottom ? { top: `${bottomOffset}px` } : { bottom: `${topOffset}px` };
   };
 
   React.useEffect(() => {
@@ -315,7 +329,7 @@ export function DataTable<
                       color: '#635bff',
                       zIndex: '999',
                       right: `${plusMode.right || 0}px`,
-                      ...getPlusYPosition(),
+                      ...getPlusYPosition(plusMode.height || 0), // Pass the row height here
                     }}
                   >
                     <PlusCircle size={32} />
