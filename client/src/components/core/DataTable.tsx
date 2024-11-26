@@ -117,6 +117,17 @@ export function DataTable<
     setPlusMode({ mode: null });
   };
 
+  const handleChangeInput = (
+    value: TEdit,
+    index: number,
+    fieldName?: keyof TRowModel,
+    internalField?: string
+  ): void => {
+    if (onChangeInput && fieldName) {
+      onChangeInput(value, index, fieldName, internalField);
+    }
+  };
+
   const getValue = (index: number, field: keyof TRowModel): TRowModel[keyof TRowModel] => {
     const currentRow = rows[index];
     const value = currentRow[field];
@@ -138,6 +149,7 @@ export function DataTable<
     }
   };
 
+  // The offset calculation here is not accurate enough and does not fit all cases, so it is temporary and subject to change.
   const interpolate = (x1: number, y1: number, x2: number, y2: number, x: number) => {
     return y1 + ((x - x1) * (y2 - y1)) / (x2 - x1);
   };
@@ -145,9 +157,6 @@ export function DataTable<
   const getPlusYPosition = (rowHeight: number) => {
     const topOffset = interpolate(54.8, 38, 102.8, 86, rowHeight);
     const bottomOffset = interpolate(54.8, 33, 102.8, 81, rowHeight);
-    console.log('rowHeight', rowHeight);
-    console.log('topOffset', topOffset);
-    console.log('bottomOffset', bottomOffset);
     return plusMode.mode === eLocationClick.bottom ? { top: `${bottomOffset}px` } : { bottom: `${topOffset}px` };
   };
 
@@ -297,13 +306,16 @@ export function DataTable<
                         fieldName={column.field}
                         cellRef={cellRef}
                         index={index}
-                        handleBlur={handleBlurInput}
+                        handleBlur={(event, value) =>
+                          handleBlurInput(event, value, index, column.field, column.internalField)
+                        }
                         value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
-                        handleChangeInput={onChangeInput}
+                        handleChangeInput={(value) =>
+                          handleChangeInput(value, index, column.field, column.internalField)
+                        }
                         editType={column.editInputType}
                         valueOption={column.valueOption && column.valueOption}
                         selectOptions={column.selectOptions && column.selectOptions}
-                        internalField={column.internalField}
                       />
                     ) : (
                       ((column.formatter
@@ -329,7 +341,7 @@ export function DataTable<
                       color: '#635bff',
                       zIndex: '999',
                       right: `${plusMode.right || 0}px`,
-                      ...getPlusYPosition(plusMode.height || 0), // Pass the row height here
+                      ...getPlusYPosition(plusMode.height || 0),
                     }}
                   >
                     <PlusCircle size={32} />

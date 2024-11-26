@@ -1,5 +1,4 @@
 import React, { Ref, useState } from 'react';
-import { SECONDS_NUM, TIME } from '@/const/minyans.const';
 import { OutlinedInput, Select, SelectChangeEvent, Switch, TextField } from '@mui/material';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';
@@ -9,35 +8,28 @@ import { Option } from '@/components/core/option';
 
 export function EditTableCellInputs<TRowModel extends object, TEdit = any>(props: {
   value: any;
-  handleChangeInput: (value: TEdit, index: number, field: keyof TRowModel, internalField?: string) => void;
+  handleChangeInput: (value: TEdit) => void;
   cellRef: Ref<any>;
   index: number;
   fieldName: keyof TRowModel;
-  handleBlur: (
-    event: React.FocusEvent | React.KeyboardEvent,
-    value?: TEdit,
-    index?: number,
-    fieldName?: keyof TRowModel,
-    internalField?: string
-  ) => void;
+  handleBlur: (event: React.FocusEvent | React.KeyboardEvent, value?: TEdit) => void;
   editType?: string;
   selectOptions?: SelectOption<string>[];
   valueOption?: any & { id: string }[];
-  internalField?: string;
 }): React.JSX.Element {
   const [select, setSelect] = useState(props.value);
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
     const editValue = props.valueOption?.find((value: any) => value.id === event.target.value) || event.target.value;
-    props.handleChangeInput && props.handleChangeInput(editValue, props.index, props.fieldName, props.internalField);
+    props.handleChangeInput && props.handleChangeInput(editValue);
   };
 
   const handle = (value: TEdit) => {
-    props.handleChangeInput && props.handleChangeInput(value, props.index, props.fieldName, props.internalField);
+    props.handleChangeInput && props.handleChangeInput(value);
   };
 
   const handleBlurInput = (value: TEdit, event: React.FocusEvent | React.KeyboardEvent) => {
-    props.handleBlur(event, value, props.index, props.fieldName, props.internalField);
+    props.handleBlur(event, value);
   };
 
   switch (props.editType) {
