@@ -12,6 +12,7 @@ export interface LuachMinyanDocument
     messageId?: ObjectId;
   };
   relativeTime: eRelativeTime;
+  relativeTimeDetail?: number;
   duration: {
     value: number;
     messageId?: ObjectId;

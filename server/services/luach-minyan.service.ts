@@ -117,6 +117,20 @@ const LuachMinyanService = {
     }
   },
 
+  getByDate: async (selectedDate: Date): Promise<LuachMinyanType[]> => {
+    const conditions = await getMongoConditionForActiveMinyansByDate(
+      selectedDate,
+      eMinyanType.luachMinyan
+    );
+    const minyansDocs = await LuachMinyanModel.find(conditions)
+      .populate("roomId")
+      .populate("timeOfDay.messageId")
+      .populate("duration.messageId")
+      .populate("blink.messageId")
+      .lean(true);
+    return minyansDocs.map(convertLuachMinyanDocument);
+  },
+
   getById: async (id?: string): Promise<LuachMinyanType> => {
     try {
       if (!id || !Types.ObjectId.isValid(id)) {

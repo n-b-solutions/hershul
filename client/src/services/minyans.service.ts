@@ -36,7 +36,8 @@ export const getNewLuachMinyanObj = (
   const indexBefore = location === eLocationClick.top ? index - 1 : index;
   const indexAfter = location === eLocationClick.top ? index : index + 1;
   return {
-    timeOfDay: (minyans[indexBefore]?.timeOfDay?.value as keyof typeof eJewishTimeOfDay) || 'netz',
+    timeOfDay:
+      minyans[indexBefore]?.timeOfDay?.value || (Object.keys(eJewishTimeOfDay)[0] as keyof typeof eJewishTimeOfDay),
     relativeTime: 'on',
     duration: 30,
     roomId: defaultRoomId,

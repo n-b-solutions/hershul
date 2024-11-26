@@ -2,20 +2,34 @@ import { EditMinyanValueType, MinyanType, NewMinyanType } from "./minyan.type";
 import { MessageType } from "./message.type";
 
 export enum eJewishTimeOfDay {
-  alotHaShachar = "Alot HaShachar",
+  chatzotNight = "Chatzot Night",
+  alotHaShachar = "Alot Ha Shachar",
   misheyakir = "Misheyakir",
-  netz = "Netz",
+  misheyakirMachmir = "Misheyakir Machmir",
+  dawn = "Dawn",
+  sunrise = "Sunrise",
+  sofZmanShmaMGA19Point8 = "Sof Zman Shma MGA 19.8",
+  sofZmanShmaMGA16Point1 = "Sof Zman Shma MGA 16.1",
+  sofZmanShmaMGA = "Sof Zman Shma MGA",
   sofZmanShma = "Sof Zman Shma",
+  sofZmanTfillaMGA19Point8 = "Sof Zman Tfilla MGA 19.8",
+  sofZmanTfillaMGA16Point1 = "Sof Zman Tfilla MGA 16.1",
+  sofZmanTfillaMGA = "Sof Zman Tfilla MGA",
   sofZmanTfilla = "Sof Zman Tfilla",
   chatzot = "Chatzot",
   minchaGedola = "Mincha Gedola",
+  minchaGedolaMGA = "Mincha Gedola MGA",
   minchaKetana = "Mincha Ketana",
-  plagHaMincha = "Plag HaMincha",
+  minchaKetanaMGA = "Mincha Ketana MGA",
+  plagHaMincha = "Plag Ha Mincha",
   sunset = "Sunset",
-  tzeit = "Tzeit",
-  tzeit42Min = "Tzeit 42 Min",
-  tzeit72Min = "Tzeit 72 Min",
-  midnight = "Midnight",
+  beinHaShmashos = "Bein Ha Shmashos",
+  dusk = "Dusk",
+  tzeit7083deg = "Tzeit 7.083 deg",
+  tzeit85deg = "Tzeit 8.5 deg",
+  tzeit42min = "Tzeit 42 min",
+  tzeit50min = "Tzeit 50 min",
+  tzeit72min = "Tzeit 72 min",
 }
 
 export enum eRelativeTime {
@@ -31,6 +45,7 @@ export interface LuachMinyanType
     message?: MessageType;
   };
   relativeTime: keyof typeof eRelativeTime;
+  relativeTimeDetail?: number;
   duration: {
     value: number;
     message?: MessageType;
@@ -41,6 +56,7 @@ export interface NewLuachMinyanType
   extends Omit<NewMinyanType, "startTime" | "endTime"> {
   timeOfDay: keyof typeof eJewishTimeOfDay;
   relativeTime: keyof typeof eRelativeTime;
+  relativeTimeDetail?: number;
   duration: number;
 }
 

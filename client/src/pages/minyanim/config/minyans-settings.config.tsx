@@ -9,7 +9,7 @@ import { Room } from '@/types/room.type';
 import { ColumnDef } from '@/types/table.type';
 
 import { eJewishTimeOfDay, eRelativeTime, LuachMinyanType } from '../../../../../lib/types/luach-minyan.type';
-import { MinyanType, eMinyanType } from '../../../../../lib/types/minyan.type';
+import { eMinyanType, MinyanType } from '../../../../../lib/types/minyan.type';
 import { ActionsMessage } from '../components/minyans-settings/ActionsMessage';
 
 const getFormatWithActionsMessage = (props: {
@@ -194,6 +194,16 @@ export const getLuachMinyansSettingsColumns = ({
     editable: true,
     padding: 'none',
     tooltip: 'Relative time to turn on the light',
+  },
+  {
+    formatter: (row): string => row.relativeTimeDetail?.toString() || '',
+    editInputType: 'number',
+    valueForEdit: (row) => row.relativeTimeDetail,
+    name: 'Relative Time Detail',
+    field: 'relativeTimeDetail',
+    editable: true,
+    padding: 'none',
+    tooltip: 'Indicates how many minutes before or after the time of day the minyan should start.',
   },
   {
     formatter: (row, index, disabledEdit?: boolean): React.JSX.Element =>

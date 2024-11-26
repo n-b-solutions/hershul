@@ -36,6 +36,7 @@ const LuachMinyanSchema: Schema<LuachMinyanDocument> = new Schema({
     enum: Object.keys(eRelativeTime),
     required: true,
   },
+  relativeTimeDetail: { type: Number, required: false },
   duration: { type: durationSchema, required: true },
   blink: { type: blinkAlertSchema },
   specificDate: { type: specificDateSchema },

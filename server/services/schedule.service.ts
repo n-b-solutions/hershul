@@ -1,5 +1,4 @@
 import { eBulbColor, eBulbStatus } from "../../lib/types/room.type";
-import MinyanModel from "../models/minyan.model";
 import {
   GeoLocation,
   Zmanim,
@@ -7,31 +6,27 @@ import {
   HDate,
   Location,
 } from "@hebcal/core";
-import { eMinyanType, MinyanType } from "../../lib/types/minyan.type";
+import { MinyanType } from "../../lib/types/minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { playAudio } from "../utils/play-audio.util";
-import { getMongoConditionForActiveMinyansByDate } from "../helpers/minyan.helper";
 import { convertHDateToDate } from "../utils/convert-date.util";
-import { convertMinyanDocument } from "../utils/convert-document.util";
 import MinyanService from "./minyan.service";
 import RoomService from "./room.service";
+import LuachMinyanService from "./luach-minyan.service";
+import { convertLuachMinyanToMinyan } from "../utils/convert-minyan.util";
 
 const ScheduleService = {
   get: async (): Promise<MinyanType[]> => {
     try {
       const today = new Date();
-      const conditions = await getMongoConditionForActiveMinyansByDate(
-        today,
-        eMinyanType.minyan
+      const minyans = await MinyanService.getByDate(today);
+      const luachMinyans = await LuachMinyanService.getByDate(today);
+      const luachMinyansAsMinyans = await Promise.all(
+        luachMinyans.map(
+          async (luachMinyan) => await convertLuachMinyanToMinyan(luachMinyan)
+        )
       );
-      const minyansForSchedule = await MinyanModel.find(conditions)
-        .populate("roomId")
-        .populate("startDate.messageId")
-        .populate("endDate.messageId")
-        .populate("blink.messageId")
-        .lean(true);
-
-      return minyansForSchedule.map(convertMinyanDocument);
+      return [...minyans, ...luachMinyansAsMinyans];
     } catch (error) {
       console.error("Error fetching schedule:", error);
       throw new ApiError(500, (error as Error).message);
@@ -44,20 +39,6 @@ const ScheduleService = {
       const nowHours = now.getHours();
       const nowMinutes = now.getMinutes();
       const nowSeconds = now.getSeconds();
-
-      const getMinyans = async () => {
-        const conditions = await getMongoConditionForActiveMinyansByDate(
-          now,
-          eMinyanType.minyan
-        );
-        const minyansDocs = await MinyanModel.find(conditions)
-          .populate("roomId")
-          .populate("startDate.messageId")
-          .populate("endDate.messageId")
-          .populate("blink.messageId")
-          .lean(true);
-        return minyansDocs.map(convertMinyanDocument);
-      };
 
       const processMinyans = (minyans: MinyanType[]) => {
         const roomStatusObj: { [key: string]: eBulbStatus } = {};
@@ -192,7 +173,7 @@ const ScheduleService = {
         audioUrls.forEach(playAudio);
       };
 
-      const minyans = await getMinyans();
+      const minyans = await ScheduleService.get();
       const { roomStatusObj, audioUrls } = processMinyans(minyans);
       await updateRooms(roomStatusObj);
       playAudioMessages(audioUrls);

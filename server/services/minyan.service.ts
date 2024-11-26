@@ -117,6 +117,20 @@ const MinyanService = {
     }
   },
 
+  getByDate: async (selectedDate: Date): Promise<MinyanType[]> => {
+    const conditions = await getMongoConditionForActiveMinyansByDate(
+      selectedDate,
+      eMinyanType.minyan
+    );
+    const minyansDocs = await MinyanModel.find(conditions)
+      .populate("roomId")
+      .populate("startDate.messageId")
+      .populate("endDate.messageId")
+      .populate("blink.messageId")
+      .lean(true);
+    return minyansDocs.map(convertMinyanDocument);
+  },
+
   getById: async (id?: string): Promise<MinyanType> => {
     try {
       if (!id || !Types.ObjectId.isValid(id)) {
