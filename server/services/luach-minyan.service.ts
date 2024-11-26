@@ -14,7 +14,11 @@ import {
   getQueryDateType,
 } from "../helpers/minyan.helper";
 import ScheduleService from "./schedule.service";
-import { eDateType, SpecificDateType } from "../../lib/types/minyan.type";
+import {
+  eDateType,
+  eMinyanType,
+  SpecificDateType,
+} from "../../lib/types/minyan.type";
 import { isRoshHodesh } from "../helpers/time.helper";
 
 const LuachMinyanService = {
@@ -136,7 +140,8 @@ const LuachMinyanService = {
   getCountMinyanByCalendar: async (selectedDate: Date): Promise<CountType> => {
     try {
       const conditions = await getMongoConditionForActiveMinyansByDate(
-        selectedDate
+        selectedDate,
+        eMinyanType.luachMinyan
       );
       const countMinyans = await LuachMinyanModel.countDocuments(conditions);
       return { count: countMinyans ?? 0 };
@@ -260,7 +265,8 @@ const LuachMinyanService = {
       if (selectedDate && duplicateFromDateType === eDateType.calendar) {
         cond = {
           ...(await getMongoConditionForActiveMinyansByDate(
-            new Date(selectedDate)
+            new Date(selectedDate),
+            eMinyanType.luachMinyan
           )),
         };
       }

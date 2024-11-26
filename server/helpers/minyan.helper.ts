@@ -1,6 +1,8 @@
 import { eDateType, MinyanType } from "../../lib/types/minyan.type";
 import { MinyanDocument } from "../types/minyan.type";
 import { isRoshHodesh, getMinchaGedolaTime } from "./time.helper";
+import { eMinyanType } from "../../lib/types/minyan.type";
+import { eJewishTimeOfDay } from "../../lib/types/luach-minyan.type";
 
 export const getActiveMinyans = (minyans: MinyanType[] | MinyanDocument[]) => {
   const now = new Date();
@@ -47,19 +49,46 @@ export const getDateTypeByDayOfWeek = (dayOfWeek: number): eDateType => {
   }
 };
 
-export const getRoshChodeshCond = async (dateType: eDateType, date: Date) => {
+export const getRoshChodeshCond = async (
+  dateType: eDateType,
+  minyanType: eMinyanType,
+  date: Date
+) => {
   if (dateType === eDateType.roshHodesh) {
     const dayOfWeekDateType = getDateTypeByDayOfWeek(date.getDay());
-    const minchaGedolaTime = await getMinchaGedolaTime(date);
-    return {
-      dateType: dayOfWeekDateType,
-      "startDate.time": { $gte: minchaGedolaTime },
-    };
+
+    if (minyanType === eMinyanType.minyan) {
+      const minchaGedolaTime = await getMinchaGedolaTime(date);
+      return {
+        dateType: dayOfWeekDateType,
+        "startDate.time": { $gte: minchaGedolaTime },
+      };
+    } else if (minyanType === eMinyanType.luachMinyan) {
+      const minchaGedolaIndex =
+        Object.keys(eJewishTimeOfDay).indexOf("minchaGedola");
+      return {
+        dateType: dayOfWeekDateType,
+        $expr: {
+          $gte: [
+            {
+              $indexOfArray: [
+                Object.keys(eJewishTimeOfDay),
+                "$timeOfDay.value",
+              ],
+            },
+            minchaGedolaIndex,
+          ],
+        },
+      };
+    }
   }
   return {};
 };
 
-export const getMongoConditionForActiveMinyansByDate = async (date: Date) => {
+export const getMongoConditionForActiveMinyansByDate = async (
+  date: Date,
+  minyanType: eMinyanType
+) => {
   const startOfDay = new Date(date);
   startOfDay.setHours(0, 0, 0, 0); // start of day
   const endOfDay = new Date(date);
@@ -87,7 +116,8 @@ export const getMongoConditionForActiveMinyansByDate = async (date: Date) => {
       },
     ],
   };
-  const roshChodeshCond = await getRoshChodeshCond(dateType, date);
+
+  const roshChodeshCond = await getRoshChodeshCond(dateType, minyanType, date);
 
   return {
     $or: [

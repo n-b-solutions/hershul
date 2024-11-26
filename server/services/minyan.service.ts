@@ -5,6 +5,7 @@ import { io } from "../socketio";
 import {
   eDateType,
   EditedType,
+  eMinyanType,
   MinyanType,
   NewMinyanType,
   SpecificDateType,
@@ -139,7 +140,8 @@ const MinyanService = {
   getCountMinyanByCalendar: async (selectedDate: Date): Promise<CountType> => {
     try {
       const conditions = await getMongoConditionForActiveMinyansByDate(
-        selectedDate
+        selectedDate,
+        eMinyanType.minyan
       );
       const countMinyans = await MinyanModel.countDocuments(conditions);
       return { count: countMinyans ?? 0 };
@@ -222,7 +224,8 @@ const MinyanService = {
       if (selectedDate && duplicateFromDateType === eDateType.calendar) {
         cond = {
           ...(await getMongoConditionForActiveMinyansByDate(
-            new Date(selectedDate)
+            new Date(selectedDate),
+            eMinyanType.minyan
           )),
         };
       }
@@ -377,7 +380,10 @@ const MinyanService = {
   setSteadyFlagForActiveMinyans: async (roomId: string): Promise<void> => {
     try {
       const now = new Date();
-      const conditions = await getMongoConditionForActiveMinyansByDate(now);
+      const conditions = await getMongoConditionForActiveMinyansByDate(
+        now,
+        eMinyanType.minyan
+      );
       const timeCond = {
         "startDate.time": { $lte: now },
         "endDate.time": { $gte: now },

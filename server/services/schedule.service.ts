@@ -7,7 +7,7 @@ import {
   HDate,
   Location,
 } from "@hebcal/core";
-import { MinyanType } from "../../lib/types/minyan.type";
+import { eMinyanType, MinyanType } from "../../lib/types/minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
 import { playAudio } from "../utils/play-audio.util";
 import { getMongoConditionForActiveMinyansByDate } from "../helpers/minyan.helper";
@@ -20,7 +20,10 @@ const ScheduleService = {
   get: async (): Promise<MinyanType[]> => {
     try {
       const today = new Date();
-      const conditions = await getMongoConditionForActiveMinyansByDate(today);
+      const conditions = await getMongoConditionForActiveMinyansByDate(
+        today,
+        eMinyanType.minyan
+      );
       const minyansForSchedule = await MinyanModel.find(conditions)
         .populate("roomId")
         .populate("startDate.messageId")
@@ -43,7 +46,10 @@ const ScheduleService = {
       const nowSeconds = now.getSeconds();
 
       const getMinyans = async () => {
-        const conditions = await getMongoConditionForActiveMinyansByDate(now);
+        const conditions = await getMongoConditionForActiveMinyansByDate(
+          now,
+          eMinyanType.minyan
+        );
         const minyansDocs = await MinyanModel.find(conditions)
           .populate("roomId")
           .populate("startDate.messageId")
