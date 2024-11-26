@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { setCurrentSelectedDate } from '@/redux/minyans/setting-times-slice';
 import { Box, Typography } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
@@ -10,11 +10,12 @@ import CalendarLuachMinyansTable from './CalendarLuachMinyansTable';
 import CalendarMinyansTable from './CalendarMinyansTable';
 
 interface CalendarContainerProps {
-  scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
+  scrollAction: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
 }
 
 const CalendarContainer: React.FC<CalendarContainerProps> = ({ scrollAction }) => {
   const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
+  const [dateRefHeight, setDateRefHeight] = useState<number | null>(null);
   const dispatch = useDispatch();
   const dateRef = React.useRef<HTMLDivElement>(null);
 
@@ -24,6 +25,25 @@ const CalendarContainer: React.FC<CalendarContainerProps> = ({ scrollAction }) =
       dispatch(setCurrentSelectedDate({ currentDate: newDate.toISOString() }));
     }
   };
+
+  useLayoutEffect(() => {
+    if (dateRef.current) {
+      setDateRefHeight(dateRef.current.clientHeight);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (dateRef.current) {
+        setDateRefHeight(dateRef.current.clientHeight);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   return (
     <>
@@ -40,7 +60,7 @@ const CalendarContainer: React.FC<CalendarContainerProps> = ({ scrollAction }) =
         sx={{
           flex: 1,
           display: 'flex',
-          height: `calc(100% - ${dateRef?.current?.clientHeight}px)`,
+          height: `calc(100% - ${dateRefHeight}px)`,
           flexDirection: 'row',
           gap: 2,
         }}
