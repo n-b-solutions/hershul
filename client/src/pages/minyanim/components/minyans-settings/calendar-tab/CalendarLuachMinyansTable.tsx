@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { eFieldName, eLocationClick, eRowEditMode } from '@/types/enums';
 import { eFieldLuachMinyanTable, LuachCalendarRowType, LuachMinyanRowType } from '@/types/luach-minyan.type';
 import { RowProps } from '@/types/table.type';
+import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
 import { CalendarTableProps, isRoutineColumn } from '@/pages/minyanim/config/calendar.config';
 import { getLuachMinyansSettingsColumns } from '@/pages/minyanim/config/minyans-settings.config';
 import { DataTable } from '@/components/core/DataTable';
@@ -30,7 +31,7 @@ import {
   LuachMinyanType,
 } from '../../../../../../../lib/types/luach-minyan.type';
 import { IdType } from '../../../../../../../lib/types/metadata.type';
-import { eDateType, SpecificDateType } from '../../../../../../../lib/types/minyan.type';
+import { eDateType, eMinyanType, SpecificDateType } from '../../../../../../../lib/types/minyan.type';
 
 const CalendarLuachMinyansTable: React.FC<CalendarTableProps> = ({ selectedDate, scrollAction }) => {
   const dispatch = useDispatch();
@@ -315,6 +316,7 @@ const CalendarLuachMinyansTable: React.FC<CalendarTableProps> = ({ selectedDate,
             rows={luachMinyanTimesItem}
             getRowProps={getRowProps}
             title="Luach Minyans"
+            noDataOption={<ImportMinyans tableType={eMinyanType.luachMinyan} />}
           />
         </Box>
       )}

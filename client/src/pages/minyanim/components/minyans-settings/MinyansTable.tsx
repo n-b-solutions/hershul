@@ -20,10 +20,17 @@ import { eFieldName, eLocationClick } from '@/types/enums';
 import { SelectOption } from '@/types/metadata.type';
 import { MinyanRowType } from '@/types/minyans.type';
 import { Room } from '@/types/room.type';
+import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
 import { DataTable } from '@/components/core/DataTable';
 
 import { IdType } from '../../../../../../lib/types/metadata.type';
-import { eDateType, EditedType, EditMinyanValueType, MinyanType } from '../../../../../../lib/types/minyan.type';
+import {
+  eDateType,
+  EditedType,
+  EditMinyanValueType,
+  eMinyanType,
+  MinyanType,
+} from '../../../../../../lib/types/minyan.type';
 import { getMinyansSettingsColumns } from '../../config/minyans-settings.config';
 
 export const MinyansTable = ({
@@ -170,6 +177,7 @@ export const MinyansTable = ({
           stickyHeader
           scrollAction={scrollAction}
           title="Minyans"
+          noDataOption={<ImportMinyans tableType={eMinyanType.minyan} />}
         />
       )}
     </>

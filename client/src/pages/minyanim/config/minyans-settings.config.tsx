@@ -9,7 +9,7 @@ import { Room } from '@/types/room.type';
 import { ColumnDef } from '@/types/table.type';
 
 import { eJewishTimeOfDay, eRelativeTime, LuachMinyanType } from '../../../../../lib/types/luach-minyan.type';
-import { MinyanType } from '../../../../../lib/types/minyan.type';
+import { MinyanType, eMinyanType } from '../../../../../lib/types/minyan.type';
 import { ActionsMessage } from '../components/minyans-settings/ActionsMessage';
 
 const getFormatWithActionsMessage = (props: {
@@ -20,7 +20,7 @@ const getFormatWithActionsMessage = (props: {
   field: tFieldMinyanTable | tFieldLuachMinyanTable;
   index?: number;
   disabledEdit?: boolean;
-  blockType?: 'minyan' | 'luachMinyan';
+  blockType?: eMinyanType;
 }) => {
   return (
     <Grid container direction="row" justifyContent="center" spacing={2}>
@@ -88,7 +88,7 @@ export const getMinyansSettingsColumns = ({
         field: 'startDate',
         index,
         disabledEdit,
-        blockType: 'minyan',
+        blockType: eMinyanType.minyan,
       }),
     editInputType: 'time',
     padding: 'none',
@@ -109,7 +109,7 @@ export const getMinyansSettingsColumns = ({
         field: 'blink',
         index,
         disabledEdit,
-        blockType: 'minyan',
+        blockType: eMinyanType.minyan,
       }),
     editInputType: 'number',
     padding: 'none',
@@ -130,7 +130,7 @@ export const getMinyansSettingsColumns = ({
         field: 'endDate',
         index,
         disabledEdit,
-        blockType: 'minyan',
+        blockType: eMinyanType.minyan,
       }),
     editInputType: 'time',
     padding: 'none',
@@ -171,7 +171,7 @@ export const getLuachMinyansSettingsColumns = ({
         field: 'timeOfDay',
         index,
         disabledEdit,
-        blockType: 'luachMinyan',
+        blockType: eMinyanType.luachMinyan,
       }),
     editInputType: 'select',
     selectOptions: Object.entries(eJewishTimeOfDay).map(([key, value]) => ({ value: key, label: value })),
@@ -205,7 +205,7 @@ export const getLuachMinyansSettingsColumns = ({
         field: 'blink',
         index,
         disabledEdit,
-        blockType: 'luachMinyan',
+        blockType: eMinyanType.luachMinyan,
       }),
     editInputType: 'number',
     valueForEdit: (row) => row.blink?.secondsNum,
@@ -226,7 +226,7 @@ export const getLuachMinyansSettingsColumns = ({
         field: 'duration',
         index,
         disabledEdit,
-        blockType: 'luachMinyan',
+        blockType: eMinyanType.luachMinyan,
       }),
     valueForEdit: (row) => row.duration?.value,
     editInputType: 'number',

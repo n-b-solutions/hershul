@@ -8,9 +8,10 @@ import {
   typesOfDates,
   WARNING_IMPORT_MINYAN,
 } from '@/const/minyans.const';
-import { setCurrentSelectedDate, setSettingTimes } from '@/redux/minyans/setting-times-slice';
+import { setCurrentSelectedDate, setLuachMinyanTimes, setSettingTimes } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
-import { Box, Button, Dialog, Paper, Select, SelectChangeEvent, Stack, Typography, IconButton } from '@mui/material';
+import { Box, Button, Dialog, IconButton, Paper, Select, SelectChangeEvent, Stack, Typography } from '@mui/material';
+import { X as CloseIcon } from '@phosphor-icons/react';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,15 +21,18 @@ import JewishDatePicker from '@/components/core/jewish-datepicker';
 import { Option } from '@/components/core/option';
 
 import { CountType } from '../../../../../../lib/types/metadata.type';
-import { eDateType } from '../../../../../../lib/types/minyan.type';
-import { X as CloseIcon } from '@phosphor-icons/react';
+import { eDateType, eMinyanType } from '../../../../../../lib/types/minyan.type';
 
 export interface CountMinyanOfDate {
   category: SelectOption<eDateType>;
   count: number;
 }
 
-export function ImportMinyans(): React.JSX.Element {
+interface ImportMinyansProps {
+  tableType: eMinyanType;
+}
+
+export function ImportMinyans({ tableType }: ImportMinyansProps): React.JSX.Element {
   const [dateType, setDateType] = useState<eDateType | string>(EMPTY_STRING);
   const [isCategorySelected, setIsCategorySelected] = useState<boolean>(false);
   const [dateTypeArray, setDateTypeArray] = useState<CountMinyanOfDate[]>([]);
@@ -45,7 +49,7 @@ export function ImportMinyans(): React.JSX.Element {
         return type.value === eDateType.calendar
           ? { category: type, count: 0 }
           : await axios
-              .get<CountType>(`${API_BASE_URL}/minyan/import/count/${type.value}`)
+              .get<CountType>(`${API_BASE_URL}/${tableType}/import/count/${type.value}`)
               .then((res) => {
                 return { category: type, count: res.data?.count };
               })
@@ -66,7 +70,7 @@ export function ImportMinyans(): React.JSX.Element {
   useEffect(() => {
     if (selectedDate) {
       axios
-        .get<CountType>(`${API_BASE_URL}/minyan/import/count/calendar/${selectedDate}`)
+        .get<CountType>(`${API_BASE_URL}/${tableType}/import/count/calendar/${selectedDate}`)
         .then((res) => {
           setDateTypeArray((currentDateTypeArray) => {
             const calendarIndex = currentDateTypeArray.findIndex(
@@ -94,7 +98,7 @@ export function ImportMinyans(): React.JSX.Element {
 
   const handleImport = () => {
     axios
-      .post(`${API_BASE_URL}/minyan/import`, {
+      .post(`${API_BASE_URL}/${tableType}/import`, {
         dateType,
         currentDateType,
         selectedDate: selectedDate ? selectedDate : null,
@@ -105,11 +109,19 @@ export function ImportMinyans(): React.JSX.Element {
           ...item,
           isRoutine: false,
         }));
-        dispatch(
-          setSettingTimes({
-            setting: updatedData,
-          })
-        );
+        if (tableType === eMinyanType.minyan) {
+          dispatch(
+            setSettingTimes({
+              setting: updatedData,
+            })
+          );
+        } else {
+          dispatch(
+            setLuachMinyanTimes({
+              setting: updatedData,
+            })
+          );
+        }
       })
       .catch((err) => console.log('Error fetching data: ', err));
   };
@@ -167,7 +179,7 @@ export function ImportMinyans(): React.JSX.Element {
                   {TITTLE_IMPORT_MINYAN_MODEL}
                 </Typography>
               </Box>
-              <IconButton  sx={{ color: 'red', fontSize: '1rem' }} onClick={handleClose}>
+              <IconButton sx={{ color: 'red', fontSize: '1rem' }} onClick={handleClose}>
                 <CloseIcon />
               </IconButton>
             </Stack>

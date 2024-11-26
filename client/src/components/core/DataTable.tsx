@@ -39,6 +39,7 @@ interface DataTableProps<TRowModel, TEdit> extends Omit<TableProps, 'onClick'> {
   scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
   getRowProps?: (row: TRowModel) => RowProps;
   title?: string;
+  noDataOption?: React.ReactNode;
 }
 
 export function DataTable<
@@ -65,6 +66,7 @@ export function DataTable<
   scrollAction,
   getRowProps,
   title,
+  noDataOption,
   ...props
 }: DataTableProps<TRowModel, TEdit>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
@@ -362,8 +364,7 @@ export function DataTable<
                   {plusMode.index === -1 && <PlusCircle size={32} />}
                 </Grid>
                 <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
-                {/* TODO: Move it out from the component */}
-                <ImportMinyans />
+                {noDataOption}
               </Grid>
             </TableCell>
           </TableRow>

@@ -14,7 +14,7 @@ import { tFieldMinyanTable } from '@/types/minyans.type';
 import { AddMessageButton } from '@/components/message/AddMessageButton';
 
 import { EditedLuachType } from '../../../../../../lib/types/luach-minyan.type';
-import { EditedType } from '../../../../../../lib/types/minyan.type';
+import { EditedType, eMinyanType } from '../../../../../../lib/types/minyan.type';
 
 export function ActionsMessage(props: {
   roomName: string;
@@ -23,7 +23,7 @@ export function ActionsMessage(props: {
   field: tFieldMinyanTable | tFieldLuachMinyanTable;
   index: number;
   disabledEdit: boolean;
-  blockType?: 'minyan' | 'luachMinyan';
+  blockType?: eMinyanType;
 }): React.JSX.Element {
   const { roomName, message, minyanId, field, index, disabledEdit, blockType } = props;
 
@@ -40,7 +40,7 @@ export function ActionsMessage(props: {
       internalField: 'message',
     };
 
-    if (blockType === 'luachMinyan') {
+    if (blockType === eMinyanType.luachMinyan) {
       const url = `${API_BASE_URL}/luach-minyan/${minyanId}`;
       axios
         .put<EditedLuachType>(url, endpointBody)

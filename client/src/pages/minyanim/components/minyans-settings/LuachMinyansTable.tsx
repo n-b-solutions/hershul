@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick } from '@/types/enums';
 import { eFieldLuachMinyanTable, LuachMinyanRowType } from '@/types/luach-minyan.type';
+import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
 import { DataTable } from '@/components/core/DataTable';
 
 import {
@@ -22,7 +23,7 @@ import {
   EditLuachMinyanValueType,
   LuachMinyanType,
 } from '../../../../../../lib/types/luach-minyan.type';
-import { eDateType } from '../../../../../../lib/types/minyan.type';
+import { eDateType, eMinyanType } from '../../../../../../lib/types/minyan.type';
 import { RoomType } from '../../../../../../lib/types/room.type';
 import { getLuachMinyansSettingsColumns } from '../../config/minyans-settings.config';
 
@@ -165,6 +166,7 @@ const LuachMinyansTable: React.FC<LuachMinyansTableProps> = ({ dateType, scrollA
           stickyHeader
           scrollAction={scrollAction}
           title="Luach Minyans"
+          noDataOption={<ImportMinyans tableType={eMinyanType.luachMinyan} />}
         />
       )}
     </>
