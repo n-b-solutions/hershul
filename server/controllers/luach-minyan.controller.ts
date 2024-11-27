@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import LuachMinyanService from "../services/luach-minyan.service";
+import { eDateType } from "../../lib/types/minyan.type";
 
 const LuachMinyanController = {
   get: async (
@@ -36,7 +37,18 @@ const LuachMinyanController = {
   ): Promise<void> => {
     try {
       const { dateType } = req.query;
-      const result = await LuachMinyanService.getByDateType(dateType);
+
+      if (
+        !dateType ||
+        !Object.values(eDateType).includes(dateType as eDateType)
+      ) {
+        res.status(400).json({ error: "Invalid or missing dateType" });
+        return;
+      }
+
+      const result = await LuachMinyanService.getByDateType(
+        dateType as eDateType
+      );
       res.send(result);
     } catch (error) {
       next(error);
@@ -80,8 +92,17 @@ const LuachMinyanController = {
   ): Promise<void> => {
     try {
       const { category } = req.params;
+
+      if (
+        !category ||
+        !Object.values(eDateType).includes(category as eDateType)
+      ) {
+        res.status(400).json({ error: "Invalid or missing category" });
+        return;
+      }
+
       const result = await LuachMinyanService.getCountMinyanByCategory(
-        category
+        category as eDateType
       );
       res.send(result);
     } catch (error) {
