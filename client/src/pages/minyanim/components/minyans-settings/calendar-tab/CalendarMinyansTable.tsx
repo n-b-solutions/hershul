@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { API_BASE_URL } from '@/const/api.const';
 import { isMinyanInactiveForSelectedDate } from '@/helpers/time.helper';
 import {
@@ -11,54 +11,35 @@ import {
 } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
-import { Typography } from '@mui/material';
-import { Box } from '@mui/system';
-import { ArrowArcLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
+import { Box, Typography } from '@mui/material';
+import { ArrowArcLeft } from '@phosphor-icons/react';
 import axios from 'axios';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick, eRowEditMode } from '@/types/enums';
 import { CalendarRowType, MinyanRowType } from '@/types/minyans.type';
-import { ColumnDef, RowProps } from '@/types/table.type';
+import { RowProps } from '@/types/table.type';
+import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
+import { CalendarTableProps, isRoutineColumn } from '@/pages/minyanim/config/calendar.config';
+import { getMinyansSettingsColumns } from '@/pages/minyanim/config/minyans-settings.config';
 import { DataTable } from '@/components/core/DataTable';
-import JewishDatePicker from '@/components/core/jewish-datepicker';
 
-import { IdType } from '../../../../../../lib/types/metadata.type';
+import { IdType } from '../../../../../../../lib/types/metadata.type';
 import {
   eDateType,
   EditedType,
   EditMinyanValueType,
+  eMinyanType,
   MinyanType,
   SpecificDateType,
-} from '../../../../../../lib/types/minyan.type';
-import { getMinyansSettingsColumns } from '../../config/minyans-settings.config';
+} from '../../../../../../../lib/types/minyan.type';
 
-const isRoutineColumn: ColumnDef<CalendarRowType> = {
-  editInputType: 'switch',
-  valueForEdit: (row) => row?.isRoutine,
-  name: 'Is Routine',
-  padding: 'none',
-  align: 'center',
-  field: 'isRoutine',
-  editable: true,
-  formatter: (row) => {
-    if (row.isRoutine === undefined) return <></>;
-    return row?.isRoutine ? <CheckCircle size={24} /> : <XCircle size={24} />;
-  },
-};
-
-export function Calendar({
-  scrollAction,
-}: {
-  scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
-}): React.JSX.Element {
-  const [selectedDate, setSelectedDate] = React.useState<Dayjs>(dayjs());
+const CalendarMinyansTable: React.FC<CalendarTableProps> = ({ selectedDate, scrollAction }) => {
+  const dispatch = useDispatch();
   const settingTimesItem = useSelector((state: RootState) => state.minyans.settingTimesItem);
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
-  const dispatch = useDispatch();
   const [loading, setLoading] = React.useState<boolean>(true);
-  const dateRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     setLoading(true);
@@ -227,12 +208,6 @@ export function Calendar({
   ): void => {
     value != null && dispatch(updateSettingTimesValue({ index, field, value, internalField }));
   };
-  const handleDateChange = (newDate: Dayjs | null) => {
-    if (newDate) {
-      setSelectedDate(newDate);
-      dispatch(setCurrentSelectedDate({ currentDate: newDate.toISOString() }));
-    }
-  };
 
   const handlePlusClick = async (index: number, location?: eLocationClick, isCalendar = false): Promise<any> => {
     const newRow = {
@@ -309,20 +284,12 @@ export function Calendar({
 
   return (
     <>
-      <Box ref={dateRef}>
-        <JewishDatePicker
-          label="Specific Date"
-          selectedDate={selectedDate}
-          onDateChange={handleDateChange}
-          sx={{ paddingBottom: '2%', paddingLeft: '1%', width: '20%' }}
-        />
-      </Box>
       {loading ? (
         <Typography textAlign="center" variant="h6">
           Loading...
         </Typography>
       ) : (
-        <Box style={{ height: `calc(100% - ${dateRef?.current?.clientHeight}px)`, overflowY: 'auto' }}>
+        <Box style={{ height: '100%', overflowY: 'auto' }}>
           <DataTable<MinyanType, EditMinyanValueType>
             columns={[
               ...getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions }),
@@ -336,9 +303,14 @@ export function Calendar({
             scrollAction={scrollAction}
             rows={settingTimesItem}
             getRowProps={getRowProps} // Call getRowProps for each row
+            title="Minyans"
+            noDataOption={<ImportMinyans tableType={eMinyanType.minyan} />}
+            stickyHeader
           />
         </Box>
       )}
     </>
   );
-}
+};
+
+export default CalendarMinyansTable;

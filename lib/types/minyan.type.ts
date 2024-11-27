@@ -10,6 +10,11 @@ export enum eDateType {
   calendar = "calendar",
 }
 
+export enum eMinyanType {
+  minyan = 'minyan',
+  luachMinyan = 'luach-minyan',
+}
+
 export interface AlertType {
   time: Date | string;
   message?: MessageType;

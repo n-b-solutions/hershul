@@ -38,6 +38,8 @@ interface DataTableProps<TRowModel, TEdit> extends Omit<TableProps, 'onClick'> {
   onDeleteClick?: (index: number) => void;
   scrollAction?: { isScroll: boolean; setIsScroll: React.Dispatch<React.SetStateAction<boolean>> };
   getRowProps?: (row: TRowModel) => RowProps;
+  title?: string;
+  noDataOption?: React.ReactNode;
 }
 
 export function DataTable<
@@ -63,6 +65,8 @@ export function DataTable<
   onDeleteClick,
   scrollAction,
   getRowProps,
+  title,
+  noDataOption,
   ...props
 }: DataTableProps<TRowModel, TEdit>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
@@ -75,7 +79,12 @@ export function DataTable<
     isClicked: false,
     id: '',
   });
-  const [plusMode, setPlusMode] = React.useState<{ mode: eLocationClick | null; index?: number; right?: number }>({
+  const [plusMode, setPlusMode] = React.useState<{
+    mode: eLocationClick | null;
+    index?: number;
+    right?: number;
+    height?: number;
+  }>({
     mode: null,
   });
   const [isShowDelete, setIsToShowDelete] = React.useState<{ hover: boolean; index: number }>({
@@ -108,6 +117,17 @@ export function DataTable<
     setPlusMode({ mode: null });
   };
 
+  const handleChangeInput = (
+    value: TEdit,
+    index: number,
+    fieldName?: keyof TRowModel,
+    internalField?: string
+  ): void => {
+    if (onChangeInput && fieldName) {
+      onChangeInput(value, index, fieldName, internalField);
+    }
+  };
+
   const getValue = (index: number, field: keyof TRowModel): TRowModel[keyof TRowModel] => {
     const currentRow = rows[index];
     const value = currentRow[field];
@@ -122,15 +142,22 @@ export function DataTable<
       const { width: rowWidth, height: rowHeight, y: rowY } = currentRowElement;
       const middleY = rowY + rowHeight / 2;
       if (mouseY < middleY) {
-        setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2 });
+        setPlusMode({ mode: eLocationClick.top, index, right: rowWidth / 2, height: rowHeight });
       } else {
-        setPlusMode({ mode: eLocationClick.bottom, index, right: rowWidth / 2 });
+        setPlusMode({ mode: eLocationClick.bottom, index, right: rowWidth / 2, height: rowHeight });
       }
     }
   };
 
-  const getPlusYPosition = () => {
-    return plusMode.mode === eLocationClick.bottom ? { top: '39px' } : { bottom: '33px' };
+  // The offset calculation here is not accurate enough and does not fit all cases, so it is temporary and subject to change.
+  const interpolate = (x1: number, y1: number, x2: number, y2: number, x: number) => {
+    return y1 + ((x - x1) * (y2 - y1)) / (x2 - x1);
+  };
+
+  const getPlusYPosition = (rowHeight: number) => {
+    const topOffset = interpolate(54.8, 38, 102.8, 86, rowHeight);
+    const bottomOffset = interpolate(54.8, 33, 102.8, 81, rowHeight);
+    return plusMode.mode === eLocationClick.bottom ? { top: `${bottomOffset}px` } : { bottom: `${topOffset}px` };
   };
 
   React.useEffect(() => {
@@ -150,6 +177,13 @@ export function DataTable<
         ))}
       </colgroup>
       <TableHead sx={{ ...(hideHead && { visibility: 'collapse', '--TableCell-borderWidth': 0 }) }}>
+        {title && (
+          <TableRow>
+            <TableCell colSpan={columns.length}>
+              <Typography variant="h6">{title}</Typography>
+            </TableCell>
+          </TableRow>
+        )}
         <TableRow>
           {selectable ? (
             <TableCell padding="checkbox" sx={{ width: '40px', minWidth: '40px', maxWidth: '40px' }}>
@@ -187,7 +221,7 @@ export function DataTable<
                       </Typography>
                     }
                   >
-                    <WarningIcon color="#635bff" display="inline" size={20} />
+                    <WarningIcon color="#635bff" display="inline" size={15} />
                   </Tooltip>
                 ) : null}
               </TableCell>
@@ -272,9 +306,13 @@ export function DataTable<
                         fieldName={column.field}
                         cellRef={cellRef}
                         index={index}
-                        handleBlur={handleBlurInput}
+                        handleBlur={(event, value) =>
+                          handleBlurInput(event, value, index, column.field, column.internalField)
+                        }
                         value={column.valueForEdit ? column.valueForEdit(row) : getValue(index, column.field)}
-                        handleChangeInput={onChangeInput}
+                        handleChangeInput={(value) =>
+                          handleChangeInput(value, index, column.field, column.internalField)
+                        }
                         editType={column.editInputType}
                         valueOption={column.valueOption && column.valueOption}
                         selectOptions={column.selectOptions && column.selectOptions}
@@ -303,7 +341,7 @@ export function DataTable<
                       color: '#635bff',
                       zIndex: '999',
                       right: `${plusMode.right || 0}px`,
-                      ...getPlusYPosition(),
+                      ...getPlusYPosition(plusMode.height || 0),
                     }}
                   >
                     <PlusCircle size={32} />
@@ -334,6 +372,7 @@ export function DataTable<
           <TableRow
             onMouseOver={() => setPlusMode({ mode: null, index: -1 })}
             onMouseLeave={() => setPlusMode({ mode: null })}
+            sx={{ position: 'relative' }}
           >
             <TableCell sx={{ padding: '15px' }} colSpan={columns.length}>
               <Grid container display="grid">
@@ -345,14 +384,13 @@ export function DataTable<
                     color: '#635bff',
                     zIndex: '999',
                     right: '50%',
-                    top: '152px',
+                    bottom: '73px',
                   }}
                 >
                   {plusMode.index === -1 && <PlusCircle size={32} />}
                 </Grid>
                 <Typography sx={{ textAlign: 'center' }}>{NO_DATA}</Typography>
-                {/* TODO: Move it out from the component */}
-                <ImportMinyans />
+                {noDataOption}
               </Grid>
             </TableCell>
           </TableRow>
