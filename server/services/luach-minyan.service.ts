@@ -12,6 +12,7 @@ import { CountType } from "../../lib/types/metadata.type";
 import {
   getMongoConditionForActiveMinyansByDate,
   getQueryDateType,
+  getRoshChodeshCond,
 } from "../helpers/minyan.helper";
 import ScheduleService from "./schedule.service";
 import {
@@ -45,6 +46,13 @@ const LuachMinyanService = {
       const queryDateType = await getQueryDateType(date);
       const startOfDay = new Date(date).setHours(0, 0, 0, 0); // start of day;
       const endOfDay = new Date(date).setHours(23, 59, 59, 999); // end of day
+
+      const roshChodeshCond = await getRoshChodeshCond(
+        queryDateType,
+        eMinyanType.luachMinyan,
+        date
+      );
+
       const minyans = await LuachMinyanModel.find({
         $or: [
           { dateType: queryDateType },
@@ -55,6 +63,7 @@ const LuachMinyanService = {
               $lt: endOfDay,
             },
           },
+          ...(Object.keys(roshChodeshCond).length > 0 ? [roshChodeshCond] : []),
         ],
       })
         .populate("roomId")
@@ -77,7 +86,7 @@ const LuachMinyanService = {
     try {
       if (dateType) queryDateType = dateType;
       else {
-        const roshHodesh = await isRoshHodesh();
+        const roshHodesh = await isRoshHodesh(today);
         if (roshHodesh) {
           queryDateType = eDateType.roshHodesh;
         } else {

@@ -13,7 +13,7 @@ export const getActiveMinyans = (minyans: MinyanType[] | MinyanDocument[]) => {
 
 export const getQueryDateType = async (date?: Date): Promise<eDateType> => {
   const dayOfWeek = getDayOfWeek(date);
-  const roshChodesh = await isRoshHodesh();
+  const roshChodesh = await isRoshHodesh(date);
 
   if (roshChodesh) {
     return eDateType.roshHodesh;
@@ -59,13 +59,25 @@ export const getRoshChodeshCond = async (
 
     if (minyanType === eMinyanType.minyan) {
       const minchaGedolaTime = await getMinchaGedolaTime(date);
+      const minchaGedolaHours = minchaGedolaTime.getHours();
+      const minchaGedolaMinutes = minchaGedolaTime.getMinutes();
+
       return {
         dateType: dayOfWeekDateType,
-        "startDate.time": { $gte: minchaGedolaTime },
+        $expr: {
+          $or: [
+            { $gt: [{ $hour: "$startDate.time" }, minchaGedolaHours] },
+            {
+              $and: [
+                { $eq: [{ $hour: "$startDate.time" }, minchaGedolaHours] },
+                { $gt: [{ $minute: "$startDate.time" }, minchaGedolaMinutes] },
+              ],
+            },
+          ],
+        },
       };
     } else if (minyanType === eMinyanType.luachMinyan) {
-      const minchaGedolaIndex =
-        Object.keys(eJewishTimeOfDay).indexOf("minchaGedola");
+      const minchaGedolaIndex = Object.keys(eJewishTimeOfDay).indexOf("minchaGedola");
       return {
         dateType: dayOfWeekDateType,
         $expr: {
