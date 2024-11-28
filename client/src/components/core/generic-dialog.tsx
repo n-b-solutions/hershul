@@ -40,6 +40,8 @@ export const GenericDialog = ({ open, handleClose, children, header }: GenericDi
             border: '1px solid var(--mui-palette-divider)',
             boxShadow: 'var(--mui-shadows-16)',
             width: '320px',
+            minHeight: '537px',
+            maxHeight: '537px',
             mx: 'auto',
             position: 'relative',
           }}
