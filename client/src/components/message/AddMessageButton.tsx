@@ -5,7 +5,6 @@ import { Plus } from '@phosphor-icons/react';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { MessagesPopup } from './MessagesPopup';
 
 export function AddMessageButton(props: {
   roomName: string;
