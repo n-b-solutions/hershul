@@ -3,8 +3,11 @@ import fs from "fs";
 import player from "play-sound";
 import { execSync } from "child_process";
 import { config } from "dotenv";
+import { FileLogger } from "../utils/file-logger.util";
 
 config();
+
+const logger = new FileLogger({ prefix: "PlayAudio", level: "ALL" });
 
 const isCommandAvailable = (command: string): boolean => {
   try {
@@ -29,7 +32,7 @@ export const playAudio = (audioUrl: string) => {
   try {
     const audioPath = path.join(process.cwd(), audioUrl);
     if (!fs.existsSync(audioPath)) {
-      console.error(`Audio file does not exist: ${audioPath}`);
+      logger.error(`Audio file does not exist: ${audioPath}`);
       return;
     }
 
@@ -46,16 +49,16 @@ export const playAudio = (audioUrl: string) => {
 
     audioPlayer.play(audioPath, (error) => {
       if (error) {
-        console.error(`Error playing audio: ${error.message}`);
+        logger.error(`Error playing audio: ${error.message}`);
       } else {
-        console.log(`Audio played successfully: ${audioPath}`);
+        logger.debug(`Audio played successfully: ${audioPath}`);
       }
     });
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`Error: ${error.message}`);
+      logger.error(`Error: ${error.message}`);
     } else {
-      console.error(`Unknown error: ${error}`);
+      logger.error(`Unknown error: ${error}`);
     }
   }
 };
