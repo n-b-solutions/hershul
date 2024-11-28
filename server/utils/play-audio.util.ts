@@ -25,6 +25,7 @@ const getLinuxAudioPlayer = (): string => {
 export const playAudio = (audioUrl: string) => {
   try {
     const audioPath = path.join(process.cwd(), audioUrl);
+    console.log(`Resolved audio path: ${audioPath}`);
 
     if (!fs.existsSync(audioPath)) {
       console.error(`Audio file does not exist: ${audioPath}`);
@@ -38,14 +39,15 @@ export const playAudio = (audioUrl: string) => {
           : process.platform === "darwin"
           ? "afplay"
           : getLinuxAudioPlayer(),
-      args: process.platform === "win32" ? ["-ao", "dsound"] : [], // Here you can add additional parameters according to the player and the operating system
     });
+
+    console.log(`Using audio player: ${audioPlayer.player}`);
 
     audioPlayer.play(audioPath, (error) => {
       if (error) {
         console.error(`Error playing audio: ${error.message}`);
       } else {
-        console.log(`Audio played: ${audioPath}`);
+        console.log(`Audio played successfully: ${audioPath}`);
       }
     });
   } catch (error) {
