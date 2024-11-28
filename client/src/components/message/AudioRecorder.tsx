@@ -113,22 +113,24 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
   return (
     <Box>
       <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-        <IconButton
-          onClick={isRecording ? stopRecording : audioBlob ? handleRedo : startRecording}
-          sx={{
-            width: 100,
-            height: 100,
-            borderRadius: '50%',
-            bgcolor: isRecording ? 'error.main' : 'primary.main',
-            color: 'white',
-            zIndex: 2,
-            '&:hover': {
-              bgcolor: isRecording ? 'error.dark' : 'primary.dark',
-            },
-          }}
-        >
-          {isRecording ? <StopIcon size={24} /> : <MicrophoneIcon size={24} />}
-        </IconButton>
+        {!showInputs && (
+          <IconButton
+            onClick={isRecording ? stopRecording : audioBlob ? handleRedo : startRecording}
+            sx={{
+              width: 100,
+              height: 100,
+              borderRadius: '50%',
+              bgcolor: isRecording ? 'error.main' : 'primary.main',
+              color: 'white',
+              zIndex: 2,
+              '&:hover': {
+                bgcolor: isRecording ? 'error.dark' : 'primary.dark',
+              },
+            }}
+          >
+            {isRecording ? <StopIcon size={24} /> : <MicrophoneIcon size={24} />}
+          </IconButton>
+        )}
         {isRecording && (
           <CircularProgress
             variant="determinate"
@@ -150,50 +152,48 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
           {formatDuration(recordingDuration)}
         </Typography>
       )}
-      {audioBlob && (
+      {audioBlob && !showInputs && (
         <>
           <Typography variant="h6" sx={{ mt: 2 }}>
             {formatDuration(recordingDuration)}
           </Typography>
           <audio controls src={audioURL || undefined} style={{ marginTop: 16, width: '75%' }} />
-          <Box>
-            {showInputs && (
-              <Box>
-                <FormControl fullWidth>
-                  <InputLabel>Name</InputLabel>
-                  <OutlinedInput name="name" value={name} onChange={(e) => setName(e.target.value)} />
-                </FormControl>
-                <FormControl fullWidth disabled={!!selectedRoom}>
-                  <InputLabel>Room</InputLabel>
-                  <Select
-                    value={selectedRoom}
-                    onChange={(e) => setSelectedRoom(e.target.value)}
-                    input={<OutlinedInput label="Room" />}
-                  >
-                    {roomsLoading ? (
-                      <MenuItem value="" disabled>
-                        Loading rooms...
-                      </MenuItem>
-                    ) : (
-                      rooms.map((room) => (
-                        <MenuItem key={room.id} value={room.name}>
-                          {room.name}
-                        </MenuItem>
-                      ))
-                    )}
-                  </Select>
-                </FormControl>
-              </Box>
-            )}
-            <Button onClick={handleSave} startIcon={<SaveIcon />}>
-              Save
-            </Button>
-            <Button onClick={handleRedo} startIcon={<RedoIcon />}>
-              Redo
-            </Button>
-          </Box>
         </>
       )}
+      {showInputs && (
+        <Box>
+          <FormControl fullWidth>
+            <InputLabel>שם</InputLabel>
+            <OutlinedInput name="name" value={name} onChange={(e) => setName(e.target.value)} />
+          </FormControl>
+          <FormControl fullWidth disabled={!!selectedRoom}>
+            <InputLabel>חדר</InputLabel>
+            <Select
+              value={selectedRoom}
+              onChange={(e) => setSelectedRoom(e.target.value)}
+              input={<OutlinedInput label="חדר" />}
+            >
+              {roomsLoading ? (
+                <MenuItem value="" disabled>
+                  loading rooms ...
+                </MenuItem>
+              ) : (
+                rooms.map((room) => (
+                  <MenuItem key={room.id} value={room.name}>
+                    {room.name}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+        </Box>
+      )}
+      <Button onClick={handleSave} startIcon={<SaveIcon />}>
+        save
+      </Button>
+      <Button onClick={handleRedo} startIcon={<RedoIcon />}>
+        redo
+      </Button>
     </Box>
   );
 };
