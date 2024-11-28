@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import player from "play-sound";
-import { execSync } from "child_process";
+import { execSync, exec } from "child_process";
 
 const isCommandAvailable = (command: string): boolean => {
   try {
@@ -22,10 +22,19 @@ const getLinuxAudioPlayer = (): string => {
   }
 };
 
+exec("mplayer", (error, stdout, stderr) => {
+  if (error) {
+    console.error(`Error executing mplayer: ${error.message}`);
+    return;
+  }
+  console.log(`mplayer version: ${stdout}`);
+});
+
 export const playAudio = (audioUrl: string) => {
   try {
     const audioPath = path.join(process.cwd(), audioUrl);
     console.log(`Resolved audio path: ${audioPath}`);
+    console.log(`PATH: ${process.env.PATH}`);
 
     if (!fs.existsSync(audioPath)) {
       console.error(`Audio file does not exist: ${audioPath}`);
@@ -40,6 +49,8 @@ export const playAudio = (audioUrl: string) => {
           ? "afplay"
           : getLinuxAudioPlayer(),
     });
+
+    console.log(`Using audio player: ${audioPlayer.player}`);
 
     console.log(`Using audio player: ${audioPlayer.player}`);
 
