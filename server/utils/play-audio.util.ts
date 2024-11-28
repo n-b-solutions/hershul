@@ -5,7 +5,7 @@ import { execSync, exec } from "child_process";
 
 const isCommandAvailable = (command: string): boolean => {
   try {
-    execSync(`command -v ${command}`);
+    execSync(`where ${command}`); // Use 'where' instead of 'command -v' for Windows
     return true;
   } catch {
     return false;
@@ -22,35 +22,36 @@ const getLinuxAudioPlayer = (): string => {
   }
 };
 
-exec("mplayer", (error, stdout, stderr) => {
-  if (error) {
-    console.error(`Error executing mplayer: ${error.message}`);
-    return;
-  }
-  console.log(`mplayer version: ${stdout}`);
-});
-
 export const playAudio = (audioUrl: string) => {
   try {
     const audioPath = path.join(process.cwd(), audioUrl);
     console.log(`Resolved audio path: ${audioPath}`);
-    console.log(`PATH: ${process.env.PATH}`);
 
     if (!fs.existsSync(audioPath)) {
       console.error(`Audio file does not exist: ${audioPath}`);
       return;
     }
 
+    console.log(`PATH: ${process.env.PATH}`);
+
+    const mplayerPath = "C:\\Windows\\System32\\mplayer-svn-38151-x86_64\\mplayer.exe"; // עדכני את הנתיב המלא ל-mplayer
+
+    exec(`${mplayerPath}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing mplayer: ${error.message}`);
+        return;
+      }
+      console.log(`mplayer version: ${stdout}`);
+    });
+
     const audioPlayer = player({
       player:
         process.platform === "win32"
-          ? "mplayer"
+          ? mplayerPath
           : process.platform === "darwin"
           ? "afplay"
           : getLinuxAudioPlayer(),
     });
-
-    console.log(`Using audio player: ${audioPlayer.player}`);
 
     console.log(`Using audio player: ${audioPlayer.player}`);
 
