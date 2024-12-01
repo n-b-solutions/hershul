@@ -20,7 +20,7 @@ import { eFieldName, eLocationClick } from '@/types/enums';
 import { SelectOption } from '@/types/metadata.type';
 import { MinyanRowType } from '@/types/minyans.type';
 import { Room } from '@/types/room.type';
-import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
+import { ImportMinyans } from '@/pages/settings/components/minyans-settings/ImportMinyans';
 import { DataTable } from '@/components/core/DataTable';
 
 import { IdType } from '../../../../../../lib/types/metadata.type';
