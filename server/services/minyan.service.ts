@@ -18,7 +18,9 @@ import {
   getQueryDateType,
 } from "../helpers/minyan.helper";
 import { HDate } from "@hebcal/core";
-import { convertToHebrewDayAndMonth, getHebrewMonthNumber } from "../utils/convert-date.util";
+import {
+  convertToHebrewDayAndMonth,
+} from "../utils/convert-date.util";
 
 const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
@@ -462,29 +464,25 @@ const MinyanService = {
   },
 
   deleteExpiredMinyan: async () => {
-  try {
-    const minyans = await MinyanModel.find();
-    const now = new Date();
-    const hebrewDate = convertToHebrewDayAndMonth(now);
+    try {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      console.log("now");
+      console.log(now);
 
-    for (const minyan of minyans) {
-      if (minyan.specificDate && minyan.specificDate.isRoutine === false) {
-        const { hebrewDayMonth, hebrewMonth } = minyan.specificDate;
-        const isExpiredDay = hebrewDayMonth && hebrewDate.hebrewDayMonth && hebrewDayMonth < hebrewDate.hebrewDayMonth;
-        const isExpiredMonth = hebrewMonth && hebrewDate.hebrewMonth && getHebrewMonthNumber(hebrewMonth) < getHebrewMonthNumber(hebrewDate.hebrewMonth);
+      const result = await MinyanModel.deleteMany({
+        'specificDate.isRoutine': false,
+        'specificDate.date': { $lt: now }
+      });
+      console.log("result");
+      console.log(result);
 
-        if (isExpiredDay || isExpiredMonth) {
-          await MinyanModel.findByIdAndDelete(minyan._id);
-          return true;
-        }
-      }
+      return result.deletedCount > 0;
+    } catch (error) {
+      console.error("Error deleting expired minyan:", error);
+      throw new ApiError(500, (error as Error).message);
     }
-    return false;
-  } catch (error) {
-    console.error("Error deleting expired minyan:", error);
-    throw new ApiError(500, (error as Error).message);
-  }
-},
+  },
 };
 
 export default MinyanService;
