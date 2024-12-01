@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { eFieldName, eLocationClick } from '@/types/enums';
 import { eFieldLuachMinyanTable, LuachMinyanRowType } from '@/types/luach-minyan.type';
-import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
+import { ImportMinyans } from '@/pages/settings/components/minyans-settings/ImportMinyans';
 import { DataTable } from '@/components/core/DataTable';
 
 import {
