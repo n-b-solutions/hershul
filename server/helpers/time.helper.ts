@@ -9,12 +9,11 @@ import { eJewishTimeOfDay } from "../../lib/types/luach-minyan.type";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export const isRoshHodesh = async (): Promise<boolean> => {
-  const now = new Date();
+export const isRoshHodesh = async (date: Date = new Date()): Promise<boolean> => {
   const hebcalRes = await axios.get(
-    `https://www.hebcal.com/converter?cfg=json&gy=${now.getFullYear()}&gm=${
-      now.getMonth() + 1
-    }&gd=${now.getDate()}&g2h=1`
+    `https://www.hebcal.com/converter?cfg=json&gy=${date.getFullYear()}&gm=${
+      date.getMonth() + 1
+    }&gd=${date.getDate()}&g2h=1`
   );
   const data = hebcalRes.data;
 

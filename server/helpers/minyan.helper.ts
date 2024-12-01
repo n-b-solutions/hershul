@@ -13,7 +13,7 @@ export const getActiveMinyans = (minyans: MinyanType[] | MinyanDocument[]) => {
 
 export const getQueryDateType = async (date?: Date): Promise<eDateType> => {
   const dayOfWeek = getDayOfWeek(date);
-  const roshChodesh = await isRoshHodesh();
+  const roshChodesh = await isRoshHodesh(date);
 
   if (roshChodesh) {
     return eDateType.roshHodesh;
