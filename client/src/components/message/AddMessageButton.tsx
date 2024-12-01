@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { messages } from '@/redux/message/messageSlice';
+import { playAudio } from '@/services/play-audio.service';
 import { CardActions, IconButton } from '@mui/material';
 import { Plus } from '@phosphor-icons/react';
 import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
@@ -12,8 +13,9 @@ export function AddMessageButton(props: {
   isSettingPage?: boolean;
   onClick?: (messageId?: string) => void;
   disabledEdit?: boolean;
+  playAudioOnClose?: boolean;
 }): React.JSX.Element {
-  const { roomName, isSettingPage, onClick, disabledEdit } = props;
+  const { roomName, isSettingPage, onClick, disabledEdit, playAudioOnClose } = props;
   const messagesSlice = useSelector(messages);
   const [displayMessages, setDisplayMessages] = React.useState<{ [key: string]: boolean }>({});
 
@@ -24,12 +26,23 @@ export function AddMessageButton(props: {
     }));
   };
 
-  const handleCloseMessage = (roomName: string, messageId?: string) => {
+  const handleCloseMessage = async (roomName: string, messageId?: string, audioUrl?: string) => {
     setDisplayMessages((prevState) => ({
       ...prevState,
       [roomName]: false,
     }));
     onClick && onClick(messageId);
+
+    if (playAudioOnClose && messageId) {
+      if (audioUrl) {
+        await playAudio(audioUrl);
+      } else {
+        const message = messagesSlice.find((msg) => msg.id === messageId);
+        if (message && message.audioUrl) {
+          await playAudio(message.audioUrl);
+        }
+      }
+    }
   };
 
   return (
@@ -55,7 +68,7 @@ export function AddMessageButton(props: {
       )}
       <MessagesPopup
         open={displayMessages[roomName] || false}
-        handleClose={(messageId?: string) => handleCloseMessage(roomName, messageId)}
+        handleClose={(messageId?: string, audioUrl?: string) => handleCloseMessage(roomName, messageId, audioUrl)}
         room={roomName}
       />
     </>

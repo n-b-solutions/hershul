@@ -90,7 +90,7 @@ export function Rooms(): React.JSX.Element {
                   </Button>
                 </CardContent>
                 <Divider />
-                <AddMessageButton roomName={room.name} />
+                <AddMessageButton roomName={room.name} playAudioOnClose={true} />
               </Card>
             </Grid>
           ))
