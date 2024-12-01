@@ -111,8 +111,16 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
   };
 
   return (
-    <Box>
-      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+    <Box
+      sx={{
+        height: '350px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
         {!showInputs && (
           <IconButton
             onClick={isRecording ? stopRecording : audioBlob ? handleRedo : startRecording}
@@ -157,7 +165,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
           <Typography variant="h6" sx={{ mt: 2 }}>
             {formatDuration(recordingDuration)}
           </Typography>
-          <audio controls src={audioURL || undefined} style={{ marginTop: 16, width: '75%' }} />
+          <audio controls src={audioURL || undefined} style={{ marginTop: 16, width: '100%' }} />
         </>
       )}
       {showInputs && (
@@ -188,12 +196,14 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
           </FormControl>
         </Box>
       )}
-      <Button onClick={handleSave} startIcon={<SaveIcon />}>
-        save
-      </Button>
-      <Button onClick={handleRedo} startIcon={<RedoIcon />}>
-        redo
-      </Button>
+      <Box sx={{ display: 'flex', gap: 4 }}>
+        <Button onClick={handleSave} startIcon={<SaveIcon />}>
+          save
+        </Button>
+        <Button onClick={handleRedo} startIcon={<RedoIcon />}>
+          redo
+        </Button>
+      </Box>
     </Box>
   );
 };

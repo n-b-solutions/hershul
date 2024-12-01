@@ -69,7 +69,7 @@ export const CreateMessagePopup = ({
   }, []);
 
   return (
-    <Box sx={{ bgcolor: 'transparent', p: 3, display: 'flex' }}>
+    <Box sx={{ bgcolor: 'transparent', p: 3, display: 'flex',justifyContent:'center' }}>
       <Box maxWidth="sm" sx={{ px: 3, py: 2 }}>
         <AudioRecorder
           onSave={handleSave}
