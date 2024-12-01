@@ -14,27 +14,14 @@ import { MinyansSettings } from './components/minyans-settings/MinyansSettings';
 const metadata: Metadata = { title: 'Setting' };
 
 export const Settings = (): React.JSX.Element => {
-  const currentType = useSelector((state: RootState) => state.minyans.dateType);
-  const dispatch = useDispatch();
-  const handleTypeChange = (_: React.SyntheticEvent, value: eDateType) => {
-    dispatch(setCurrentDateType({ currentType: value }));
-  };
-
   return (
     <>
       <Helmet>
         <title>{metadata.title}</title>
       </Helmet>
       <Grid container sx={{ width: '100%', height: '100%' }}>
-        <Grid item xs={12}>
-          <Tabs onChange={handleTypeChange} sx={{ px: 3 }} value={currentType} variant="scrollable">
-            {typesOfDates.map((tab) => (
-              <Tab key={tab.value} label={tab.label} value={tab.value} />
-            ))}
-          </Tabs>
-        </Grid>
-        <Grid item xs={12} sx={{ height: 'calc(100% - 48px)', overflowY: 'auto' }}>
-          <MinyansSettings dateType={currentType} />
+        <Grid item xs={12} sx={{ height: '100%' }}>
+          <MinyansSettings />
         </Grid>
       </Grid>
     </>
