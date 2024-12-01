@@ -19,7 +19,7 @@ import { CreateMessagePopup } from './CreateMessagePopup';
 
 export function MessagesPopup(props: {
   open: boolean;
-  handleClose: (messageId?: string) => void;
+  handleClose: (messageId?: string, audioUrl?: string) => void;
   room: string;
 }): React.JSX.Element {
   const { open, handleClose, room } = props;
@@ -41,9 +41,9 @@ export function MessagesPopup(props: {
     setIsCreateDialogOpen(true);
   };
 
-  const handleCreateDialogClose = (messageId?: string) => {
+  const handleCreateDialogClose = (messageId?: string, audioUrl?: string) => {
     setIsCreateDialogOpen(false);
-    handleClose(messageId);
+    handleClose(messageId, audioUrl);
   };
 
   const handleItemClick = (message: string, messageId?: string) => {
@@ -146,7 +146,7 @@ export function MessagesPopup(props: {
 
       <CreateMessagePopup
         open={isCreateDialogOpen}
-        handleClose={(messageId?: string) => handleCreateDialogClose(messageId)}
+        handleClose={(messageId?: string, audioUrl?: string) => handleCreateDialogClose(messageId, audioUrl)}
         room={room}
       />
     </>

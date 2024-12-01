@@ -23,7 +23,7 @@ export const CreateMessagePopup = ({
   room,
 }: {
   open: boolean;
-  handleClose: (id?: string) => void;
+  handleClose: (id?: string, audioUrl?: string) => void;
   room?: string;
 }): React.JSX.Element => {
   const [selectedRoom, setSelectedRoom] = React.useState<string>(room || '');
@@ -48,7 +48,7 @@ export const CreateMessagePopup = ({
         audioBlob,
       };
       const newMessage = await dispatch(createMessage(newRoom));
-      handleClose(newMessage?.id);
+      handleClose(newMessage?.id, newMessage?.audioUrl);
     }
   };
 
