@@ -2,12 +2,12 @@ import * as React from 'react';
 import { messageLoading } from '@/redux/message/messageSlice';
 import { createMessage } from '@/redux/message/messageThunk';
 import type { AppDispatch } from '@/redux/store';
+import { SelectChangeEvent } from '@mui/material';
 import Box from '@mui/material/Box';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { fetchRooms, selectRooms, selectRoomsLoading } from '../../redux/room/room-slice';
 import AudioRecorder from './AudioRecorder';
-import { SelectChangeEvent } from '@mui/material';
 
 export const CreateMessagePopup = ({
   onFinish,
@@ -49,6 +49,7 @@ export const CreateMessagePopup = ({
   const handleRedo = () => {
     setAudioBlob(null);
     setShowInputs(false);
+    onFinish();
   };
 
   React.useEffect(() => {
@@ -69,7 +70,7 @@ export const CreateMessagePopup = ({
   }, []);
 
   return (
-    <Box sx={{ bgcolor: 'transparent', p: 3, display: 'flex',justifyContent:'center' }}>
+    <Box sx={{ bgcolor: 'transparent', p: 3, display: 'flex', justifyContent: 'center' }}>
       <Box maxWidth="sm" sx={{ px: 3, py: 2 }}>
         <AudioRecorder
           onSave={handleSave}

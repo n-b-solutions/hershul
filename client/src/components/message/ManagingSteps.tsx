@@ -26,19 +26,17 @@ export const ManagingSteps: React.FC<ManagingStepsProps> = () => {
 
   const onStepFinish = (messageId?: string): void => {
     if (step === 1) {
-      {
-        messageId ? (popupState.field === 'blink' ? setStep(3) : handleClose(messageId)) : setStep(2);
-      }
-    }
-    if (step === 2) {
+      messageId ? (popupState.field === 'blink' ? setStep(3) : handleClose(messageId)) : setStep(2);
+    } else if (step === 2) {
       if (popupState.field === 'blink') {
         setStep(3);
       } else {
-        handleClose(messageId);
+        messageId ? handleClose(messageId) : setStep(1);
       }
-    }
-    if (step === 3) {
+    } else if (step === 3) {
       handleClose(messageId);
+    } else {
+      setStep(1);
     }
   };
 
