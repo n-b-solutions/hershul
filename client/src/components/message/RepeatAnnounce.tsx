@@ -3,7 +3,6 @@ import { Box, Button, Dialog, IconButton, Paper, SelectChangeEvent, Typography }
 import { X as CloseIcon } from '@phosphor-icons/react/dist/ssr/X';
 
 const RepeatAnnounce = ({ onFinish }: { onFinish: (id?: string) => void }) => {
-  console.log('RepeatAnnounce');
 
   const [repeatInterval, setRepeatInterval] = useState(0);
 
