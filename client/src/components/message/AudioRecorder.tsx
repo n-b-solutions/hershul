@@ -28,6 +28,7 @@ interface AudioRecorderProps {
   setSelectedRoom: (room: string) => void;
   rooms: { id: string; name: string }[];
   roomsLoading: boolean;
+  isLastStep: boolean;
 }
 
 const AudioRecorder: React.FC<AudioRecorderProps> = ({
@@ -40,6 +41,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
   setSelectedRoom,
   rooms,
   roomsLoading,
+  isLastStep,
 }) => {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -205,10 +207,10 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
       )}
       <Box sx={{ display: 'flex', gap: 4 }}>
         <Button onClick={handleSave} startIcon={<SaveIcon />} disabled={!audioBlob || (showInputs && !name)}>
-          save
+          {isLastStep && showInputs ? 'Save' : 'Next'}
         </Button>
         <Button onClick={handleRedo} startIcon={<RedoIcon />}>
-          redo
+          Back
         </Button>
       </Box>
     </Box>

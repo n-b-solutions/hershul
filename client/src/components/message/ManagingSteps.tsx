@@ -46,7 +46,13 @@ export const ManagingSteps: React.FC<ManagingStepsProps> = () => {
         return <MessagesPopup onFinish={(messageId?: string) => onStepFinish(messageId)} />;
         break;
       case 2:
-        return <CreateMessagePopup room={popupState.roomName} onFinish={onStepFinish} />;
+        return (
+          <CreateMessagePopup
+            room={popupState.roomName}
+            onFinish={onStepFinish}
+            isLastStep={popupState.field !== 'blink'}
+          />
+        );
         break;
       case 3:
         return <RepeatAnnounce onFinish={onStepFinish} />;

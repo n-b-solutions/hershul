@@ -12,9 +12,11 @@ import AudioRecorder from './AudioRecorder';
 export const CreateMessagePopup = ({
   onFinish,
   room,
+  isLastStep,
 }: {
   onFinish: (id?: string) => void;
   room?: string;
+  isLastStep: boolean;
 }): React.JSX.Element => {
   const [selectedRoom, setSelectedRoom] = React.useState<string>(room || '');
   const [name, setName] = React.useState<string>('');
@@ -82,6 +84,7 @@ export const CreateMessagePopup = ({
           setSelectedRoom={setSelectedRoom}
           rooms={rooms}
           roomsLoading={roomsLoading}
+          isLastStep={isLastStep}
         />
       </Box>
     </Box>
