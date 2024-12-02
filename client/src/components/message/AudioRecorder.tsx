@@ -90,6 +90,13 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
     onRedo();
   };
 
+  const resetAndStartRecording = () => {
+    setAudioBlob(null);
+    setAudioURL(null);
+    setRecordingDuration(0); 
+       startRecording();
+  };
+
   const handleSave = () => {
     if (audioBlob) {
       onSave(audioBlob);
@@ -123,7 +130,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
       <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
         {!showInputs && (
           <IconButton
-            onClick={isRecording ? stopRecording : audioBlob ? handleRedo : startRecording}
+             onClick={isRecording ? stopRecording : audioBlob ? resetAndStartRecording : startRecording}
             sx={{
               width: 100,
               height: 100,
