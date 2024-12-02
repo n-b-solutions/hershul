@@ -18,9 +18,7 @@ import {
   getQueryDateType,
 } from "../helpers/minyan.helper";
 import { HDate } from "@hebcal/core";
-import {
-  convertToHebrewDayAndMonth,
-} from "../utils/convert-date.util";
+import { convertToHebrewDayAndMonth } from "../utils/convert-date.util";
 
 const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
@@ -467,16 +465,10 @@ const MinyanService = {
     try {
       const now = new Date();
       now.setHours(0, 0, 0, 0);
-      console.log("now");
-      console.log(now);
-
       const result = await MinyanModel.deleteMany({
-        'specificDate.isRoutine': false,
-        'specificDate.date': { $lt: now }
+        "specificDate.isRoutine": false,
+        "specificDate.date": { $lt: now },
       });
-      console.log("result");
-      console.log(result);
-
       return result.deletedCount > 0;
     } catch (error) {
       console.error("Error deleting expired minyan:", error);
