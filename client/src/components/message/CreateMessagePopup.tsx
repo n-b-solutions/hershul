@@ -51,7 +51,7 @@ export const CreateMessagePopup = ({
   const handleRedo = () => {
     setAudioBlob(null);
     setShowInputs(false);
-    onFinish();
+    onFinish('redo');
   };
 
   React.useEffect(() => {
