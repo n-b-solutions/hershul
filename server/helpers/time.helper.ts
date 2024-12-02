@@ -9,7 +9,9 @@ import { eJewishTimeOfDay } from "../../lib/types/luach-minyan.type";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export const isRoshHodesh = async (date: Date = new Date()): Promise<boolean> => {
+export const isRoshHodesh = async (
+  date: Date = new Date()
+): Promise<boolean> => {
   const hebcalRes = await axios.get(
     `https://www.hebcal.com/converter?cfg=json&gy=${date.getFullYear()}&gm=${
       date.getMonth() + 1
@@ -46,7 +48,10 @@ export const getMinchaGedolaTime = async (date: Date): Promise<Date> => {
   const data = await fetchHebcalData(date);
 
   if (data.times && data.times.minchaGedola) {
-    const minchaGedolaLocal = dayjs(data.times.minchaGedola);
+    const minchaGedolaLocal = dayjs.tz(
+      data.times.minchaGedola,
+      data?.location?.tzid
+    );
     const minchaGedolaUTC = minchaGedolaLocal.utc().toDate();
     return minchaGedolaUTC;
   }
