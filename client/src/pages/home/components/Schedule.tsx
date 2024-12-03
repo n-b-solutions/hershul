@@ -19,7 +19,11 @@ import { columns } from '../config/schedule.config';
 export function Schedule(): React.JSX.Element {
   const [allScheduleActions, setAllScheduleActions] = useState<ScheduleActionType[]>([]);
   const [nextScheduleActions, setNextScheduleActions] = useState<ScheduleActionType[]>([]);
+  const [clickedRowIndex, setClickedRowIndex] = useState<number | null>(null);
 
+  const handleDeleteClick = (index: number) => {
+    setClickedRowIndex(index);
+  };
   const mapMinyansToScheduleActions = (data: MinyanType[]) => {
     return data.reduce<ScheduleActionType[]>((acc, minyan) => {
       const roomName = minyan.room?.name;
@@ -127,10 +131,18 @@ export function Schedule(): React.JSX.Element {
               </Typography>
             </Box>
           ) : (
-            <DataTable<ScheduleActionType> columns={columns} rows={nextScheduleActions} />
+            <DataTable<ScheduleActionType>
+              columns={columns}
+              rows={nextScheduleActions}
+              onDeleteClick={handleDeleteClick}
+              clickedRowIndex={clickedRowIndex}
+              setClickedRowIndex={setClickedRowIndex}
+            />
           )}
         </Box>
       </Card>
     </Box>
   );
-}
+};
+
+export default Schedule;

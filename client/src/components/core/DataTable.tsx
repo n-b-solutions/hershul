@@ -40,6 +40,8 @@ interface DataTableProps<TRowModel, TEdit> extends Omit<TableProps, 'onClick'> {
   getRowProps?: (row: TRowModel) => RowProps;
   title?: string;
   noDataOption?: React.ReactNode;
+  clickedRowIndex?: number | null; 
+  setClickedRowIndex?: React.Dispatch<React.SetStateAction<number | null>>; // Add this prop
 }
 
 export function DataTable<
@@ -67,6 +69,8 @@ export function DataTable<
   getRowProps,
   title,
   noDataOption,
+  clickedRowIndex, 
+  setClickedRowIndex, 
   ...props
 }: DataTableProps<TRowModel, TEdit>): React.JSX.Element {
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
@@ -260,6 +264,7 @@ export function DataTable<
                 ...(edited && {
                   bgcolor: row.isEdited ? '#dcdfe4' : 'none',
                 }),
+                ...(clickedRowIndex === index && { bgcolor: 'red' }),
                 ...(rowProps?.sx ? rowProps?.sx : {}),
               }}
             >
@@ -358,7 +363,10 @@ export function DataTable<
                 >
                   <IconButton
                     disabled={!!rowRef?.current}
-                    onClick={() => onDeleteClick(index)}
+                    onClick={() => {
+                      onDeleteClick(index);
+                      setClickedRowIndex?.(index); 
+                    }}
                     sx={{ position: 'absolute', right: '20px', top: '9px' }}
                   >
                     {rowProps?.deleteIcon || <Trash size={24} />}
