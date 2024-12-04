@@ -492,6 +492,16 @@ const MinyanService = {
       throw new ApiError(500, (error as Error).message);
     }
   },
+
+  deleteAllMinyans: async () => {
+    try {
+      console.log(4);
+      await MinyanModel.deleteMany();
+    } catch (error) {
+      console.error(`Error deleting minyans `, error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
 };
 
 export default MinyanService;

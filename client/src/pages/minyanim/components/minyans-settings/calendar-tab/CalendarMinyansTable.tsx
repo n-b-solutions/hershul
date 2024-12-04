@@ -79,7 +79,7 @@ const CalendarMinyansTable: React.FC<CalendarTableProps> = ({ selectedDate, scro
     if (settingTimesItem[index].dateType === eDateType.calendar) {
       // Deleting Minyan
       axios
-        .delete<IdType>(`${API_BASE_URL}/minyan/${settingTimesItem[index].id}`)
+        .delete<IdType>(`${API_BASE_URL}/minyan/delete/${settingTimesItem[index].id}`)
         .then((res) => dispatch(deleteMinyan({ minyanId: res.data.id })))
         .catch((err) => console.log('Error fetching data:', err));
     } else {

@@ -201,6 +201,21 @@ const MinyanController = {
       next(error);
     }
   },
+
+  deleteAllMinyans: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      await MinyanService.deleteAllMinyans();
+      console.log(3);
+
+      res.status(200).send({ message: "All minyans deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
 
 export default MinyanController;

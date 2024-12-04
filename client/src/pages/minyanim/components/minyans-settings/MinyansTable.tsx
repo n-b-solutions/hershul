@@ -10,7 +10,7 @@ import {
 } from '@/redux/minyans/setting-times-slice';
 import type { RootState } from '@/redux/store';
 import { getNewMinyanObj } from '@/services/minyans.service';
-import { Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
@@ -44,7 +44,14 @@ export const MinyansTable = ({
   const dispatch = useDispatch();
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const [loading, setLoading] = React.useState<boolean>(true);
-
+  const handleImportClick = async () => {
+    await axios
+      .delete(`${API_BASE_URL}/minyan/deleteAll`)
+      .then((res) => {
+        dispatch(setSettingTimes({ setting: [] }));
+      })
+      .catch((err) => console.log('Error fetching data:', err));
+  };
   React.useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
@@ -126,7 +133,7 @@ export const MinyansTable = ({
   const handleDelete = (index: number) => {
     const minyanId = settingTimesItem[index].id;
     axios
-      .delete<IdType>(`${API_BASE_URL}/minyan/${minyanId}`)
+      .delete<IdType>(`${API_BASE_URL}/minyan/delete/${minyanId}`)
       .then((res) => dispatch(deleteMinyan({ minyanId: res.data.id })))
       .catch((err) => console.log('Error fetching data:', err));
   };
@@ -166,19 +173,22 @@ export const MinyansTable = ({
           Loading...
         </Typography>
       ) : (
-        <DataTable<MinyanRowType, EditMinyanValueType>
-          columns={getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions })}
-          edited
-          onAddRowClick={handlePlusClick}
-          onChangeInput={handleChange}
-          onBlurInput={handleBlurInput}
-          onDeleteClick={handleDelete}
-          rows={settingTimesItem}
-          stickyHeader
-          scrollAction={scrollAction}
-          title="Minyans"
-          noDataOption={<ImportMinyans tableType={eMinyanType.minyan} />}
-        />
+        <>
+          {settingTimesItem.length > 0 && <Button onClick={handleImportClick}>Import Minyans</Button>}{' '}
+          <DataTable<MinyanRowType, EditMinyanValueType>
+            columns={getMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions })}
+            edited
+            onAddRowClick={handlePlusClick}
+            onChangeInput={handleChange}
+            onBlurInput={handleBlurInput}
+            onDeleteClick={handleDelete}
+            rows={settingTimesItem}
+            stickyHeader
+            scrollAction={scrollAction}
+            title="Minyans"
+            noDataOption={<ImportMinyans tableType={eMinyanType.minyan} />}
+          />
+        </>
       )}
     </>
   );

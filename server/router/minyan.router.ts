@@ -73,9 +73,17 @@ MinyanListRouter.put(
 );
 
 MinyanListRouter.delete(
-  "/:id",
+  "/delete/:id",
   (req: Request, res: Response, next: NextFunction) => {
     MinyanController.delete(req, res, next);
+  }
+);
+MinyanListRouter.delete(
+  "/deleteAll",
+  (req: Request, res: Response, next: NextFunction) => {
+    console.log(2);
+
+    MinyanController.deleteAllMinyans(req, res, next);
   }
 );
 

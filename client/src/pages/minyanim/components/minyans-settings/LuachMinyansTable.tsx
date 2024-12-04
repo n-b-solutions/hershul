@@ -9,7 +9,7 @@ import {
 } from '@/redux/minyans/setting-times-slice';
 import { RootState } from '@/redux/store';
 import { getNewLuachMinyanObj } from '@/services/minyans.service';
-import { Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -37,7 +37,14 @@ const LuachMinyansTable: React.FC<LuachMinyansTableProps> = ({ dateType, scrollA
   const luachMinyanTimesItem = useSelector((state: RootState) => state.minyans.luachMinyanTimesItem);
   const { rooms, roomsAsSelectOptions } = useSelector((state: RootState) => state.room);
   const [loading, setLoading] = React.useState<boolean>(true);
+  const [showImport, setShowImport] = React.useState<boolean>(false);
 
+  const handleImportClick = async () => {
+    // Delete all existing luach minyans
+    await axios.delete(`${API_BASE_URL}/luach-minyan/deleteAll`);
+    dispatch(setLuachMinyanTimes({ setting: [] }));
+    setShowImport(true);
+  };
   React.useEffect(() => {
     setLoading(true);
     axios
@@ -155,19 +162,23 @@ const LuachMinyansTable: React.FC<LuachMinyansTableProps> = ({ dateType, scrollA
           Loading...
         </Typography>
       ) : (
-        <DataTable<LuachMinyanRowType, EditLuachMinyanValueType>
-          columns={getLuachMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions })}
-          edited
-          onAddRowClick={handlePlusClick}
-          onChangeInput={handleChange}
-          onBlurInput={handleBlurInput}
-          onDeleteClick={handleDelete}
-          rows={luachMinyanTimesItem}
-          stickyHeader
-          scrollAction={scrollAction}
-          title="Luach Minyans"
-          noDataOption={<ImportMinyans tableType={eMinyanType.luachMinyan} />}
-        />
+        <>
+          <Button onClick={handleImportClick}>Import Luach Minyans</Button>
+          {showImport && <ImportMinyans tableType={eMinyanType.luachMinyan} />}
+          <DataTable<LuachMinyanRowType, EditLuachMinyanValueType>
+            columns={getLuachMinyansSettingsColumns({ roomArray: rooms, roomsOptionsArray: roomsAsSelectOptions })}
+            edited
+            onAddRowClick={handlePlusClick}
+            onChangeInput={handleChange}
+            onBlurInput={handleBlurInput}
+            onDeleteClick={handleDelete}
+            rows={luachMinyanTimesItem}
+            stickyHeader
+            scrollAction={scrollAction}
+            title="Luach Minyans"
+            noDataOption={<ImportMinyans tableType={eMinyanType.luachMinyan} />}
+          />
+        </>
       )}
     </>
   );
