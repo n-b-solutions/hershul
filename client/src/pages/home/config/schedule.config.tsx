@@ -1,5 +1,5 @@
-import { Chip, Tooltip, Typography } from '@mui/material';
-import { SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react/dist/ssr/SpeakerSimpleHigh';
+import { Tooltip, Typography } from '@mui/material';
+import { LightbulbFilament, Power as OnIcon, SpeakerSimpleHigh as SpeakerIcon } from '@phosphor-icons/react';
 import dayjs from 'dayjs';
 
 import { ScheduleActionType } from '@/types/minyans.type';
@@ -18,20 +18,16 @@ export const columns: ColumnDef<ScheduleActionType>[] = [
     width: '70px',
   },
   {
-    formatter: (row): React.JSX.Element => (
-      <Chip
-        label={row.action}
-        color={
-          row.action === 'on'
-            ? 'success'
-            : row.action === 'off'
-              ? 'error'
-              : row.action === 'blink'
-                ? 'warning'
-                : 'default'
-        }
-      />
-    ),
+    formatter: (row): React.JSX.Element =>
+      row.action === 'on' ? (
+        <OnIcon size={20} color="green" />
+      ) : row.action === 'off' ? (
+        <OnIcon size={20} color="red" />
+      ) : row.action === 'blink' ? (
+        <LightbulbFilament size={20} />
+      ) : (
+        <div />
+      ),
     name: 'Action',
     width: '70px',
   },
