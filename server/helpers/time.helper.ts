@@ -9,7 +9,11 @@ import { eJewishTimeOfDay } from "../../lib/types/luach-minyan.type";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export const isRoshHodesh = async (date: Date = new Date()): Promise<boolean> => {
+const DEFAULT_TIMEZONE = "America/New_York";
+
+export const isRoshHodesh = async (
+  date: Date = new Date()
+): Promise<boolean> => {
   const hebcalRes = await axios.get(
     `https://www.hebcal.com/converter?cfg=json&gy=${date.getFullYear()}&gm=${
       date.getMonth() + 1
@@ -39,16 +43,23 @@ export const fetchHebcalData = async (date: Date): Promise<any> => {
       date.getMonth() + 1
     }&gd=${date.getDate()}`
   );
-  return hebcalRes.data;
+  const hebcalData = hebcalRes.data;
+
+  const timezone = hebcalData.location?.tzid || DEFAULT_TIMEZONE;
+
+  return { hebcalData, timezone };
+};
+
+const convertToUTC = (timeString: string, timezone: string): Date => {
+  const timeLocal = dayjs.tz(timeString, timezone);
+  return timeLocal.utc().toDate();
 };
 
 export const getMinchaGedolaTime = async (date: Date): Promise<Date> => {
-  const data = await fetchHebcalData(date);
+  const { hebcalData, timezone } = await fetchHebcalData(date);
 
-  if (data.times && data.times.minchaGedola) {
-    const minchaGedolaLocal = dayjs(data.times.minchaGedola);
-    const minchaGedolaUTC = minchaGedolaLocal.utc().toDate();
-    return minchaGedolaUTC;
+  if (hebcalData.times && hebcalData.times.minchaGedola) {
+    return convertToUTC(hebcalData.times.minchaGedola, timezone);
   }
 
   throw new Error("Mincha Gedola time not found for the given date");
@@ -58,12 +69,10 @@ export const getTimeOfDayDate = async (
   timeOfDay: keyof typeof eJewishTimeOfDay
 ): Promise<Date> => {
   const now = new Date();
-  const data = await fetchHebcalData(now);
-  const timeString = data.times[timeOfDay];
+  const { hebcalData, timezone } = await fetchHebcalData(now);
+  const timeString = hebcalData.times[timeOfDay];
   if (!timeString) {
     throw new Error(`Time for ${timeOfDay} not found`);
   }
-  const timeLocal = dayjs(timeString);
-  const timeUTC = timeLocal.utc().toDate();
-  return timeUTC;
+  return convertToUTC(timeString, timezone);
 };
