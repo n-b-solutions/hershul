@@ -13,7 +13,6 @@ import { WarningCircle as WarningIcon } from '@phosphor-icons/react/dist/ssr/War
 
 import { eLocationClick, eRowEditMode } from '@/types/enums';
 import { ColumnDef, RowProps } from '@/types/table.type';
-import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
 
 import { EditTableCellInputs } from './edit-table-cell-inputs';
 

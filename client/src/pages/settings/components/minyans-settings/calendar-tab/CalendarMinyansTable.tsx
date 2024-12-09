@@ -20,9 +20,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { eFieldName, eLocationClick, eRowEditMode } from '@/types/enums';
 import { CalendarRowType, MinyanRowType } from '@/types/minyans.type';
 import { RowProps } from '@/types/table.type';
-import { ImportMinyans } from '@/pages/minyanim/components/minyans-settings/ImportMinyans';
-import { CalendarTableProps, isRoutineColumn } from '@/pages/minyanim/config/calendar.config';
-import { getMinyansSettingsColumns } from '@/pages/minyanim/config/minyans-settings.config';
+import { ImportMinyans } from '@/pages/settings/components/minyans-settings/ImportMinyans';
+import { CalendarTableProps, isRoutineColumn } from '@/pages/settings/config/calendar.config';
+import { getMinyansSettingsColumns } from '@/pages/settings/config/minyans-settings.config';
 import { DataTable } from '@/components/core/DataTable';
 
 import { IdType } from '../../../../../../../lib/types/metadata.type';
