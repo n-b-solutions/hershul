@@ -9,6 +9,7 @@ import { router } from "./router";
 import RoomService from "./services/room.service";
 import errorHandler from "./middlewares/error-handler.middleware";
 import ScheduleService from "./services/schedule.service";
+import CronService from "./services/cron.service";
 
 export const initializeApp = async (app: express.Application, server: any) => {
   try {
@@ -25,6 +26,9 @@ export const initializeApp = async (app: express.Application, server: any) => {
 
     // update the room statuses according to the schedule
     await ScheduleService.updateRoomStatuses(true);
+
+    // Start all scheduled cron jobs
+    CronService.startCronJobs();
 
     // set security HTTP headers
     app.use(helmet());

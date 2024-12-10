@@ -20,6 +20,8 @@ import {
   getRoshChodeshCond,
 } from "../helpers/minyan.helper";
 import ScheduleService from "./schedule.service";
+import { HDate } from "@hebcal/core";
+import { convertToHebrewDayAndMonth } from "../utils/convert-date.util";
 
 const MinyanService = {
   get: async (): Promise<MinyanType[]> => {
@@ -46,6 +48,11 @@ const MinyanService = {
       const queryDateType = await getQueryDateType(date);
       const startOfDay = new Date(date).setHours(0, 0, 0, 0); // start of day;
       const endOfDay = new Date(date).setHours(23, 59, 59, 999); // end of day
+
+      const hDate = new HDate(date);
+      const hebrewDay = hDate.getDate();
+      const hebrewMonth = hDate.getMonthName();
+
       const roshChodeshCond = await getRoshChodeshCond(
         queryDateType,
         eMinyanType.minyan,
@@ -59,6 +66,15 @@ const MinyanService = {
             "specificDate.date": {
               $gte: startOfDay,
               $lt: endOfDay,
+            },
+          },
+          {
+            "specificDate.isRoutine": true,
+            $expr: {
+              $and: [
+                { $eq: ["$specificDate.hebrewDayMonth", hebrewDay.toString()] },
+                { $eq: ["$specificDate.hebrewMonth", hebrewMonth] },
+              ],
             },
           },
           ...(Object.keys(roshChodeshCond).length > 0 ? [roshChodeshCond] : []),
@@ -205,13 +221,16 @@ const MinyanService = {
       startDate.setSeconds(0, 0);
       endDate.setSeconds(0, 0);
 
+      const convertedSpecificDate = specificDate
+        ? convertToHebrewDayAndMonth(new Date(specificDate.date))
+        : undefined;
       const newMinyan = {
         roomId: new ObjectId(roomId),
         startDate: { time: startDate },
         endDate: { time: endDate },
         ...(blinkNum ? { blink: { secondsNum: blinkNum } } : {}),
         dateType,
-        specificDate,
+        specificDate: convertedSpecificDate,
       };
       const minyanRecord = await MinyanModel.create(newMinyan);
 
@@ -489,6 +508,21 @@ const MinyanService = {
       return { id: deletedMinyan._id?.toString() };
     } catch (error) {
       console.error(`Error deleting minyan with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
+  deleteExpiredMinyan: async () => {
+    try {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const result = await MinyanModel.deleteMany({
+        "specificDate.isRoutine": false,
+        "specificDate.date": { $lt: now },
+      });
+      return result.deletedCount > 0;
+    } catch (error) {
+      console.error("Error deleting expired minyan:", error);
       throw new ApiError(500, (error as Error).message);
     }
   },

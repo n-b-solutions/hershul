@@ -1,5 +1,6 @@
 import { RoomType } from "./room.type";
 import { MessageType } from "./message.type";
+import { HDate } from "@hebcal/core";
 
 export enum eDateType {
   sunday = "sunday",
@@ -26,6 +27,8 @@ export interface BlinkAlertType {
 export interface SpecificDateType {
   date: Date | string;
   isRoutine?: boolean;
+  hebrewMonth?: string;
+  hebrewDayMonth?: string;
 }
 export interface MinyanType {
   id: string;
@@ -47,6 +50,8 @@ export interface NewMinyanType {
   dateType: eDateType;
   specificDate?: SpecificDateType;
 }
+
+
 
 export type EditMinyanValueType =
   | string

@@ -35,7 +35,7 @@
     "@fullcalendar/react": "6.1.11",
     "@fullcalendar/timegrid": "6.1.11",
     "@fullcalendar/timeline": "6.1.11",
-    "@hebcal/core": "^5.4.11",
+    "@hebcal/core": "^5.8.0",
     "@hookform/resolvers": "3.3.4",
     "@mui/lab": "5.0.0-alpha.166",
     "@mui/material": "^5.15.11",
