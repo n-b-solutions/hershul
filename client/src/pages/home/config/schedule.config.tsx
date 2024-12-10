@@ -24,7 +24,7 @@ export const columns: ColumnDef<ScheduleActionType>[] = [
       ) : row.action === 'off' ? (
         <OnIcon size={20} color="red" />
       ) : row.action === 'blink' ? (
-        <LightbulbFilament size={20} />
+        <LightbulbFilament size={20} color="orange"/>
       ) : (
         <div />
       ),
