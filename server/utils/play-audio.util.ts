@@ -1,7 +1,6 @@
 import path from "path";
 import fs from "fs";
-import player from "play-sound";
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import { config } from "dotenv";
 import { FileLogger } from "../utils/file-logger.util";
 
@@ -11,7 +10,7 @@ const logger = new FileLogger({ prefix: "PlayAudio", level: "ALL" });
 
 const isCommandAvailable = (command: string): boolean => {
   try {
-    execSync(`where ${command}`); // Use 'where' instead of 'command -v' for Windows
+    execSync(`command -v ${command}`); // Use 'command -v' for Unix-like systems
     return true;
   } catch {
     return false;
@@ -28,7 +27,11 @@ const getLinuxAudioPlayer = (): string => {
   }
 };
 
-export const playAudio = (audioUrl: string) => {
+export const playAudio = (
+  audioUrl: string,
+  deviceIndex: number = 0,
+  deviceName?: string
+) => {
   try {
     const audioPath = path.join(process.cwd(), audioUrl);
     if (!fs.existsSync(audioPath)) {
@@ -36,23 +39,46 @@ export const playAudio = (audioUrl: string) => {
       return;
     }
 
-    const mplayerPath = process.env.VITE_MPLAYER_PATH || "mplayer";
+    let command: string;
 
-    const audioPlayer = player({
-      player:
-        process.platform === "win32"
-          ? mplayerPath
-          : process.platform === "darwin"
-          ? "afplay"
-          : getLinuxAudioPlayer(),
-    });
+    if (process.platform === "win32") {
+      const mplayerPath = process.env.VITE_MPLAYER_PATH || "mplayer";
+      command = `${mplayerPath} -ao dsound:device=${deviceIndex} ${audioPath}`;
+    } else if (process.platform === "darwin") {
+      if (deviceName) {
+        logger.warn(
+          "Device selection is not supported on macOS with afplay. Using default device."
+        );
+      }
+      command = `afplay ${audioPath}`;
+    } else {
+      const linuxPlayer = getLinuxAudioPlayer();
+      if (linuxPlayer === "aplay" && deviceName) {
+        command = `${linuxPlayer} -D ${deviceName} ${audioPath}`;
+      } else if (linuxPlayer === "paplay" && deviceName) {
+        command = `${linuxPlayer} --device=${deviceName} ${audioPath}`;
+      } else {
+        command = `${linuxPlayer} ${audioPath}`;
+      }
+    }
 
-    audioPlayer.play(audioPath, (error) => {
+    logger.debug(`Executing command: ${command}`);
+    const startTime = Date.now();
+
+    exec(command, (error, stdout, stderr) => {
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      logger.debug(`Command execution time: ${duration}ms`);
+
       if (error) {
         logger.error(`Error playing audio: ${error.message}`);
-      } else {
-        logger.debug(`Audio played successfully: ${audioPath}`);
+        return;
       }
+      if (stderr) {
+        logger.error(`Player stderr: ${stderr}`);
+        return;
+      }
+      logger.debug(`Audio played successfully: ${audioPath}`);
     });
   } catch (error) {
     if (error instanceof Error) {
