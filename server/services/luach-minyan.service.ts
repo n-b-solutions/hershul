@@ -1,46 +1,44 @@
 import { Types } from "mongoose";
-import { ObjectId } from "mongodb";
-import MinyanModel from "../models/minyan.model";
+import LuachMinyanModel from "../models/luach-minyan.model";
 import { io } from "../socketio";
 import {
-  eDateType,
-  EditedType,
-  eMinyanType,
-  MinyanType,
-  NewMinyanType,
-  SpecificDateType,
-} from "../../lib/types/minyan.type";
-import { isRoshHodesh } from "../helpers/time.helper";
+  EditedLuachType,
+  LuachMinyanType,
+  NewLuachMinyanType,
+} from "../../lib/types/luach-minyan.type";
 import { ApiError } from "../../lib/utils/api-error.util";
-import { convertMinyanDocument } from "../utils/convert-document.util";
-import { CountType, IdType } from "../../lib/types/metadata.type";
+import { convertLuachMinyanDocument } from "../utils/convert-document.util";
+import { CountType } from "../../lib/types/metadata.type";
 import {
   getMongoConditionForActiveMinyansByDate,
   getQueryDateType,
   getRoshChodeshCond,
 } from "../helpers/minyan.helper";
 import ScheduleService from "./schedule.service";
-import { HDate } from "@hebcal/core";
-import { convertToHebrewDayAndMonth } from "../utils/convert-date.util";
+import {
+  eDateType,
+  eMinyanType,
+  SpecificDateType,
+} from "../../lib/types/minyan.type";
+import { isRoshHodesh } from "../helpers/time.helper";
 
-const MinyanService = {
-  get: async (): Promise<MinyanType[]> => {
+const LuachMinyanService = {
+  get: async (): Promise<LuachMinyanType[]> => {
     try {
-      const minyans = await MinyanModel.find()
+      const minyans = await LuachMinyanModel.find()
         .lean(true)
         .populate("roomId")
-        .populate("startDate.messageId")
-        .populate("endDate.messageId")
+        .populate("timeOfDay.messageId")
+        .populate("duration.messageId")
         .populate("blink.messageId");
-
-      return minyans.map(convertMinyanDocument);
+      return minyans.map(convertLuachMinyanDocument);
     } catch (error) {
       console.error("Error fetching minyan list:", error);
       throw new ApiError(500, (error as Error).message);
     }
   },
 
-  getCalendar: async (date?: Date): Promise<MinyanType[]> => {
+  getCalendar: async (date?: Date): Promise<LuachMinyanType[]> => {
     try {
       if (!date || !(date instanceof Date)) {
         throw new ApiError(400, "Invalid date format");
@@ -49,16 +47,13 @@ const MinyanService = {
       const startOfDay = new Date(date).setHours(0, 0, 0, 0); // start of day;
       const endOfDay = new Date(date).setHours(23, 59, 59, 999); // end of day
 
-      const hDate = new HDate(date);
-      const hebrewDay = hDate.getDate();
-      const hebrewMonth = hDate.getMonthName();
-
       const roshChodeshCond = await getRoshChodeshCond(
         queryDateType,
-        eMinyanType.minyan,
+        eMinyanType.luachMinyan,
         date
       );
-      const minyans = await MinyanModel.find({
+
+      const minyans = await LuachMinyanModel.find({
         $or: [
           { dateType: queryDateType },
           {
@@ -68,31 +63,22 @@ const MinyanService = {
               $lt: endOfDay,
             },
           },
-          {
-            "specificDate.isRoutine": true,
-            $expr: {
-              $and: [
-                { $eq: ["$specificDate.hebrewDayMonth", hebrewDay.toString()] },
-                { $eq: ["$specificDate.hebrewMonth", hebrewMonth] },
-              ],
-            },
-          },
           ...(Object.keys(roshChodeshCond).length > 0 ? [roshChodeshCond] : []),
         ],
       })
         .populate("roomId")
-        .populate("startDate.messageId")
-        .populate("endDate.messageId")
+        .populate("timeOfDay.messageId")
+        .populate("duration.messageId")
         .populate("blink.messageId")
         .lean(true);
-      return minyans.map(convertMinyanDocument);
+      return minyans.map(convertLuachMinyanDocument);
     } catch (error) {
       console.error("Error fetching calendar minyan list:", error);
       throw new ApiError(500, (error as Error).message);
     }
   },
 
-  getByDateType: async (dateType?: eDateType): Promise<MinyanType[]> => {
+  getByDateType: async (dateType?: eDateType): Promise<LuachMinyanType[]> => {
     let queryDateType: string;
 
     const today = new Date();
@@ -125,49 +111,49 @@ const MinyanService = {
           }
         }
       }
-      const minyans = await MinyanModel.find({
+      const minyans = await LuachMinyanModel.find({
         dateType: queryDateType,
       })
         .populate("roomId")
-        .populate("startDate.messageId")
-        .populate("endDate.messageId")
+        .populate("timeOfDay.messageId")
+        .populate("duration.messageId")
         .populate("blink.messageId")
         .lean(true);
-      return minyans.map(convertMinyanDocument);
+      return minyans.map(convertLuachMinyanDocument);
     } catch (error) {
       console.error(`Error fetching minyan for date type ${dateType}:`, error);
       throw new ApiError(500, (error as Error).message);
     }
   },
 
-  getByDate: async (selectedDate: Date): Promise<MinyanType[]> => {
+  getByDate: async (selectedDate: Date): Promise<LuachMinyanType[]> => {
     const conditions = await getMongoConditionForActiveMinyansByDate(
       selectedDate,
-      eMinyanType.minyan
+      eMinyanType.luachMinyan
     );
-    const minyansDocs = await MinyanModel.find(conditions)
+    const minyansDocs = await LuachMinyanModel.find(conditions)
       .populate("roomId")
-      .populate("startDate.messageId")
-      .populate("endDate.messageId")
+      .populate("timeOfDay.messageId")
+      .populate("duration.messageId")
       .populate("blink.messageId")
       .lean(true);
-    return minyansDocs.map(convertMinyanDocument);
+    return minyansDocs.map(convertLuachMinyanDocument);
   },
 
-  getById: async (id?: string): Promise<MinyanType> => {
+  getById: async (id?: string): Promise<LuachMinyanType> => {
     try {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");
       }
-      const minyan = await MinyanModel.findById(id)
+      const minyan = await LuachMinyanModel.findById(id)
         .populate("roomId")
-        .populate("startDate.messageId")
-        .populate("endDate.messageId")
+        .populate("timeOfDay.messageId")
+        .populate("duration.messageId")
         .populate("blink.messageId");
       if (!minyan) {
         throw new ApiError(404, "Minyan not found");
       }
-      return convertMinyanDocument(minyan);
+      return convertLuachMinyanDocument(minyan);
     } catch (error) {
       console.error(`Error fetching minyan with ID ${id}:`, error);
       throw new ApiError(500, (error as Error).message);
@@ -178,9 +164,9 @@ const MinyanService = {
     try {
       const conditions = await getMongoConditionForActiveMinyansByDate(
         selectedDate,
-        eMinyanType.minyan
+        eMinyanType.luachMinyan
       );
-      const countMinyans = await MinyanModel.countDocuments(conditions);
+      const countMinyans = await LuachMinyanModel.countDocuments(conditions);
       return { count: countMinyans ?? 0 };
     } catch (error) {
       console.error(
@@ -193,7 +179,7 @@ const MinyanService = {
 
   getCountMinyanByCategory: async (dateType: eDateType): Promise<CountType> => {
     try {
-      const countMinyans = await MinyanModel.countDocuments({
+      const countMinyans = await LuachMinyanModel.countDocuments({
         dateType,
       });
       return { count: countMinyans ?? 0 };
@@ -208,45 +194,83 @@ const MinyanService = {
 
   post: async ({
     roomId,
-    startTime,
-    endTime,
+    timeOfDay,
+    relativeTime,
+    duration,
     dateType,
     blinkNum,
     specificDate,
-  }: NewMinyanType): Promise<MinyanType> => {
+  }: NewLuachMinyanType): Promise<LuachMinyanType> => {
     try {
-      // Convert strings to Date objects and set seconds to 00
-      const startDate = new Date(startTime);
-      const endDate = new Date(endTime);
-      startDate.setSeconds(0, 0);
-      endDate.setSeconds(0, 0);
-
-      const convertedSpecificDate = specificDate
-        ? convertToHebrewDayAndMonth(new Date(specificDate.date))
-        : undefined;
-      const newMinyan = {
-        roomId: new ObjectId(roomId),
-        startDate: { time: startDate },
-        endDate: { time: endDate },
-        ...(blinkNum ? { blink: { secondsNum: blinkNum } } : {}),
+      const newMinyan = new LuachMinyanModel({
+        roomId,
+        timeOfDay: { value: timeOfDay },
+        relativeTime,
+        duration: { value: duration },
         dateType,
-        specificDate: convertedSpecificDate,
-      };
-      const minyanRecord = await MinyanModel.create(newMinyan);
+        blink: blinkNum ? { secondsNum: blinkNum } : undefined,
+        specificDate,
+      });
+      const minyanRecord = await newMinyan.save();
 
-      const newMinyanDocument = await MinyanModel.findById(minyanRecord.id)
+      const newMinyanDocument = await LuachMinyanModel.findById(minyanRecord.id)
         .populate("roomId")
-        .populate("startDate.messageId")
-        .populate("endDate.messageId")
+        .populate("timeOfDay.messageId")
+        .populate("duration.messageId")
         .populate("blink.messageId")
         .lean(true);
 
+      // const minyans = await ScheduleService.get();
+      // io.emit("minyanUpdated", minyans);
+
+      return convertLuachMinyanDocument(newMinyanDocument!);
+    } catch (error) {
+      console.error("Error creating new minyan:", error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
+  update: async (
+    id: string,
+    updateData: Partial<LuachMinyanType>
+  ): Promise<LuachMinyanType> => {
+    try {
+      if (!id || !Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID format");
+      }
+      const updatedMinyan = await LuachMinyanModel.findByIdAndUpdate(
+        id,
+        updateData,
+        { new: true, runValidators: true }
+      )
+        .populate("roomId")
+        .populate("timeOfDay.messageId")
+        .populate("duration.messageId")
+        .populate("blink.messageId");
+      if (!updatedMinyan) {
+        throw new ApiError(404, "Minyan not found");
+      }
+      return convertLuachMinyanDocument(updatedMinyan);
+    } catch (error) {
+      console.error(`Error updating minyan with ID ${id}:`, error);
+      throw new ApiError(500, (error as Error).message);
+    }
+  },
+
+  delete: async (id?: string): Promise<{ id: string }> => {
+    try {
+      if (!id || !Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID format");
+      }
+      const deletedMinyan = await LuachMinyanModel.findByIdAndDelete(id);
+      if (!deletedMinyan) {
+        throw new ApiError(404, "Minyan not found");
+      }
       const minyans = await ScheduleService.get();
       io.emit("minyanUpdated", minyans);
-
-      return convertMinyanDocument(newMinyanDocument!);
+      return { id: deletedMinyan._id?.toString() };
     } catch (error) {
-      console.error("Error creating minyan:", error);
+      console.error(`Error deleting minyan with ID ${id}:`, error);
       throw new ApiError(500, (error as Error).message);
     }
   },
@@ -256,7 +280,7 @@ const MinyanService = {
     currentDateType: eDateType,
     selectedDate?: Date,
     currentSelectedDate?: Date
-  ): Promise<MinyanType[]> => {
+  ): Promise<LuachMinyanType[]> => {
     try {
       let cond: any = {
         dateType: duplicateFromDateType,
@@ -265,35 +289,28 @@ const MinyanService = {
         cond = {
           ...(await getMongoConditionForActiveMinyansByDate(
             new Date(selectedDate),
-            eMinyanType.minyan
+            eMinyanType.luachMinyan
           )),
         };
       }
-      const minyansToDuplicateFrom = await MinyanModel.find(cond);
+      const minyansToDuplicateFrom = await LuachMinyanModel.find(cond);
 
       const duplicateMinyansToInsert = minyansToDuplicateFrom.map((minyan) => {
         return {
           roomId: minyan.roomId,
-          startDate: minyan.startDate,
-          endDate: minyan.endDate,
+          timeOfDay: minyan.timeOfDay,
+          relativeTime: minyan.relativeTime,
+          duration: minyan.duration,
           blink: minyan.blink,
           dateType: currentDateType,
           specificDate: currentSelectedDate && { date: currentSelectedDate },
         };
       });
 
-      const insertData = await MinyanModel.insertMany(duplicateMinyansToInsert);
-      const ids = insertData.map((minyan) => minyan._id);
-      const duplicateMinyansDocuments = await MinyanModel.find({
-        _id: { $in: ids },
-      })
-        .populate("roomId")
-        .populate("startDate.messageId")
-        .populate("endDate.messageId")
-        .populate("blink.messageId")
-        .lean(true);
-
-      return duplicateMinyansDocuments.map(convertMinyanDocument);
+      const insertedMinyans = await LuachMinyanModel.insertMany(
+        duplicateMinyansToInsert
+      );
+      return insertedMinyans.map(convertLuachMinyanDocument);
     } catch (error) {
       console.error("Error duplicating minyan:", error);
       throw new ApiError(500, (error as Error).message);
@@ -308,7 +325,7 @@ const MinyanService = {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");
       }
-      const minyan = await MinyanModel.findById(id);
+      const minyan = await LuachMinyanModel.findById(id);
       if (!minyan) {
         throw new ApiError(404, "Minyan not found");
       }
@@ -340,7 +357,7 @@ const MinyanService = {
       if (!date || !(new Date(date) instanceof Date)) {
         throw new ApiError(400, "Invalid date format");
       }
-      const minyan = await MinyanModel.findById(id);
+      const minyan = await LuachMinyanModel.findById(id);
       if (!minyan) {
         throw new ApiError(404, "Minyan not found");
       }
@@ -382,7 +399,7 @@ const MinyanService = {
         throw new ApiError(400, "Invalid ID format");
       }
 
-      const minyan = await MinyanModel.findById(id);
+      const minyan = await LuachMinyanModel.findById(id);
       if (!minyan) {
         throw new ApiError(404, "Minyan not found");
       }
@@ -417,63 +434,18 @@ const MinyanService = {
     }
   },
 
-  setSteadyFlagForActiveMinyans: async (roomId: string): Promise<void> => {
-    try {
-      const now = new Date();
-      const conditions = await getMongoConditionForActiveMinyansByDate(
-        now,
-        eMinyanType.minyan
-      );
-      const timeCond = {
-        "startDate.time": { $lte: now },
-        "endDate.time": { $gte: now },
-      };
-      const queryConditions = {
-        ...conditions,
-        roomId: roomId,
-        ...timeCond,
-      };
-
-      await MinyanModel.updateMany(queryConditions, {
-        $set: { steadyFlag: true },
-      });
-    } catch (error) {
-      console.error("Error setting steadyFlag for active minyans:", error);
-      throw new ApiError(500, (error as Error).message);
-    }
-  },
-
   put: async (
     field: string,
     internalField: string,
     value: any,
     id?: string
-  ): Promise<EditedType> => {
+  ): Promise<EditedLuachType> => {
     try {
       if (!id || !Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid ID format");
       }
-
-      // Convert strings to Date objects and set seconds to 00
-      if (
-        field === "endDate" &&
-        internalField === "time" &&
-        typeof value === "string"
-      ) {
-        value = new Date(value);
-        value.setSeconds(0, 0);
-      }
-      if (
-        field === "startDate" &&
-        internalField === "time" &&
-        typeof value === "string"
-      ) {
-        value = new Date(value);
-        value.setSeconds(0, 0);
-      }
-
       const fieldForEdit = internalField ? `${field}.${internalField}` : field;
-      const updatedMinyan = await MinyanModel.findByIdAndUpdate(
+      const updatedMinyan = await LuachMinyanModel.findByIdAndUpdate(
         id,
         { [fieldForEdit]: value },
         { new: true, runValidators: true }
@@ -493,39 +465,6 @@ const MinyanService = {
       throw new ApiError(500, (error as Error).message);
     }
   },
-
-  delete: async (id?: string): Promise<IdType> => {
-    try {
-      if (!id || !Types.ObjectId.isValid(id)) {
-        throw new ApiError(400, "Invalid ID format");
-      }
-      const deletedMinyan = await MinyanModel.findByIdAndDelete(id);
-      if (!deletedMinyan) {
-        throw new ApiError(404, "Minyan not found");
-      }
-      const minyans = await ScheduleService.get();
-      io.emit("minyanUpdated", minyans);
-      return { id: deletedMinyan._id?.toString() };
-    } catch (error) {
-      console.error(`Error deleting minyan with ID ${id}:`, error);
-      throw new ApiError(500, (error as Error).message);
-    }
-  },
-
-  deleteExpiredMinyan: async () => {
-    try {
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      const result = await MinyanModel.deleteMany({
-        "specificDate.isRoutine": false,
-        "specificDate.date": { $lt: now },
-      });
-      return result.deletedCount > 0;
-    } catch (error) {
-      console.error("Error deleting expired minyan:", error);
-      throw new ApiError(500, (error as Error).message);
-    }
-  },
 };
 
-export default MinyanService;
+export default LuachMinyanService;

@@ -2,6 +2,7 @@ import { getMiddleTime } from '@/helpers/time.helper';
 
 import { eLocationClick } from '@/types/enums';
 
+import { eJewishTimeOfDay, LuachMinyanType, NewLuachMinyanType } from '../../../lib/types/luach-minyan.type';
 import { eDateType, MinyanType, NewMinyanType } from '../../../lib/types/minyan.type';
 
 export const getNewMinyanObj = (
@@ -25,9 +26,21 @@ export const getNewMinyanObj = (
   };
 };
 
-export const getAllMinyans = (): MinyanType[] => {
-  return [];
-};
-export const getMinyansByDateType = (dateType: eDateType): MinyanType[] => {
-  return [];
+export const getNewLuachMinyanObj = (
+  minyans: LuachMinyanType[],
+  dateType: eDateType,
+  defaultRoomId: string,
+  index: number,
+  location?: eLocationClick
+): NewLuachMinyanType => {
+  const indexBefore = location === eLocationClick.top ? index - 1 : index;
+  const indexAfter = location === eLocationClick.top ? index : index + 1;
+  return {
+    timeOfDay:
+      minyans[indexBefore]?.timeOfDay?.value || (Object.keys(eJewishTimeOfDay)[0] as keyof typeof eJewishTimeOfDay),
+    relativeTime: 'on',
+    duration: 30,
+    roomId: defaultRoomId,
+    dateType,
+  };
 };

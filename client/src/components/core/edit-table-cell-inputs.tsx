@@ -1,5 +1,4 @@
 import React, { Ref, useState } from 'react';
-import { SECONDS_NUM, TIME } from '@/const/minyans.const';
 import { OutlinedInput, Select, SelectChangeEvent, Switch, TextField } from '@mui/material';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';
@@ -9,17 +8,11 @@ import { Option } from '@/components/core/option';
 
 export function EditTableCellInputs<TRowModel extends object, TEdit = any>(props: {
   value: any;
-  handleChangeInput: (value: TEdit, index: number, field: keyof TRowModel, internalField?: string) => void;
+  handleChangeInput: (value: TEdit) => void;
   cellRef: Ref<any>;
   index: number;
   fieldName: keyof TRowModel;
-  handleBlur: (
-    event: React.FocusEvent | React.KeyboardEvent,
-    value?: TEdit,
-    index?: number,
-    fieldName?: keyof TRowModel,
-    internalField?: string
-  ) => void;
+  handleBlur: (event: React.FocusEvent | React.KeyboardEvent, value?: TEdit) => void;
   editType?: string;
   selectOptions?: SelectOption<string>[];
   valueOption?: any & { id: string }[];
@@ -27,16 +20,16 @@ export function EditTableCellInputs<TRowModel extends object, TEdit = any>(props
   const [select, setSelect] = useState(props.value);
   const handleChange = (event: SelectChangeEvent<any>) => {
     setSelect(event.target.value);
-    const editValue = props.valueOption?.find((value: any) => value.id === event.target.value);
-    props.handleChangeInput && props.handleChangeInput(editValue, props.index, props.fieldName);
+    const editValue = props.valueOption?.find((value: any) => value.id === event.target.value) || event.target.value;
+    props.handleChangeInput && props.handleChangeInput(editValue);
   };
 
-  const handle = (value: TEdit, internalField?: string) => {
-    props.handleChangeInput && props.handleChangeInput(value, props.index, props.fieldName, internalField);
+  const handle = (value: TEdit) => {
+    props.handleChangeInput && props.handleChangeInput(value);
   };
 
-  const handleBlurInput = (value: TEdit, event: React.FocusEvent | React.KeyboardEvent, internalField?: string) => {
-    props.handleBlur(event, value, props.index, props.fieldName, internalField);
+  const handleBlurInput = (value: TEdit, event: React.FocusEvent | React.KeyboardEvent) => {
+    props.handleBlur(event, value);
   };
 
   switch (props.editType) {
@@ -45,15 +38,15 @@ export function EditTableCellInputs<TRowModel extends object, TEdit = any>(props
         <OutlinedInput
           value={props.value || ''}
           onChange={(e) => {
-            handle(parseInt(e.target.value) as TEdit, SECONDS_NUM);
+            handle(parseInt(e.target.value) as TEdit);
           }}
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
           type="number"
           onBlur={(e) => {
-            handleBlurInput(parseInt(props.value) as TEdit, e, SECONDS_NUM);
+            handleBlurInput(parseInt(props.value) as TEdit, e);
           }}
-          onKeyDown={(e) => e.key === 'Enter' && handleBlurInput(parseInt(props.value) as TEdit, e, SECONDS_NUM)}
+          onKeyDown={(e) => e.key === 'Enter' && handleBlurInput(parseInt(props.value) as TEdit, e)}
         />
       );
     case 'time':
@@ -61,15 +54,15 @@ export function EditTableCellInputs<TRowModel extends object, TEdit = any>(props
         <TimeField
           value={props.value}
           onChange={(e) => {
-            handle(e.toISOString() as TEdit, TIME);
+            handle(e.toISOString() as TEdit);
           }}
           inputRef={props.cellRef}
           name={props.fieldName.toString() + props.index}
           onBlur={(e) => {
-            handleBlurInput(dayjs(e.target.value, 'hh:mm A').toISOString() as TEdit, e, TIME);
+            handleBlurInput(dayjs(e.target.value, 'hh:mm A').toISOString() as TEdit, e);
           }}
           onKeyDown={(e) =>
-            e.key === 'Enter' && handleBlurInput(dayjs(props.value, 'hh:mm A').toISOString() as TEdit, e, TIME)
+            e.key === 'Enter' && handleBlurInput(dayjs(props.value, 'hh:mm A').toISOString() as TEdit, e)
           }
         />
       );

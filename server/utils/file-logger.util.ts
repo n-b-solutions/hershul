@@ -1,25 +1,34 @@
-/* eslint-disable no-console -- Allow */
+import { createWriteStream, existsSync, mkdirSync } from "fs";
+import { join } from "path";
 
-// NOTE: A tracking system such as Sentry should replace the console
+import {
+  LoggerOptions,
+  LogLevel,
+  LogLevelNumber,
+} from "../../client/src/lib/logger";
 
-export const LogLevel = { NONE: 'NONE', ERROR: 'ERROR', WARN: 'WARN', DEBUG: 'DEBUG', ALL: 'ALL' } as const;
+const logDir = join(process.cwd(), "logs");
+const logFile = join(logDir, "app.log");
 
-export const LogLevelNumber = { NONE: 0, ERROR: 1, WARN: 2, DEBUG: 3, ALL: 4 } as const;
-
-export interface LoggerOptions {
-  prefix?: string;
-  level?: keyof typeof LogLevel;
-  showLevel?: boolean;
+// Ensure the log directory exists
+if (!existsSync(logDir)) {
+  mkdirSync(logDir);
 }
 
-export class Logger {
+const logStream = createWriteStream(logFile, { flags: "a" });
+
+export class FileLogger {
   protected prefix: string;
   protected level: keyof typeof LogLevel;
   protected showLevel: boolean;
 
   private levelNumber: number;
 
-  constructor({ prefix = '', level = LogLevel.ALL, showLevel = true }: LoggerOptions) {
+  constructor({
+    prefix = "",
+    level = LogLevel.ALL,
+    showLevel = true,
+  }: LoggerOptions) {
     this.prefix = prefix;
     this.level = level;
     this.levelNumber = LogLevelNumber[this.level];
@@ -55,17 +64,14 @@ export class Logger {
       prefix = `- ${level} ${prefix}`;
     }
 
+    const message = `${new Date().toISOString()} ${prefix} ${args.join(" ")}\n`;
+
     if (level === LogLevel.ERROR) {
-      console.error(prefix, ...args);
+      console.error(message);
     } else {
-      console.log(prefix, ...args);
+      console.log(message);
     }
+
+    logStream.write(message);
   }
-}
-
-// This can be extended to create context specific logger (Server Action, Router Handler, etc.)
-// to add context information (IP, User-Agent, timestamp, etc.)
-
-export function createLogger({ prefix, level }: LoggerOptions = {}): Logger {
-  return new Logger({ prefix, level });
 }

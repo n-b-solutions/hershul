@@ -22,9 +22,7 @@ export function Rooms(): React.JSX.Element {
 
   useEffect(() => {
     const getRooms = async () => {
-      if (!rooms.length) {
-        await dispatch(fetchRooms());
-      }
+      await dispatch(fetchRooms());
     };
     getRooms();
 
@@ -92,7 +90,7 @@ export function Rooms(): React.JSX.Element {
                   </Button>
                 </CardContent>
                 <Divider />
-                <AddMessageButton roomName={room.name} />
+                <AddMessageButton roomName={room.name} playAudioOnClose={true} />
               </Card>
             </Grid>
           ))

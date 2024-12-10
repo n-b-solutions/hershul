@@ -1,6 +1,7 @@
 import { GENERATE_TIME } from '@/const/minyans.const';
 import dayjs from 'dayjs';
 
+import { eJewishTimeOfDay, eRelativeTime, LuachMinyanType } from '../../../lib/types/luach-minyan.type';
 import { MinyanType } from '../../../lib/types/minyan.type';
 
 export const isMinyanInactiveForSelectedDate = (selectedDate: Date, inactiveDates: any[] = []): boolean => {
@@ -64,4 +65,21 @@ export const getMiddleTime = (beforeDate: Date | string | undefined, afterDate: 
     .minute(minuteBefore + min / 2);
 
   return dayjs(newTime).toDate();
+};
+
+export const sortLuachMinyanTimes = (array: LuachMinyanType[]): LuachMinyanType[] => {
+  return array.sort((a, b) => {
+    // Sort by time of day
+    const timeOfDayA = Object.keys(eJewishTimeOfDay).indexOf(a.timeOfDay.value);
+    const timeOfDayB = Object.keys(eJewishTimeOfDay).indexOf(b.timeOfDay.value);
+    if (timeOfDayA !== timeOfDayB) return timeOfDayA - timeOfDayB;
+
+    // Sort by relative time
+    const relativeTimeA = Object.keys(eRelativeTime).indexOf(a.relativeTime);
+    const relativeTimeB = Object.keys(eRelativeTime).indexOf(b.relativeTime);
+    if (relativeTimeA !== relativeTimeB) return relativeTimeA - relativeTimeB;
+
+    // Sort by duration
+    return a.duration.value - b.duration.value;
+  });
 };
