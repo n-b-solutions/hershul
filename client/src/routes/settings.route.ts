@@ -6,7 +6,7 @@ export const route: RouteObject = {
     {
       index: true,
       lazy: async () => {
-        const { Settings } = await import('@/pages/minyanim/Settings');
+        const { Settings } = await import('@/pages/settings/Settings');
         return { Component: Settings };
       },
     },
