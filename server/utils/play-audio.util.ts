@@ -8,6 +8,63 @@ config();
 
 const logger = new FileLogger({ prefix: "PlayAudio", level: "ALL" });
 
+//#region Move to another file and fix.
+
+const listAudioDevicesWindows = () => {
+  const command =
+    'powershell "Import-Module AudioDeviceCmdlets; Get-AudioDevice -List"';
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error listing audio devices: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`Error listing audio devices: ${stderr}`);
+      return;
+    }
+    console.log("Available audio devices:", stdout);
+  });
+};
+
+const listAudioDevicesLinux = () => {
+  exec("aplay -l", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error listing audio devices: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`Error listing audio devices: ${stderr}`);
+      return;
+    }
+    console.log("Available audio devices:", stdout);
+  });
+};
+
+const listAudioDevicesMac = () => {
+  exec("system_profiler SPAudioDataType", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error listing audio devices: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`Error listing audio devices: ${stderr}`);
+      return;
+    }
+    console.log("Available audio devices:", stdout);
+  });
+};
+
+export const listAudioDevices = () => {
+  if (process.platform === "win32") {
+    listAudioDevicesWindows();
+  } else if (process.platform === "darwin") {
+    listAudioDevicesMac();
+  } else if (process.platform === "linux") {
+    listAudioDevicesLinux();
+  }
+};
+//#endregion Move to another file and fix.
+
 const isCommandAvailable = (command: string): boolean => {
   try {
     execSync(`command -v ${command}`); // Use 'command -v' for Unix-like systems
