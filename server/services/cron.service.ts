@@ -1,19 +1,20 @@
 import { CronJob } from "cron";
 import MinyanService from "./minyan.service";
+import { FileLogger } from "../utils/file-logger.util";
+
+// Create an instance of FileLogger
+const logger = new FileLogger({ prefix: "CronService", level: "ALL" });
 
 const CronService = {
   deleteExpiredMinyanOnceADay: () => {
     const job = new CronJob("0 0 * * *", async () => {
-      console.log("Cron job started for deleting expired minyans");
       try {
         const deletedMinyan = await MinyanService.deleteExpiredMinyan();
         if (deletedMinyan) {
-          console.log("Expired minyan deleted successfully");
-        } else {
-          console.log("No minyan to delete");
-        }
+          logger.debug("Expired minyan deleted successfully");
+        } 
       } catch (error) {
-        console.error("Error deleting expired minyans:", error);
+        logger.error("Error deleting expired minyans:", error);
       }
     });
     job.start();
@@ -21,7 +22,6 @@ const CronService = {
 
   startCronJobs: () => {
     CronService.deleteExpiredMinyanOnceADay();
-    console.log("Cron jobs started");
   },
 };
 
